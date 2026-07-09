@@ -1,0 +1,8 @@
+{
+  "locale": "en",
+  "default": false,
+  "name": "English",
+  "direction": "ltr",
+  "status": "planned",
+  "notes": "English localization placeholder. Future implementation can map data-i18n keys from this locale file without changing the page structure."
+}

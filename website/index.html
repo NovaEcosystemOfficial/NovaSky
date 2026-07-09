@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="it" data-locale="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="NovaSky è il tuo osservatorio personale per trasformare una notte con Seestar in una sessione più chiara, intenzionale e memorabile."
+    />
+    <meta name="theme-color" content="#05070a" />
+    <title>NovaSky - Il tuo osservatorio personale per Seestar</title>
+    <link rel="alternate" hreflang="it" href="./index.html" />
+    <link rel="alternate" hreflang="en" href="./index.html?lang=en" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles/main.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main" data-i18n="nav.skip">Vai al contenuto</a>
+
+    <header class="site-header" data-site-header>
+      <nav class="nav shell" aria-label="Navigazione principale">
+        <a class="brand brand-prominent" href="./index.html" aria-label="Home NovaSky">
+          <span class="brand-mark" aria-hidden="true">
+            <span></span>
+          </span>
+          <span class="brand-word">NovaSky</span>
+        </a>
+
+        <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-menu">
+          <span class="sr-only" data-i18n="nav.open">Apri menu</span>
+          <span></span>
+          <span></span>
+        </button>
+
+        <div class="nav-links" id="primary-menu" data-nav-menu>
+          <a href="#vision" data-i18n="nav.vision">Visione</a>
+          <a href="#solution" data-i18n="nav.companion">Companion</a>
+          <a href="#experience" data-i18n="nav.experience">Esperienza</a>
+          <a href="#roadmap" data-i18n="nav.roadmap">Roadmap</a>
+        </div>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero" id="vision" aria-labelledby="hero-title">
+        <div class="hero-media" aria-hidden="true">
+          <img src="./assets/images/novasky-hero.png" alt="" />
+        </div>
+        <div class="hero-atmosphere" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <div class="hero-overlay" aria-hidden="true"></div>
+
+        <div class="hero-grid shell">
+          <div class="hero-copy">
+            <p class="eyebrow" data-i18n="hero.eyebrow">Osservatorio personale per Seestar</p>
+            <h1 id="hero-title" data-i18n="hero.title">NovaSky</h1>
+            <p class="hero-subtitle" data-i18n="hero.subtitle">La notte smette di essere una lista di oggetti. Diventa una missione.</p>
+            <p class="hero-description" data-i18n="hero.description">
+              NovaSky aiuta gli utenti Seestar a capire cosa vale la pena osservare, quando farlo, come prepararsi e
+              cosa ricordare dopo l'ultima cattura.
+            </p>
+            <div class="hero-signal" aria-label="Sintesi del valore NovaSky">
+              <span data-i18n="hero.signal1">Pianifica</span>
+              <i aria-hidden="true"></i>
+              <span data-i18n="hero.signal2">Osserva</span>
+              <i aria-hidden="true"></i>
+              <span data-i18n="hero.signal3">Ricorda</span>
+            </div>
+            <div class="hero-actions" aria-label="Azioni principali">
+              <a class="button button-primary" href="#solution" data-i18n="hero.primaryCta">
+                Esplora la visione
+              </a>
+              <a class="button button-secondary" href="#roadmap" data-i18n="hero.secondaryCta">Roadmap</a>
+            </div>
+          </div>
+
+          <aside class="mission-panel" aria-label="Anteprima briefing della notte">
+            <div class="panel-scanline" aria-hidden="true"></div>
+            <div class="nova-orbit-signature" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <div class="panel-header">
+              <span data-i18n="mission.title">Mission control</span>
+              <span class="status-dot" data-mission-badge data-i18n="mission.badge">Anteprima live</span>
+            </div>
+
+            <div class="mission-clock">
+              <span data-i18n="mission.clockLabel">Ora locale</span>
+              <strong data-mission-clock>22:10</strong>
+            </div>
+
+            <div class="mission-target">
+              <span data-i18n="mission.targetLabel">Target consigliato</span>
+              <strong data-mission-target>NGC 7000</strong>
+              <small data-mission-target-note>Nebulosa Nord America · alta nel cielo</small>
+            </div>
+
+            <div class="score-block">
+              <span class="score-label" data-i18n="mission.windowLabel">Finestra osservativa</span>
+              <strong data-mission-window>22:10 - 01:35</strong>
+            </div>
+
+            <div class="mission-metrics">
+              <div>
+                <span data-i18n="mission.moonLabel">Luna</span>
+                <strong data-i18n="mission.moonValue">Gestibile</strong>
+              </div>
+              <div>
+                <span data-i18n="mission.skyLabel">Cielo</span>
+                <strong data-mission-sky data-i18n="mission.skyValue">Trasparenza buona</strong>
+              </div>
+              <div>
+                <span data-i18n="mission.deviceLabel">Profilo</span>
+                <strong data-i18n="mission.deviceValue">S50 / S30 Pro</strong>
+              </div>
+            </div>
+
+            <div class="mission-status-row" aria-label="Stato simulato della sessione">
+              <span><i aria-hidden="true"></i><b data-i18n="mission.statusPlan">Piano pronto</b></span>
+              <span><i aria-hidden="true"></i><b data-i18n="mission.statusTarget">Target in finestra</b></span>
+            </div>
+
+            <div class="mission-progress" aria-label="Avanzamento simulato della sessione">
+              <div>
+                <span data-i18n="mission.progressLabel">Sessione</span>
+                <strong data-mission-progress-label>34%</strong>
+              </div>
+              <span class="progress-track"><i data-mission-progress></i></span>
+            </div>
+
+            <div class="orbit-graph" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section problem-section" aria-labelledby="problem-title">
+        <div class="shell section-grid">
+          <div class="section-intro">
+            <p class="eyebrow" data-i18n="problem.eyebrow">Il problema reale</p>
+            <h2 id="problem-title" data-i18n="problem.title">
+              Seestar semplifica la cattura. NovaSky semplifica la scelta.
+            </h2>
+            <p data-i18n="problem.description">
+              Il telescopio può puntare e catturare. Ma prima c'è la domanda più importante: quale notte vuoi davvero
+              costruire?
+            </p>
+          </div>
+          <div class="question-list">
+            <article class="question-card">
+              <span>01</span>
+              <h3 data-i18n="problem.q1Title">Cosa osservo questa sera?</h3>
+              <p data-i18n="problem.q1Text">
+                Un target spettacolare non è sempre il target giusto per quest'ora, questo cielo e questo telescopio.
+              </p>
+            </article>
+            <article class="question-card">
+              <span>02</span>
+              <h3 data-i18n="problem.q2Title">Il cielo è davvero abbastanza buono?</h3>
+              <p data-i18n="problem.q2Text">
+                Luna, nuvole, trasparenza, buio e orario cambiano completamente la risposta.
+              </p>
+            </article>
+            <article class="question-card">
+              <span>03</span>
+              <h3 data-i18n="problem.q3Title">Quali target hanno senso da qui?</h3>
+              <p data-i18n="problem.q3Text">
+                S50 e S30 Pro meritano suggerimenti costruiti sul loro modo reale di essere usati.
+              </p>
+            </article>
+            <article class="question-card">
+              <span>04</span>
+              <h3 data-i18n="problem.q4Title">Come preparo una sessione migliore?</h3>
+              <p data-i18n="problem.q4Text">
+                Una buona notte è una sequenza: preparare, osservare, catturare, adattarsi e ricordare.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section solution-section" id="solution" aria-labelledby="solution-title">
+        <div class="shell">
+          <div class="section-heading">
+            <p class="eyebrow" data-i18n="solution.eyebrow">L'approccio NovaSky</p>
+            <h2 id="solution-title" data-i18n="solution.title">
+              Non un telecomando. Non un planetario. Una regia calma per la tua notte.
+            </h2>
+          </div>
+          <div class="feature-grid">
+            <article class="feature-card feature-card-large">
+              <div class="feature-icon" aria-hidden="true">01</div>
+              <h3 data-i18n="solution.f1Title">Planner osservativo intelligente</h3>
+              <p data-i18n="solution.f1Text">
+                Trasforma luogo, orario, Luna, visibilità dei target e profilo Seestar in un piano calmo e leggibile.
+              </p>
+            </article>
+            <article class="feature-card">
+              <div class="feature-icon" aria-hidden="true">02</div>
+              <h3 data-i18n="solution.f2Title">Concetto di mappa interattiva</h3>
+              <p data-i18n="solution.f2Text">
+                Una vista del cielo pensata per decisioni, inquadratura e finestre temporali.
+              </p>
+            </article>
+            <article class="feature-card">
+              <div class="feature-icon" aria-hidden="true">03</div>
+              <h3 data-i18n="solution.f3Title">Raccomandazioni sui target</h3>
+              <p data-i18n="solution.f3Text">
+                Porta in primo piano ciò che ha senso per la notte, non solo ciò che esiste in catalogo.
+              </p>
+            </article>
+            <article class="feature-card">
+              <div class="feature-icon" aria-hidden="true">04</div>
+              <h3 data-i18n="solution.f4Title">Preparazione della sessione</h3>
+              <p data-i18n="solution.f4Text">
+                Condizioni, finestre, ordine dei target, note e intenzione osservativa nello stesso flusso.
+              </p>
+            </article>
+            <article class="feature-card">
+              <div class="feature-icon" aria-hidden="true">05</div>
+              <h3 data-i18n="solution.f5Title">Futura integrazione Seestar</h3>
+              <p data-i18n="solution.f5Text">
+                Un livello di integrazione è in ricerca, senza promettere controllo dispositivo prima delle verifiche.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section compatibility-section" aria-labelledby="compatibility-title">
+        <div class="shell compatibility-panel">
+          <div>
+            <p class="eyebrow" data-i18n="compatibility.eyebrow">Direzione compatibilità</p>
+            <h2 id="compatibility-title" data-i18n="compatibility.title">Progettata attorno ai flussi Seestar.</h2>
+            <p data-i18n="compatibility.description">
+              NovaSky nasce per chi usa Seestar S50 e Seestar S30 Pro. Il primo obiettivo è rendere più chiari planning,
+              scelta dei target, preparazione e memoria della sessione con un'esperienza naturale per chi osserva con
+              Seestar.
+            </p>
+            <p class="careful-note" data-i18n="compatibility.note">
+              Il controllo diretto del dispositivo non viene dichiarato in questa fase. Un futuro livello di integrazione
+              è in studio, includendo flussi locali e opzioni basate su standard dove disponibili.
+            </p>
+          </div>
+          <div class="device-stack" aria-label="Focus dei flussi supportati">
+            <article>
+              <span>Seestar</span>
+              <strong>S50</strong>
+              <p data-i18n="compatibility.s50">
+                Planning, scelta target, compatibilità del campo e memoria osservativa per il telescopio smart compatto.
+              </p>
+            </article>
+            <article>
+              <span>Seestar</span>
+              <strong>S30 Pro</strong>
+              <p data-i18n="compatibility.s30">
+                Pensata anche per i flussi Seestar di nuova generazione e per la ricerca su integrazioni future.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section experience-section" id="experience" aria-labelledby="experience-title">
+        <div class="shell">
+          <div class="section-heading">
+            <p class="eyebrow" data-i18n="experience.eyebrow">Flusso dell'esperienza</p>
+            <h2 id="experience-title" data-i18n="experience.title">
+              Ogni sessione diventa un piccolo rito: preparare, osservare, catturare, ricordare.
+            </h2>
+          </div>
+          <div class="flow-line" aria-label="Prepara Osserva Cattura Ricorda">
+            <article>
+              <span>01</span>
+              <h3 data-i18n="experience.prepareTitle">Prepara</h3>
+              <p data-i18n="experience.prepareText">
+                Leggi la notte, scegli il luogo, interpreta la Luna e costruisci un piano realistico.
+              </p>
+            </article>
+            <article>
+              <span>02</span>
+              <h3 data-i18n="experience.observeTitle">Osserva</h3>
+              <p data-i18n="experience.observeText">
+                Resta orientato con contesto celeste, finestre temporali e guida sui target.
+              </p>
+            </article>
+            <article>
+              <span>03</span>
+              <h3 data-i18n="experience.captureTitle">Cattura</h3>
+              <p data-i18n="experience.captureText">
+                Segui la sessione, adattati quando cambia il cielo e tieni vicine le note importanti.
+              </p>
+            </article>
+            <article>
+              <span>04</span>
+              <h3 data-i18n="experience.rememberTitle">Ricorda</h3>
+              <p data-i18n="experience.rememberText">
+                Trasforma ogni notte in conoscenza: cosa ha funzionato, cosa è cambiato, cosa riprovare.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section roadmap-section" id="roadmap" aria-labelledby="roadmap-title">
+        <div class="shell roadmap-layout">
+          <div class="section-intro">
+            <p class="eyebrow" data-i18n="roadmap.eyebrow">Roadmap</p>
+            <h2 id="roadmap-title" data-i18n="roadmap.title">
+              Prima l'identità. Poi il prototipo. Infine gli strumenti sul campo.
+            </h2>
+            <p data-i18n="roadmap.description">
+              NovaSky viene costruita con una regola semplice: nessuna promessa prima della verifica, nessuna funzione
+              senza un valore reale durante la notte.
+            </p>
+          </div>
+          <ol class="roadmap-list">
+            <li>
+              <span data-i18n="roadmap.phase1">Fase 1</span>
+              <strong data-i18n="roadmap.phase1Title">Sito e identità</strong>
+              <p data-i18n="roadmap.phase1Text">
+                Definire linguaggio pubblico, fondazione visiva e promessa emotiva del prodotto.
+              </p>
+            </li>
+            <li>
+              <span data-i18n="roadmap.phase2">Fase 2</span>
+              <strong data-i18n="roadmap.phase2Title">Prototipo Android</strong>
+              <p data-i18n="roadmap.phase2Text">
+                Esplorare navigazione, briefing della notte, dettaglio target e flusso sessione.
+              </p>
+            </li>
+            <li>
+              <span data-i18n="roadmap.phase3">Fase 3</span>
+              <strong data-i18n="roadmap.phase3Title">Sky planner e database target</strong>
+              <p data-i18n="roadmap.phase3Text">
+                Costruire motore di planning, struttura dei target e modello di raccomandazione.
+              </p>
+            </li>
+            <li>
+              <span data-i18n="roadmap.phase4">Fase 4</span>
+              <strong data-i18n="roadmap.phase4Title">Strumenti per workflow Seestar</strong>
+              <p data-i18n="roadmap.phase4Text">
+                Sviluppare strumenti companion attorno ad abitudini reali e integrazioni validate.
+              </p>
+            </li>
+            <li>
+              <span data-i18n="roadmap.phase5">Fase 5</span>
+              <strong data-i18n="roadmap.phase5Title">Community beta</strong>
+              <p data-i18n="roadmap.phase5Text">
+                Testare con osservatori, rifinire l'esperienza e preparare il primo percorso pubblico.
+              </p>
+            </li>
+          </ol>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="shell footer-grid">
+        <div>
+          <a class="brand" href="./index.html" aria-label="Home NovaSky">
+            <span class="brand-mark" aria-hidden="true">
+              <span></span>
+            </span>
+            <span class="brand-word">NovaSky</span>
+          </a>
+          <p data-i18n="footer.byline">NovaSky by Nova Ecosystem</p>
+        </div>
+        <div class="footer-links" aria-label="Aree future del sito">
+          <a href="#roadmap" data-i18n="footer.roadmap">Roadmap</a>
+          <a href="./pages/docs.html" data-i18n="footer.docs">Documentazione</a>
+          <a href="./pages/blog.html" data-i18n="footer.blog">Blog</a>
+          <a href="./pages/support.html" data-i18n="footer.support">Supporto</a>
+        </div>
+      </div>
+    </footer>
+
+    <script src="./scripts/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "locale": "it",
+  "default": true,
+  "name": "Italiano",
+  "direction": "ltr",
+  "status": "active",
+  "notes": "Lingua predefinita della homepage NovaSky. Il markup HTML contiene gia il copy italiano; le chiavi data-i18n preparano lo switch futuro."
+}
