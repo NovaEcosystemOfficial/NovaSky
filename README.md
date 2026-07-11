@@ -20,6 +20,7 @@ website/
 - Product design direction approved.
 - Brand foundation defined.
 - Initial official website foundation created.
+- **Mission Map prototype** — first interactive product screen (`website/pages/mission-map.html`).
 - Android implementation pending future approval.
 
 ## Key Documents

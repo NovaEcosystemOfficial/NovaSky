@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="NovaSky Mission Map — interpreta il cielo e scegli cosa vale la pena osservare stanotte con Seestar."
+    />
+    <meta name="theme-color" content="#05070a" />
+    <title>NovaSky — Mission Map</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles/mission-map.css" />
+  </head>
+  <body class="mission-map-page">
+    <div class="mission-app" data-mission-app>
+      <header class="mission-header">
+        <div class="mission-header-left">
+          <a class="brand" href="../index.html" aria-label="Home NovaSky">
+            <span class="brand-mark" aria-hidden="true"><span></span></span>
+            <span class="brand-word">NovaSky</span>
+          </a>
+          <div class="mission-header-divider" aria-hidden="true"></div>
+          <div class="mission-header-context">
+            <span class="mission-label">Mission Map</span>
+            <strong data-location>Osservatorio di casa</strong>
+            <small data-date>Sabato 11 luglio 2026</small>
+          </div>
+        </div>
+
+        <div class="mission-header-center">
+          <p class="mission-verdict" data-verdict>Buona notte per nebulose a emissione</p>
+          <div class="mission-meta-row">
+            <span><i aria-hidden="true"></i> Finestra <strong data-window>22:10 – 01:35</strong></span>
+            <span><i aria-hidden="true"></i> <span data-moon>Luna gestibile</span></span>
+            <span><i aria-hidden="true"></i> <span data-sky>Cielo discreto</span></span>
+          </div>
+        </div>
+
+        <div class="mission-header-right">
+          <span class="target-summary" data-target-summary>0 consigliati</span>
+          <button type="button" class="ghost-btn" data-reset-view>Ripristina vista</button>
+          <button type="button" class="ghost-btn" data-filter-recommended>Solo consigliati</button>
+        </div>
+      </header>
+
+      <div class="mission-body">
+        <section class="map-stage" aria-label="Mappa decisionale del cielo">
+          <canvas id="mission-canvas" aria-label="Mappa del cielo con target consigliati"></canvas>
+
+          <div class="map-overlay map-overlay-top">
+            <div class="decision-stack" aria-label="Sintesi decisionale">
+              <span>Cielo</span>
+              <strong>Discreto</strong>
+              <i aria-hidden="true"></i>
+              <span>Luna</span>
+              <strong>Gestibile</strong>
+              <i aria-hidden="true"></i>
+              <span>Target top</span>
+              <strong>NGC 7000</strong>
+            </div>
+          </div>
+
+          <div class="map-overlay map-overlay-bottom">
+            <div class="map-legend" data-legend aria-label="Legenda consigli"></div>
+            <p class="map-hint">Trascina per esplorare · Scroll per zoom · Doppio tap per reset</p>
+          </div>
+
+          <div class="map-tooltip" data-map-tooltip hidden></div>
+        </section>
+
+        <aside class="mission-sidebar" data-mission-panel aria-label="Dettaglio target e missione">
+          <section class="target-card-panel" data-target-card>
+            <div class="panel-head">
+              <h2>Target</h2>
+              <span class="panel-sub">Seleziona un'opportunità sulla mappa</span>
+            </div>
+
+            <div class="target-empty" data-target-empty>
+              <div class="target-empty-orbit" aria-hidden="true">
+                <span></span>
+                <span></span>
+              </div>
+              <p>NovaSky interpreta il cielo, non lo elenca.</p>
+              <small>Clicca un target per capire perché vale la pena — o no — stanotte.</small>
+            </div>
+
+            <div class="target-content" data-target-content hidden>
+              <div class="target-preview" data-target-preview aria-hidden="true"></div>
+              <div class="target-head">
+                <div>
+                  <h3 data-target-name>M27</h3>
+                  <p data-target-category>Nebulosa planetaria</p>
+                </div>
+                <span class="target-badge" data-target-badge data-level="recommended">Consigliato</span>
+              </div>
+
+              <div class="target-section">
+                <span class="section-label">Perché stasera</span>
+                <p data-target-reason>Motivazione del consiglio.</p>
+              </div>
+
+              <dl class="target-facts">
+                <div>
+                  <dt>Finestra</dt>
+                  <dd data-target-window>22:10 – 01:20</dd>
+                </div>
+                <div>
+                  <dt>Difficoltà</dt>
+                  <dd data-target-difficulty>Facile</dd>
+                </div>
+                <div>
+                  <dt>Filtro</dt>
+                  <dd data-target-filter>Dual-band</dd>
+                </div>
+              </dl>
+
+              <div class="target-section">
+                <span class="section-label">Compatibilità Seestar</span>
+                <div class="seestar-row">
+                  <article>
+                    <span>S50</span>
+                    <strong data-target-s50>Ottimo</strong>
+                  </article>
+                  <article>
+                    <span>S30 Pro</span>
+                    <strong data-target-s30>Ottimo</strong>
+                  </article>
+                </div>
+              </div>
+
+              <button type="button" class="button-primary" data-add-mission>Aggiungi alla missione</button>
+            </div>
+          </section>
+
+          <section class="mission-timeline-panel" data-mission-timeline>
+            <div class="panel-head">
+              <div>
+                <h2>Missione</h2>
+                <span class="panel-sub">Timeline della notte</span>
+              </div>
+              <span class="mission-count"><strong data-mission-count>0</strong> target</span>
+            </div>
+
+            <div class="timeline-shell">
+              <div class="timeline-markers" data-timeline-markers>
+                <span>22:00</span>
+                <span>23:10</span>
+                <span>00:40</span>
+                <span>01:20</span>
+              </div>
+              <div class="timeline-track-wrap">
+                <div class="timeline-track" data-timeline-track" aria-label="Sequenza target"></div>
+              </div>
+            </div>
+
+            <div class="timeline-empty" data-timeline-empty>
+              <p>Nessun target in missione.</p>
+              <small>Aggiungi opportunità dalla mappa per costruire la notte.</small>
+            </div>
+
+            <div class="timeline-list" data-timeline-list hidden></div>
+          </section>
+        </aside>
+      </div>
+    </div>
+
+    <script type="module" src="../scripts/mission-map/app.js"></script>
+  </body>
+</html>
