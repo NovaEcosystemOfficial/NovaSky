@@ -1,0 +1,255 @@
+/* NovaSky — cinematic visual layer (no layout / content changes) */
+
+/* ── Intro overlay ─────────────────────────────────────── */
+
+.cinematic-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 420ms ease;
+}
+
+.cinematic-intro.is-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.cinematic-intro.is-exiting {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 480ms ease;
+}
+
+.cinematic-intro__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  text-align: center;
+}
+
+.cinematic-intro__brand {
+  flex-direction: column;
+  gap: 16px;
+  font-size: 1.35rem;
+  opacity: 0;
+  transform: translateY(8px) scale(0.96);
+  animation: intro-logo-in 680ms cubic-bezier(0.22, 1, 0.36, 1) 80ms forwards;
+}
+
+.cinematic-intro__brand .brand-mark {
+  width: 52px;
+  height: 52px;
+}
+
+.cinematic-intro__line {
+  min-height: 1.4em;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 650;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 320ms ease,
+    transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cinematic-intro__line.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+body.is-intro-active {
+  overflow: hidden;
+}
+
+@keyframes intro-logo-in {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ── Living cosmic background ──────────────────────────── */
+
+.cosmic-bg-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+/* Subtle parallax on existing body star field */
+body::before {
+  transition: transform 120ms ease-out;
+  will-change: transform;
+}
+
+body.cosmic-parallax::before {
+  transform: translate3d(calc(var(--mx, 0) * 6px), calc(var(--my, 0) * 4px), 0);
+}
+
+/* ── Hero deep sky behind title ────────────────────────── */
+
+.hero-copy {
+  position: relative;
+  isolation: isolate;
+}
+
+.hero-sky-wrap {
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: 12px;
+  opacity: 0.72;
+  mask-image: radial-gradient(ellipse 90% 85% at 50% 50%, #000 20%, transparent 78%);
+  -webkit-mask-image: radial-gradient(ellipse 90% 85% at 50% 50%, #000 20%, transparent 78%);
+}
+
+.hero-sky-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Slow drift on hero atmosphere layers */
+.hero-atmosphere::before,
+.hero-atmosphere::after {
+  will-change: transform;
+}
+
+/* ── Card micro-animations ─────────────────────────────── */
+
+.cinematic-reveal {
+  opacity: 0;
+  transform: translate3d(0, 20px, 0);
+  transition:
+    opacity 620ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 620ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 220ms ease,
+    box-shadow 220ms ease;
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+.cinematic-reveal.is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.question-card,
+.feature-card,
+.flow-line article,
+.roadmap-list li,
+.device-stack article,
+.mission-panel,
+.compatibility-panel {
+  will-change: transform, box-shadow;
+  transition:
+    transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 280ms ease,
+    box-shadow 280ms ease,
+    background 280ms ease;
+}
+
+.question-card:hover,
+.feature-card:hover,
+.flow-line article:hover,
+.roadmap-list li:hover,
+.device-stack article:hover,
+.mission-panel:hover,
+.compatibility-panel:hover {
+  border-color: rgba(92, 199, 216, 0.42);
+  box-shadow:
+    var(--shadow),
+    0 0 32px rgba(92, 199, 216, 0.14),
+    0 0 0 1px rgba(92, 199, 216, 0.08);
+  transform: translate3d(0, -4px, 0);
+}
+
+/* ── Button enhancements ───────────────────────────────── */
+
+.button {
+  will-change: transform, box-shadow;
+  transition:
+    transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 280ms ease,
+    background 280ms ease,
+    box-shadow 280ms ease;
+}
+
+.button:hover,
+.button:focus-visible {
+  transform: translate3d(0, -2px, 0) scale(1.03);
+}
+
+.button-primary:hover,
+.button-primary:focus-visible {
+  box-shadow:
+    0 22px 62px rgba(92, 199, 216, 0.32),
+    0 0 28px rgba(92, 199, 216, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.42);
+}
+
+.button-secondary:hover,
+.button-secondary:focus-visible {
+  box-shadow:
+    0 12px 36px rgba(92, 199, 216, 0.12),
+    0 0 20px rgba(92, 199, 216, 0.1);
+}
+
+.button:active {
+  transform: translate3d(0, 0, 0) scale(0.98);
+  transition-duration: 80ms;
+}
+
+.button-pulse {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 24px rgba(92, 199, 216, 0.9);
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(0);
+  animation: button-pulse-ring 520ms ease-out forwards;
+}
+
+@keyframes button-pulse-ring {
+  0% {
+    opacity: 0.9;
+    transform: translate(-50%, -50%) scale(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(14);
+  }
+}
+
+/* ── Reduced motion ────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .cinematic-intro,
+  .cinematic-intro__brand,
+  .cinematic-reveal {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .cosmic-bg-canvas,
+  .hero-sky-wrap {
+    display: none;
+  }
+}
