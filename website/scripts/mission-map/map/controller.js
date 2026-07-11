@@ -1,20 +1,15 @@
-/** Pan, zoom, hover, click for the mission map canvas. */
+/** Pan, zoom, hover, click — natural sky camera. */
 
 export class MapController {
-  /**
-   * @param {HTMLCanvasElement} canvas
-   * @param {import('./renderer.js').SkyRenderer} renderer
-   * @param {{ onSelect: (id: string|null) => void, onHover: (id: string|null) => void }} callbacks
-   */
   constructor(canvas, renderer, callbacks) {
     this.canvas = canvas;
     this.renderer = renderer;
     this.callbacks = callbacks;
     this.isDragging = false;
     this.lastPointer = { x: 0, y: 0 };
-    this.velocity = { x: 0, y: 0 };
-    this.selectedId = null;
+    this.velocity = 0;
     this.hoveredId = null;
+    this.selectedId = null;
 
     this.bindEvents();
   }
@@ -40,7 +35,7 @@ export class MapController {
   onPointerDown = (event) => {
     this.isDragging = true;
     this.lastPointer = { x: event.clientX, y: event.clientY };
-    this.velocity = { x: 0, y: 0 };
+    this.velocity = 0;
     this.canvas.setPointerCapture(event.pointerId);
     this.canvas.style.cursor = "grabbing";
   };
@@ -52,16 +47,13 @@ export class MapController {
 
     if (this.isDragging) {
       const dx = event.clientX - this.lastPointer.x;
-      const dy = event.clientY - this.lastPointer.y;
-      this.velocity = { x: dx, y: dy };
+      this.velocity = dx;
       this.lastPointer = { x: event.clientX, y: event.clientY };
 
-      const size = Math.min(this.renderer.width, this.renderer.height);
-      const scale = size * 0.88 * this.renderer.camera.zoom;
       const cam = this.renderer.camera;
+      const sensitivity = (cam.fov / cam.zoom) / this.renderer.width;
       this.renderer.setCamera({
-        x: cam.x - dx / scale,
-        y: cam.y - dy / scale,
+        azCenter: cam.azCenter - dx * sensitivity * 1.15,
       });
       return;
     }
@@ -77,7 +69,7 @@ export class MapController {
   };
 
   onPointerUp = (event) => {
-    const wasDrag = Math.hypot(this.velocity.x, this.velocity.y) > 4;
+    const wasDrag = Math.abs(this.velocity) > 4;
     this.isDragging = false;
     this.canvas.releasePointerCapture(event.pointerId);
     this.canvas.style.cursor = this.hoveredId ? "pointer" : "grab";
@@ -103,25 +95,16 @@ export class MapController {
 
   onWheel = (event) => {
     event.preventDefault();
-    const rect = this.canvas.getBoundingClientRect();
-    const mx = (event.clientX - rect.left) / rect.width;
-    const my = (event.clientY - rect.top) / rect.height;
-    const delta = -event.deltaY * 0.0012;
+    const delta = -event.deltaY * 0.0015;
     const cam = this.renderer.camera;
-    const nextZoom = Math.min(2.4, Math.max(0.75, cam.zoom * (1 + delta)));
-
-    this.renderer.setCamera({
-      x: cam.x + (mx - 0.5) * (cam.zoom - nextZoom) * 0.15,
-      y: cam.y + (my - 0.5) * (cam.zoom - nextZoom) * 0.15,
-      zoom: nextZoom,
-    });
+    const nextZoom = Math.min(2.2, Math.max(0.7, cam.zoom * (1 + delta)));
+    this.renderer.setCamera({ zoom: nextZoom });
   };
 
   onDoubleClick = () => {
-    this.renderer.setCamera({ x: 0.5, y: 0.5, zoom: 1 });
+    this.renderer.setCamera({ azCenter: 25, zoom: 1, lift: 0 });
   };
 
-  /** @returns {{ id: string, target: object } | null} */
   hitTest(x, y) {
     const positions = this.renderer.getTargetScreenPositions();
     let closest = null;
@@ -129,7 +112,7 @@ export class MapController {
 
     for (const pos of positions) {
       const dist = Math.hypot(x - pos.sx, y - pos.sy);
-      if (dist <= pos.radius + 6 && dist < closestDist) {
+      if (dist <= pos.radius + 14 && dist < closestDist) {
         closest = { id: pos.id, target: pos.target };
         closestDist = dist;
       }
@@ -141,22 +124,29 @@ export class MapController {
     this.selectedId = id;
     this.renderer.setSelected(id);
     this.callbacks.onSelect(id);
+
+    const target = this.renderer.targets.find((t) => t.id === id);
+    if (target) {
+      const cam = this.renderer.camera;
+      let dAz = target.az - cam.azCenter;
+      while (dAz > 180) dAz -= 360;
+      while (dAz < -180) dAz += 360;
+      if (Math.abs(dAz) > 25) {
+        this.renderer.setCamera({ azCenter: target.az });
+      }
+    }
   }
 
   applyInertia() {
-    if (Math.abs(this.velocity.x) < 0.3 && Math.abs(this.velocity.y) < 0.3) {
-      this.velocity = { x: 0, y: 0 };
+    if (Math.abs(this.velocity) < 0.3) {
+      this.velocity = 0;
       return;
     }
-
-    const size = Math.min(this.renderer.width, this.renderer.height);
-    const scale = size * 0.88 * this.renderer.camera.zoom;
     const cam = this.renderer.camera;
+    const sensitivity = (cam.fov / cam.zoom) / this.renderer.width;
     this.renderer.setCamera({
-      x: cam.x - this.velocity.x / scale,
-      y: cam.y - this.velocity.y / scale,
+      azCenter: cam.azCenter - this.velocity * sensitivity * 0.35,
     });
-    this.velocity.x *= 0.92;
-    this.velocity.y *= 0.92;
+    this.velocity *= 0.9;
   }
 }

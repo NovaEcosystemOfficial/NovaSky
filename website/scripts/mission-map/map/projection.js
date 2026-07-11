@@ -1,37 +1,29 @@
-/** Alt/az (degrees) → normalized polar map coordinates. */
+/** Natural sky projection — panoramic alt/az view (not radar). */
 
 const DEG = Math.PI / 180;
 
 /**
- * @param {number} alt - altitude 0–90
- * @param {number} az - azimuth 0–360 (N=0, E=90)
- * @param {number} maxAlt - horizon mapping edge (default 90)
- * @returns {{ x: number, y: number, r: number }}
+ * Maps altitude/azimuth to normalized screen coordinates.
+ * Horizon sits low; zenith high. Azimuth wraps with camera pan.
+ *
+ * @param {number} alt - 0–90°
+ * @param {number} az - 0–360°
+ * @param {{ azCenter: number, fov: number, lift: number }} camera
  */
-export function altAzToMap(alt, az, maxAlt = 90) {
-  const clampedAlt = Math.max(0, Math.min(maxAlt, alt));
-  const r = (maxAlt - clampedAlt) / maxAlt;
-  const theta = (az - 90) * DEG;
-  return {
-    x: 0.5 + r * 0.5 * Math.cos(theta),
-    y: 0.5 + r * 0.5 * Math.sin(theta),
-    r,
-  };
-}
+export function altAzToSky(alt, az, camera) {
+  let dAz = az - camera.azCenter;
+  while (dAz > 180) dAz -= 360;
+  while (dAz < -180) dAz += 360;
 
-/**
- * @param {number} x - normalized 0–1
- * @param {number} y - normalized 0–1
- * @returns {{ alt: number, az: number }}
- */
-export function mapToAltAz(x, y) {
-  const dx = (x - 0.5) * 2;
-  const dy = (y - 0.5) * 2;
-  const r = Math.min(1, Math.hypot(dx, dy));
-  const alt = 90 - r * 90;
-  let az = (Math.atan2(dy, dx) / DEG + 90) % 360;
-  if (az < 0) az += 360;
-  return { alt, az };
+  const fov = camera.fov / camera.zoom;
+  const x = 0.5 + (dAz / fov) * 0.92;
+
+  const altNorm = Math.pow(Math.max(0, alt) / 90, 0.82);
+  const y = 0.94 - altNorm * 0.78 + camera.lift * 0.001;
+
+  const depth = 0.15 + (alt / 90) * 0.85;
+
+  return { x, y, depth, visible: x > -0.08 && x < 1.08 && alt >= 0 };
 }
 
 /**
@@ -50,4 +42,28 @@ export function formatTime(minutes) {
 
 export function sortByWindowStart(a, b) {
   return parseTime(a.window.start) - parseTime(b.window.start);
+}
+
+/** Seeded pseudo-random for star field consistency. */
+export function seededRandom(seed) {
+  let s = seed;
+  return () => {
+    s = (s * 16807 + 0) % 2147483647;
+    return (s - 1) / 2147483646;
+  };
+}
+
+export function generateStarField(count = 420, seed = 42) {
+  const rand = seededRandom(seed);
+  const stars = [];
+  for (let i = 0; i < count; i++) {
+    stars.push({
+      alt: 5 + rand() * 85,
+      az: rand() * 360,
+      mag: 0.5 + rand() * 5.5,
+      layer: rand() < 0.25 ? 0 : rand() < 0.55 ? 1 : 2,
+      phase: rand() * Math.PI * 2,
+    });
+  }
+  return stars;
 }

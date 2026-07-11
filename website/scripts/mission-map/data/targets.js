@@ -538,3 +538,12 @@ export const BACKGROUND_STARS = [
   [73, 55], [71, 95], [69, 135], [67, 175], [65, 215], [63, 255], [61, 295], [59, 335], [57, 15],
   [55, 55], [53, 95], [51, 135], [49, 175], [47, 215], [45, 255], [43, 295], [41, 335], [39, 15],
 ];
+
+for (const target of TARGETS) {
+  const base =
+    target.recommendation === "recommended" ? 82 : target.recommendation === "possible" ? 58 : 32;
+  target.novaScore = Math.min(
+    97,
+    Math.max(24, base + Math.round(target.alt * 0.14) - Math.max(0, target.magnitude - 6) * 2),
+  );
+}
