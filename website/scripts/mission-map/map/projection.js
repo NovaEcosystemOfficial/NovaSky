@@ -53,16 +53,17 @@ export function seededRandom(seed) {
   };
 }
 
-export function generateStarField(count = 420, seed = 42) {
+export function generateStarField(count = 2800, seed = 42) {
   const rand = seededRandom(seed);
   const stars = [];
   for (let i = 0; i < count; i++) {
     stars.push({
-      alt: 5 + rand() * 85,
+      alt: 3 + rand() * 87,
       az: rand() * 360,
-      mag: 0.5 + rand() * 5.5,
-      layer: rand() < 0.25 ? 0 : rand() < 0.55 ? 1 : 2,
+      mag: 0.3 + rand() * 6.2,
+      layer: rand() < 0.2 ? 0 : rand() < 0.5 ? 1 : 2,
       phase: rand() * Math.PI * 2,
+      tint: rand() < 0.12 ? "warm" : rand() < 0.08 ? "cool" : "neutral",
     });
   }
   return stars;

@@ -12,21 +12,35 @@ import { ThumbnailCache } from "./ui/thumbnail-cache.js";
 class ObservatoryApp {
   constructor() {
     this.canvas = document.getElementById("mission-canvas");
+    this.canvasWrap = document.querySelector(".sky-chamber");
     this.mission = [];
     this.targetsById = new Map(TARGETS.map((t) => [t.id, t]));
     this.lastFrame = 0;
     this.thumbnails = new ThumbnailCache(TARGETS);
+    this.renderer = null;
+    this.controller = null;
+    this.targetCard = null;
+    this.timeline = null;
+  }
 
+  async init() {
+    await this.thumbnails.load();
     this.initMeta();
     this.initRenderer();
     this.initUI();
     this.startLoop();
 
-    window.addEventListener("resize", () => this.renderer.resize());
+    window.addEventListener("resize", () => {
+      this.renderer.resize();
+      this.updateCardAnchor();
+    });
 
     const topTarget = TARGETS.find((t) => t.id === "ngc7000") ?? TARGETS[0];
     this.controller.selectById(topTarget.id);
     this.timeline.setSelected(topTarget.id);
+    this.updateCardAnchor();
+
+    document.querySelector("[data-sky-prompt]")?.classList.add("is-hidden");
   }
 
   initMeta() {
@@ -62,6 +76,7 @@ class ObservatoryApp {
 
     this.timeline = new MissionTimeline(document.querySelector("[data-mission-timeline]"), {
       targets: TARGETS,
+      thumbnails: this.thumbnails,
       onRemove: (id) => this.removeFromMission(id),
       onSelect: (id) => {
         this.controller.selectById(id);
@@ -70,10 +85,25 @@ class ObservatoryApp {
     });
   }
 
+  updateCardAnchor() {
+    if (!this.renderer || !this.canvasWrap || !this.targetCard) return;
+    const anchor = this.targetCard.getAnchorPoint();
+    if (!anchor) {
+      this.renderer.setCardAnchor(null);
+      return;
+    }
+    const canvasRect = this.canvas.getBoundingClientRect();
+    this.renderer.setCardAnchor({
+      x: anchor.x - canvasRect.left,
+      y: anchor.y - canvasRect.top,
+    });
+  }
+
   handleSelect(id) {
     const target = id ? this.targetsById.get(id) : null;
     this.targetCard.show(target ?? null);
     this.timeline.setSelected(id);
+    requestAnimationFrame(() => this.updateCardAnchor());
 
     const prompt = document.querySelector("[data-sky-prompt]");
     if (prompt) prompt.classList.toggle("is-hidden", Boolean(target));
@@ -121,5 +151,5 @@ class ObservatoryApp {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  new ObservatoryApp();
+  new ObservatoryApp().init();
 });

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="NovaSky — il tuo osservatorio personale. Il cielo mostra le opportunità della notte."
+      content="NovaSky — osservatorio personale. Il cielo mostra le opportunità della notte."
     />
     <meta name="theme-color" content="#05070a" />
     <title>NovaSky — Osservatorio personale</title>
@@ -24,12 +24,10 @@
           <span class="brand-mark" aria-hidden="true"><span></span></span>
           <span class="brand-word">NovaSky</span>
         </a>
-
         <div class="header-verdict">
           <p data-verdict>Buona notte per nebulose a emissione</p>
           <span data-location>Osservatorio di casa · 45.4°N</span>
         </div>
-
         <div class="header-meta">
           <time data-date>Sabato 11 luglio 2026</time>
           <span class="header-window">Finestra <strong data-window>22:10 – 01:35</strong></span>
@@ -38,36 +36,51 @@
 
       <main class="observatory-main">
         <section class="sky-chamber" aria-label="Opportunità della notte">
-          <canvas id="mission-canvas" aria-label="Cielo con preview astronomiche degli oggetti consigliati"></canvas>
-
+          <canvas id="mission-canvas" aria-label="Cielo con oggetti astronomici sospesi"></canvas>
           <div class="sky-prompt" data-sky-prompt>
             <p>Il cielo mostra le opportunità di stanotte.</p>
           </div>
         </section>
 
         <aside class="premium-card" data-target-card aria-label="Scheda target" hidden>
-          <article class="premium-card-inner" data-target-content>
+          <article class="premium-card-inner">
             <div class="premium-hero">
-              <canvas data-target-hero-canvas width="800" height="500" aria-hidden="true"></canvas>
-              <div class="premium-hero-overlay">
-                <span class="premium-badge" data-target-badge data-level="recommended">Consigliato</span>
-                <div class="premium-hero-titles">
-                  <h2 data-target-name>NGC 7000</h2>
-                  <p data-target-subtitle>Nebulosa Nord America</p>
-                </div>
-              </div>
+              <img data-target-hero-img src="" alt="" width="800" height="500" />
+              <div class="premium-hero-fade" aria-hidden="true"></div>
+              <span class="premium-badge" data-target-badge data-level="recommended">Consigliato</span>
             </div>
 
             <div class="premium-body">
+              <header class="premium-head">
+                <h2 data-target-name>NGC 7000</h2>
+                <p data-target-subtitle>Nebulosa Nord America</p>
+              </header>
+
               <section class="premium-block">
                 <h3>Perché stanotte</h3>
                 <p data-target-reason>Motivazione del consiglio.</p>
               </section>
 
               <section class="premium-block premium-block-emphasis">
-                <h3>Cosa puoi ottenere</h3>
+                <h3>Cosa otterrai fotografandolo</h3>
                 <p data-target-expectation>Risultato atteso dalla sessione.</p>
               </section>
+
+              <div class="premium-window">
+                <span>Finestra osservativa</span>
+                <strong data-target-window>22:00 – 03:40</strong>
+              </div>
+
+              <div class="premium-seestar">
+                <div>
+                  <span>Seestar S50</span>
+                  <strong data-target-s50>Ottimo</strong>
+                </div>
+                <div>
+                  <span>S30 Pro</span>
+                  <strong data-target-s30>Ottimo</strong>
+                </div>
+              </div>
 
               <button type="button" class="btn-mission btn-mission-primary" data-add-mission>
                 Aggiungi alla missione
@@ -76,38 +89,11 @@
               <details class="premium-specs">
                 <summary>Dettagli tecnici</summary>
                 <dl>
-                  <div>
-                    <dt>NovaScore</dt>
-                    <dd data-target-score>91</dd>
-                  </div>
-                  <div>
-                    <dt>Magnitudine</dt>
-                    <dd data-target-magnitude>4.0</dd>
-                  </div>
-                  <div>
-                    <dt>Filtro</dt>
-                    <dd data-target-filter>Dual-band</dd>
-                  </div>
-                  <div>
-                    <dt>Altezza</dt>
-                    <dd data-target-altitude>78°</dd>
-                  </div>
-                  <div>
-                    <dt>Finestra</dt>
-                    <dd data-target-window>22:00 – 03:40</dd>
-                  </div>
-                  <div>
-                    <dt>Difficoltà</dt>
-                    <dd data-target-difficulty>Facile</dd>
-                  </div>
-                  <div class="spec-wide">
-                    <dt>Seestar S50</dt>
-                    <dd data-target-s50>Ottimo</dd>
-                  </div>
-                  <div class="spec-wide">
-                    <dt>Seestar S30 Pro</dt>
-                    <dd data-target-s30>Ottimo</dd>
-                  </div>
+                  <div><dt>NovaScore</dt><dd data-target-score>91</dd></div>
+                  <div><dt>Magnitudine</dt><dd data-target-magnitude>4.0</dd></div>
+                  <div><dt>Filtro</dt><dd data-target-filter>Dual-band</dd></div>
+                  <div><dt>Altezza</dt><dd data-target-altitude>78°</dd></div>
+                  <div><dt>Difficoltà</dt><dd data-target-difficulty>Facile</dd></div>
                 </dl>
               </details>
             </div>
@@ -119,20 +105,19 @@
         <div class="mission-deck-head">
           <div>
             <h2>La missione di stanotte</h2>
-            <p>La notte, in una sequenza</p>
+            <p>Costruisci la tua notte, target dopo target</p>
           </div>
           <span class="mission-deck-count"><strong data-mission-count>0</strong> target</span>
         </div>
 
         <div class="mission-deck-empty" data-timeline-empty>
-          <p>Scegli un'opportunità nel cielo e costruisci la tua serata.</p>
+          <p>Scegli un'opportunità nel cielo e inizia a comporre la serata.</p>
         </div>
 
-        <div class="mission-deck-track" data-timeline-filled hidden>
-          <div class="mission-markers" data-timeline-markers></div>
-          <div class="mission-rail">
-            <div class="mission-moon-band" data-moon-band aria-hidden="true"></div>
-            <div class="mission-track" data-timeline-track></div>
+        <div class="mission-deck-filled" data-timeline-filled hidden>
+          <div class="night-markers" data-timeline-markers></div>
+          <div class="night-chain-wrap">
+            <div class="night-chain" data-timeline-chain></div>
           </div>
         </div>
       </footer>

@@ -16,7 +16,7 @@ website/
 ## Current scope
 
 - Landing page with hero, problem, solution, compatibility, experience, roadmap, and footer.
-- **Mission Map v3** (`pages/mission-map.html`) — astronomical preview thumbnails suspended in the sky, premium narrative card, mission timeline hero.
+- **Mission Map Premium** (`pages/mission-map.html`) — transparent PNG targets suspended in space with category glow, cosmic sky with parallax, narrative dossier card, connected mission timeline.
 - Italian-first localization with `data-i18n` keys and locale placeholders in `locales/`.
 - Responsive layout for desktop and mobile.
 - Local generated hero image.

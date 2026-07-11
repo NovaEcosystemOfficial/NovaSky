@@ -1,13 +1,12 @@
 import { altAzToSky, generateStarField } from "./projection.js";
+import { getCategory } from "../data/categories.js";
 import { glowStrength } from "../ui/target-art.js";
 
-const NEBULA_PATCHES = [
-  { alt: 76, az: 285, rx: 0.14, ry: 0.06, color: [92, 140, 180], alpha: 0.07 },
-  { alt: 68, az: 20, rx: 0.12, ry: 0.05, color: [180, 100, 140], alpha: 0.06 },
-  { alt: 55, az: 100, rx: 0.1, ry: 0.04, color: [100, 180, 160], alpha: 0.05 },
-  { alt: 30, az: 180, rx: 0.16, ry: 0.07, color: [200, 120, 80], alpha: 0.055 },
-  { alt: 72, az: 350, rx: 0.18, ry: 0.08, color: [80, 160, 200], alpha: 0.08 },
-  { alt: 62, az: 310, rx: 0.08, ry: 0.04, color: [140, 120, 200], alpha: 0.04 },
+const MILKY_CLOUDS = [
+  { alt: 55, az: 310, rx: 0.22, ry: 0.09, alpha: 0.045 },
+  { alt: 62, az: 340, rx: 0.18, ry: 0.07, alpha: 0.038 },
+  { alt: 48, az: 280, rx: 0.15, ry: 0.06, alpha: 0.032 },
+  { alt: 38, az: 250, rx: 0.2, ry: 0.08, alpha: 0.028 },
 ];
 
 export class ObservatoryRenderer {
@@ -17,7 +16,7 @@ export class ObservatoryRenderer {
     this.targets = data.targets;
     this.constellations = data.constellations;
     this.thumbnails = data.thumbnails;
-    this.stars = generateStarField(480, 7);
+    this.stars = generateStarField(2800, 11);
     this.dpr = 1;
     this.width = 0;
     this.height = 0;
@@ -25,18 +24,17 @@ export class ObservatoryRenderer {
     this.hoveredId = null;
     this.selectedId = null;
     this.missionIds = new Set();
-    this.filterRecommendedOnly = false;
     this.time = 0;
+    this.cardAnchor = null;
     this.resize();
   }
 
-  setFilterRecommended(active) {
-    this.filterRecommendedOnly = active;
+  setCardAnchor(point) {
+    this.cardAnchor = point;
   }
 
   get visibleTargets() {
-    if (!this.filterRecommendedOnly) return this.targets;
-    return this.targets.filter((t) => t.recommendation === "recommended");
+    return this.targets;
   }
 
   resize() {
@@ -69,8 +67,15 @@ export class ObservatoryRenderer {
     this.time += dt;
   }
 
-  worldToScreen(alt, az) {
-    const sky = altAzToSky(alt, az, this.camera);
+  parallaxShift(layer) {
+    const delta = this.camera.azCenter - 25;
+    const factors = [0.12, 0.06, 0.025];
+    return delta * factors[layer];
+  }
+
+  worldToScreen(alt, az, layer = 1) {
+    const parallax = this.parallaxShift(layer === 0 ? 0 : layer === 1 ? 1 : 2);
+    const sky = altAzToSky(alt, az + parallax, this.camera);
     return {
       x: sky.x * this.width,
       y: sky.y * this.height,
@@ -82,12 +87,13 @@ export class ObservatoryRenderer {
   getTargetScreenPositions() {
     return this.visibleTargets
       .map((target) => {
-        const pos = this.worldToScreen(target.alt, target.az);
+        const pos = this.worldToScreen(target.alt, target.az, 2);
+        const size = this.getTargetSize(target);
         return {
           id: target.id,
           sx: pos.x,
           sy: pos.y,
-          radius: this.getPreviewSize(target) * 0.52,
+          radius: size * 0.55,
           target,
           visible: pos.visible,
         };
@@ -95,50 +101,58 @@ export class ObservatoryRenderer {
       .filter((p) => p.visible);
   }
 
-  getTargetRadius(target) {
-    const base = this.getPreviewSize(target) * 0.55;
-    if (target.id === this.selectedId) return base * 1.2;
-    if (target.id === this.hoveredId) return base * 1.05;
+  getTargetSize(target) {
+    const depth = 0.88 + (target.alt / 90) * 0.12;
+    const isSelected = target.id === this.selectedId;
+    const isHovered = target.id === this.hoveredId;
+    let base = 52 * depth;
+    if (isSelected) base = 68 * depth;
+    else if (isHovered) base = 58 * depth;
     return base;
   }
 
-  getPreviewSize(target) {
-    const isSelected = target.id === this.selectedId;
-    const isHovered = target.id === this.hoveredId;
-    const depth = 0.85 + (target.alt / 90) * 0.15;
-    let size = 40 * depth;
-    if (isSelected) size = 58 * depth;
-    else if (isHovered) size = 46 * depth;
-    return size;
+  breathingScale(seed, isSelected) {
+    const amp = isSelected ? 0.045 : 0.04;
+    return 1 + Math.sin(this.time * 0.0011 + seed * 0.13) * amp;
   }
 
   render() {
     const { ctx, width, height } = this;
     ctx.clearRect(0, 0, width, height);
-    this.drawDeepSky();
+    this.drawCosmicBackground();
     this.drawMilkyWay();
-    this.drawNebulae();
+    this.drawMilkyClouds();
     this.drawHorizon();
     this.drawConstellations();
-    this.drawStars();
+    this.drawStarLayer(0);
+    this.drawStarLayer(1);
+    this.drawStarLayer(2);
     this.drawSkyDim();
     this.drawTargets();
+    this.drawConnectionLine();
   }
 
-  drawDeepSky() {
+  drawCosmicBackground() {
     const { ctx, width, height } = this;
-    const grad = ctx.createLinearGradient(0, 0, 0, height);
-    grad.addColorStop(0, "#060810");
-    grad.addColorStop(0.35, "#05070a");
-    grad.addColorStop(0.75, "#040608");
-    grad.addColorStop(1, "#030406");
-    ctx.fillStyle = grad;
+    const g = ctx.createLinearGradient(0, 0, width * 0.3, height);
+    g.addColorStop(0, "#04060c");
+    g.addColorStop(0.35, "#05070a");
+    g.addColorStop(0.7, "#030508");
+    g.addColorStop(1, "#020305");
+    ctx.fillStyle = g;
     ctx.fillRect(0, 0, width, height);
 
-    const glow = ctx.createRadialGradient(width * 0.55, height * 0.2, 0, width * 0.5, height * 0.35, width * 0.7);
-    glow.addColorStop(0, "rgba(30, 40, 60, 0.35)");
-    glow.addColorStop(1, "transparent");
-    ctx.fillStyle = glow;
+    const nebula = ctx.createRadialGradient(width * 0.62, height * 0.18, 0, width * 0.55, height * 0.35, width * 0.85);
+    nebula.addColorStop(0, "rgba(35, 45, 75, 0.28)");
+    nebula.addColorStop(0.45, "rgba(20, 28, 48, 0.12)");
+    nebula.addColorStop(1, "transparent");
+    ctx.fillStyle = nebula;
+    ctx.fillRect(0, 0, width, height);
+
+    const warm = ctx.createRadialGradient(width * 0.15, height * 0.75, 0, width * 0.15, height * 0.75, width * 0.45);
+    warm.addColorStop(0, "rgba(40, 25, 18, 0.08)");
+    warm.addColorStop(1, "transparent");
+    ctx.fillStyle = warm;
     ctx.fillRect(0, 0, width, height);
   }
 
@@ -146,254 +160,207 @@ export class ObservatoryRenderer {
     const { ctx, width, height, time } = this;
     ctx.save();
     ctx.globalCompositeOperation = "screen";
-
-    const drift = Math.sin(time * 0.00008) * 0.01;
-    const cx = width * (0.42 + drift);
-    const cy = height * 0.38;
-
-    const band = ctx.createLinearGradient(cx - width * 0.5, cy, cx + width * 0.5, cy + height * 0.3);
-    band.addColorStop(0, "transparent");
-    band.addColorStop(0.25, "rgba(140, 160, 200, 0.025)");
-    band.addColorStop(0.45, "rgba(200, 210, 230, 0.055)");
-    band.addColorStop(0.55, "rgba(180, 190, 220, 0.05)");
-    band.addColorStop(0.75, "rgba(120, 140, 180, 0.03)");
-    band.addColorStop(1, "transparent");
+    const drift = Math.sin(time * 0.00005) * 8;
+    const cx = width * 0.46 + drift;
+    const cy = height * 0.36;
 
     ctx.translate(cx, cy);
-    ctx.rotate(-0.55);
+    ctx.rotate(-0.52);
     ctx.translate(-cx, -cy);
+
+    const band = ctx.createLinearGradient(0, cy - 40, width, cy + 120);
+    band.addColorStop(0, "transparent");
+    band.addColorStop(0.2, "rgba(130, 150, 190, 0.018)");
+    band.addColorStop(0.42, "rgba(210, 218, 235, 0.055)");
+    band.addColorStop(0.52, "rgba(190, 200, 225, 0.048)");
+    band.addColorStop(0.72, "rgba(120, 140, 180, 0.025)");
+    band.addColorStop(1, "transparent");
     ctx.fillStyle = band;
     ctx.fillRect(0, 0, width, height);
-
-    const core = ctx.createRadialGradient(width * 0.48, height * 0.42, 0, width * 0.48, height * 0.42, width * 0.22);
-    core.addColorStop(0, "rgba(220, 225, 240, 0.04)");
-    core.addColorStop(0.4, "rgba(160, 170, 200, 0.025)");
-    core.addColorStop(1, "transparent");
-    ctx.fillStyle = core;
-    ctx.fillRect(0, 0, width, height);
-
     ctx.restore();
   }
 
-  drawNebulae() {
-    const { ctx } = this;
+  drawMilkyClouds() {
+    const { ctx, time } = this;
     ctx.save();
     ctx.globalCompositeOperation = "screen";
-
-    for (const patch of NEBULA_PATCHES) {
-      const pos = this.worldToScreen(patch.alt, patch.az);
+    for (const cloud of MILKY_CLOUDS) {
+      const pos = this.worldToScreen(cloud.alt, cloud.az, 0);
       if (!pos.visible) continue;
-      const [r, g, b] = patch.color;
-      const breathe = 1 + Math.sin(this.time * 0.0006 + patch.az) * 0.04;
-      const rx = this.width * patch.rx * breathe * (0.6 + pos.depth * 0.4);
-      const ry = this.height * patch.ry * breathe;
-
+      const breathe = 1 + Math.sin(time * 0.0004 + cloud.az) * 0.03;
+      const rx = this.width * cloud.rx * breathe;
+      const ry = this.height * cloud.ry * breathe;
       const neb = ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, rx);
-      neb.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${patch.alpha * pos.depth})`);
-      neb.addColorStop(0.5, `rgba(${r}, ${g}, ${b}, ${patch.alpha * 0.35 * pos.depth})`);
+      neb.addColorStop(0, `rgba(200, 210, 230, ${cloud.alpha})`);
+      neb.addColorStop(0.6, `rgba(160, 175, 210, ${cloud.alpha * 0.35})`);
       neb.addColorStop(1, "transparent");
       ctx.fillStyle = neb;
       ctx.beginPath();
-      ctx.ellipse(pos.x, pos.y, rx, ry, -0.3, 0, Math.PI * 2);
+      ctx.ellipse(pos.x, pos.y, rx, ry, -0.25, 0, Math.PI * 2);
       ctx.fill();
     }
-
     ctx.restore();
   }
 
   drawHorizon() {
     const { ctx, width, height } = this;
-    const y = height * 0.93;
-
-    const haze = ctx.createLinearGradient(0, y - 80, 0, height);
+    const y = height * 0.935;
+    const haze = ctx.createLinearGradient(0, y - 100, 0, height);
     haze.addColorStop(0, "transparent");
-    haze.addColorStop(0.5, "rgba(20, 25, 35, 0.25)");
-    haze.addColorStop(1, "rgba(5, 7, 10, 0.85)");
+    haze.addColorStop(0.55, "rgba(12, 16, 22, 0.35)");
+    haze.addColorStop(1, "rgba(2, 3, 5, 0.92)");
     ctx.fillStyle = haze;
-    ctx.fillRect(0, y - 80, width, height - y + 80);
-
-    ctx.beginPath();
-    ctx.moveTo(0, y + 2);
-    ctx.bezierCurveTo(width * 0.25, y - 8, width * 0.75, y + 12, width, y + 2);
-    ctx.strokeStyle = "rgba(174, 185, 197, 0.08)";
-    ctx.lineWidth = 1;
-    ctx.stroke();
+    ctx.fillRect(0, y - 100, width, height - y + 100);
   }
 
   drawConstellations() {
     const { ctx } = this;
-    ctx.lineWidth = 0.75;
-    ctx.strokeStyle = "rgba(174, 185, 197, 0.09)";
+    ctx.lineWidth = 0.6;
+    ctx.strokeStyle = "rgba(174, 185, 197, 0.07)";
     ctx.lineCap = "round";
-
     for (const constellation of this.constellations) {
       const points = constellation.lines
-        .map(([alt, az]) => this.worldToScreen(alt, az))
+        .map(([alt, az]) => this.worldToScreen(alt, az, 1))
         .filter((p) => p.visible);
       if (points.length < 2) continue;
       ctx.beginPath();
-      points.forEach((p, i) => {
-        if (i === 0) ctx.moveTo(p.x, p.y);
-        else ctx.lineTo(p.x, p.y);
-      });
+      points.forEach((p, i) => (i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)));
       ctx.stroke();
     }
   }
 
-  drawStars() {
+  drawStarLayer(layerIndex) {
     const { ctx, time } = this;
-    const layers = [0.35, 0.65, 1];
+    const parallaxFactors = [0.35, 0.65, 1];
 
     for (const star of this.stars) {
-      const pos = this.worldToScreen(star.alt, star.az);
+      if (star.layer !== layerIndex) continue;
+      const pos = this.worldToScreen(star.alt, star.az, star.layer);
       if (!pos.visible) continue;
 
-      const breathe = 0.7 + Math.sin(time * 0.0008 + star.phase) * 0.3;
-      const layerScale = layers[star.layer];
-      const brightness = (6 - star.mag) / 6;
-      const alpha = brightness * 0.55 * breathe * layerScale * (0.4 + pos.depth * 0.6);
-      const size = (star.mag < 2 ? 1.6 : star.mag < 4 ? 1.1 : 0.7) * layerScale;
+      const twinkle = 0.65 + Math.sin(time * 0.0007 + star.phase) * 0.35;
+      const brightness = Math.max(0.08, (7 - star.mag) / 7);
+      const alpha = brightness * 0.7 * twinkle * parallaxFactors[layerIndex] * (0.35 + pos.depth * 0.65);
+      const size = (star.mag < 1.8 ? 1.8 : star.mag < 3.5 ? 1.15 : star.mag < 5 ? 0.75 : 0.45) * parallaxFactors[layerIndex];
+
+      let color = "238, 244, 248";
+      if (star.tint === "warm") color = "255, 230, 210";
+      if (star.tint === "cool") color = "200, 220, 255";
 
       ctx.beginPath();
       ctx.arc(pos.x, pos.y, size, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(238, 244, 248, ${Math.min(0.85, alpha)})`;
+      ctx.fillStyle = `rgba(${color}, ${Math.min(0.9, alpha)})`;
       ctx.fill();
-
-      if (star.mag < 2.5) {
-        const glow = ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, size * 4);
-        glow.addColorStop(0, `rgba(200, 220, 240, ${alpha * 0.25})`);
-        glow.addColorStop(1, "transparent");
-        ctx.fillStyle = glow;
-        ctx.beginPath();
-        ctx.arc(pos.x, pos.y, size * 4, 0, Math.PI * 2);
-        ctx.fill();
-      }
     }
   }
 
   drawSkyDim() {
-    if (!this.selectedId && !this.hoveredId) return;
+    if (!this.selectedId) return;
     const { ctx, width, height } = this;
-    const alpha = this.selectedId ? 0.38 : 0.18;
-    ctx.fillStyle = `rgba(3, 5, 8, ${alpha})`;
+    ctx.fillStyle = "rgba(2, 4, 7, 0.32)";
     ctx.fillRect(0, 0, width, height);
   }
 
   drawTargets() {
-    const sorted = [...this.visibleTargets].sort((a, b) => {
-      const score = (t) => {
-        let s = t.alt;
-        if (t.id === this.selectedId) s += 200;
-        if (t.id === this.hoveredId) s += 100;
-        return s;
-      };
-      return score(a) - score(b);
-    });
-
+    const sorted = [...this.visibleTargets].sort((a, b) => a.alt - b.alt);
     for (const target of sorted) {
-      if (target.id !== this.selectedId) {
-        this.drawFloatingPreview(target);
-      }
+      if (target.id !== this.selectedId) this.drawSuspendedTarget(target);
     }
-    const selected = sorted.find((t) => t.id === this.selectedId);
-    if (selected) this.drawFloatingPreview(selected);
+    const selected = this.visibleTargets.find((t) => t.id === this.selectedId);
+    if (selected) this.drawSuspendedTarget(selected);
   }
 
-  drawFloatingPreview(target) {
+  drawSuspendedTarget(target) {
     const { ctx, time, thumbnails } = this;
-    const thumb = thumbnails?.getMini(target.id);
-    const pos = this.worldToScreen(target.alt, target.az);
+    const img = thumbnails?.getMini(target.id);
+    const pos = this.worldToScreen(target.alt, target.az, 2);
     if (!pos.visible) return;
 
     const isSelected = target.id === this.selectedId;
     const isHovered = target.id === this.hoveredId;
-    const inMission = this.missionIds.has(target.id);
-    const hasFocus = Boolean(this.selectedId || this.hoveredId);
+    const hasSelection = Boolean(this.selectedId);
+    const cat = getCategory(target);
+    const [cr, cg, cb] = cat.rgb;
+    const seed = seedFromId(target.id);
 
-    const pw = this.getPreviewSize(target);
-    const ph = pw * 0.72;
-    const seed = target.id.charCodeAt(0);
-    const floatY = Math.sin(time * 0.00085 + seed) * (isSelected ? 2 : 4);
-    const floatX = Math.cos(time * 0.0006 + seed * 0.7) * 1.5;
+    const baseSize = this.getTargetSize(target);
+    const breath = this.breathingScale(seed, isSelected);
+    const size = baseSize * breath;
+    const aspect = img ? img.height / img.width : 0.78;
+    const w = size;
+    const h = size * aspect;
 
-    const alpha =
-      hasFocus && !isSelected && !isHovered
-        ? 0.42
-        : isSelected
-          ? 1
-          : isHovered
-            ? 0.92
-            : 0.78;
+    const floatY = Math.sin(time * 0.00075 + seed) * 3;
+    const floatX = Math.cos(time * 0.00055 + seed * 0.6) * 2;
+
+    const alpha = hasSelection && !isSelected ? 0.48 : isHovered && !isSelected ? 0.78 : 1;
 
     ctx.save();
     ctx.translate(pos.x + floatX, pos.y + floatY);
     ctx.globalAlpha = alpha;
 
-    const glow = glowStrength(target) * (isSelected ? 1.35 : 1);
-    const [c1, c2] = target.preview;
-    const glowR = pw * (isSelected ? 1.8 : 1.35);
-    const outer = ctx.createRadialGradient(0, 0, pw * 0.2, 0, 0, glowR);
-    outer.addColorStop(0, `${c2}${Math.round(glow * 90).toString(16).padStart(2, "0")}`);
-    outer.addColorStop(0.45, `${c1}22`);
+    const glow = glowStrength(target) * (isSelected ? 1.4 : 1);
+    const glowR = Math.max(w, h) * (isSelected ? 1.5 : 1.15);
+    const outer = ctx.createRadialGradient(0, 0, size * 0.15, 0, 0, glowR);
+    outer.addColorStop(0, `rgba(${cr}, ${cg}, ${cb}, ${glow * 0.55})`);
+    outer.addColorStop(0.4, `rgba(${cr}, ${cg}, ${cb}, ${glow * 0.15})`);
     outer.addColorStop(1, "transparent");
     ctx.fillStyle = outer;
     ctx.beginPath();
-    ctx.ellipse(0, 0, glowR, glowR * 0.85, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, 0, glowR, glowR * 0.82, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    const r = 10;
-    const x0 = -pw / 2;
-    const y0 = -ph / 2;
-
-    ctx.shadowColor = isSelected ? "rgba(92, 199, 216, 0.35)" : "rgba(0, 0, 0, 0.45)";
-    ctx.shadowBlur = isSelected ? 28 : 14;
-    ctx.shadowOffsetY = isSelected ? 0 : 6;
-
-    ctx.beginPath();
-    ctx.roundRect(x0, y0, pw, ph, r);
-    ctx.fillStyle = "rgba(8, 10, 14, 0.92)";
-    ctx.fill();
-
-    ctx.shadowBlur = 0;
-    ctx.shadowOffsetY = 0;
-
-    if (thumb) {
+    if (isSelected) {
+      const orbitAngle = time * 0.00035;
       ctx.save();
+      ctx.rotate(orbitAngle);
       ctx.beginPath();
-      ctx.roundRect(x0, y0, pw, ph, r);
-      ctx.clip();
-      ctx.drawImage(thumb, x0, y0, pw, ph);
+      ctx.ellipse(0, 0, w * 0.72, h * 0.52, 0.2, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(${cr}, ${cg}, ${cb}, 0.45)`;
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.ellipse(0, 0, w * 0.82, h * 0.6, 0.2, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(92, 199, 216, 0.18)";
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
       ctx.restore();
     }
 
-    ctx.strokeStyle = isSelected
-      ? "rgba(92, 199, 216, 0.55)"
-      : isHovered
-        ? "rgba(238, 244, 248, 0.28)"
-        : "rgba(238, 244, 248, 0.12)";
-    ctx.lineWidth = isSelected ? 1.5 : 1;
-    ctx.beginPath();
-    ctx.roundRect(x0, y0, pw, ph, r);
-    ctx.stroke();
-
-    if (inMission) {
-      ctx.beginPath();
-      ctx.arc(pw / 2 - 8, -ph / 2 + 8, 4, 0, Math.PI * 2);
-      ctx.fillStyle = "#5cc7d8";
-      ctx.fill();
-      ctx.strokeStyle = "rgba(5, 7, 10, 0.8)";
-      ctx.lineWidth = 1;
-      ctx.stroke();
+    if (img) {
+      ctx.drawImage(img, -w / 2, -h / 2, w, h);
     }
 
-    if (isSelected || isHovered) {
-      ctx.font = `500 11px Inter, sans-serif`;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "top";
-      ctx.fillStyle = "rgba(238, 244, 248, 0.9)";
-      ctx.fillText(target.name, 0, ph / 2 + 10);
+    if (this.missionIds.has(target.id)) {
+      ctx.beginPath();
+      ctx.arc(w / 2 - 4, -h / 2 + 4, 3.5, 0, Math.PI * 2);
+      ctx.fillStyle = "#5cc7d8";
+      ctx.fill();
     }
 
     ctx.restore();
   }
+
+  drawConnectionLine() {
+    if (!this.selectedId || !this.cardAnchor) return;
+    const target = this.targets.find((t) => t.id === this.selectedId);
+    if (!target) return;
+    const pos = this.worldToScreen(target.alt, target.az, 2);
+    if (!pos.visible) return;
+
+    const { ctx } = this;
+    const { x: tx, y: ty } = pos;
+    const { x: cx, y: cy } = this.cardAnchor;
+
+    ctx.beginPath();
+    ctx.moveTo(tx, ty);
+    ctx.bezierCurveTo(tx + (cx - tx) * 0.45, ty - 12, cx - 40, cy, cx, cy);
+    ctx.strokeStyle = "rgba(92, 199, 216, 0.14)";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+}
+
+function seedFromId(id) {
+  return id.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
 }

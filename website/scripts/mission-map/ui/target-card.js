@@ -4,22 +4,22 @@ export class TargetCard {
   constructor(root, callbacks) {
     this.root = root;
     this.callbacks = callbacks;
-    this.currentId = null;
     this.thumbnails = callbacks.thumbnails;
+    this.currentId = null;
 
     this.els = {
-      heroCanvas: root.querySelector("[data-target-hero-canvas]"),
+      heroImg: root.querySelector("[data-target-hero-img]"),
       name: root.querySelector("[data-target-name]"),
       subtitle: root.querySelector("[data-target-subtitle]"),
       reason: root.querySelector("[data-target-reason]"),
       expectation: root.querySelector("[data-target-expectation]"),
-      badge: root.querySelector("[data-target-badge]"),
+      window: root.querySelector("[data-target-window]"),
       s50: root.querySelector("[data-target-s50]"),
       s30: root.querySelector("[data-target-s30]"),
+      badge: root.querySelector("[data-target-badge]"),
       magnitude: root.querySelector("[data-target-magnitude]"),
       filter: root.querySelector("[data-target-filter]"),
       altitude: root.querySelector("[data-target-altitude]"),
-      window: root.querySelector("[data-target-window]"),
       difficulty: root.querySelector("[data-target-difficulty]"),
       score: root.querySelector("[data-target-score]"),
       addBtn: root.querySelector("[data-add-mission]"),
@@ -51,27 +51,31 @@ export class TargetCard {
     this.els.subtitle.textContent = target.subtitle;
     this.els.reason.textContent = target.reason;
     this.els.expectation.textContent = target.expectation;
-    this.els.badge.textContent = rec.label;
-    this.els.badge.dataset.level = target.recommendation;
+    this.els.window.textContent = `${target.window.start} – ${target.window.end}`;
     this.els.s50.textContent = target.seestar.s50;
     this.els.s30.textContent = target.seestar.s30;
+    this.els.badge.textContent = rec.label;
+    this.els.badge.dataset.level = target.recommendation;
     this.els.magnitude.textContent = String(target.magnitude);
     this.els.filter.textContent = target.filter;
     this.els.altitude.textContent = `${target.alt}°`;
-    this.els.window.textContent = `${target.window.start} – ${target.window.end}`;
     this.els.difficulty.textContent = target.difficulty;
     if (this.els.score) this.els.score.textContent = String(target.novaScore);
 
-    if (this.els.heroCanvas && this.thumbnails) {
-      const hero = this.thumbnails.getHero(target.id);
-      const ctx = this.els.heroCanvas.getContext("2d");
-      if (hero && ctx) {
-        ctx.clearRect(0, 0, this.els.heroCanvas.width, this.els.heroCanvas.height);
-        ctx.drawImage(hero, 0, 0, this.els.heroCanvas.width, this.els.heroCanvas.height);
-      }
+    const heroPath = `../assets/targets/hero/${target.id}.png`;
+    if (this.els.heroImg) {
+      this.els.heroImg.src = heroPath;
+      this.els.heroImg.alt = target.name;
     }
 
     this.updateMissionButton(this.els.addBtn?.dataset.inMission === "true");
+  }
+
+  /** @returns {{ x: number, y: number } | null} anchor point for sky connection line */
+  getAnchorPoint() {
+    if (!this.root.classList.contains("is-open")) return null;
+    const rect = this.root.getBoundingClientRect();
+    return { x: rect.left + 12, y: rect.top + rect.height * 0.28 };
   }
 
   setInMission(id, inMission) {
