@@ -1,4 +1,5 @@
 import { RECOMMENDATION } from "../data/targets.js";
+import { PHOTO_CREDITS } from "../data/photo-credits.js";
 
 export class TargetCard {
   constructor(root, callbacks) {
@@ -22,6 +23,7 @@ export class TargetCard {
       altitude: root.querySelector("[data-target-altitude]"),
       difficulty: root.querySelector("[data-target-difficulty]"),
       score: root.querySelector("[data-target-score]"),
+      photoCredit: root.querySelector("[data-target-photo-credit]"),
       addBtn: root.querySelector("[data-add-mission]"),
     };
 
@@ -62,10 +64,18 @@ export class TargetCard {
     this.els.difficulty.textContent = target.difficulty;
     if (this.els.score) this.els.score.textContent = String(target.novaScore);
 
-    const heroPath = `../assets/targets/hero/${target.id}.png`;
+    const heroPath = `../assets/targets/hero/${target.id}.jpg`;
     if (this.els.heroImg) {
       this.els.heroImg.src = heroPath;
       this.els.heroImg.alt = target.name;
+    }
+
+    const credit = PHOTO_CREDITS[target.id];
+    if (this.els.photoCredit && credit?.artist) {
+      this.els.photoCredit.textContent = `Foto: ${credit.artist} · ${credit.license}`;
+      this.els.photoCredit.hidden = false;
+    } else if (this.els.photoCredit) {
+      this.els.photoCredit.hidden = true;
     }
 
     this.updateMissionButton(this.els.addBtn?.dataset.inMission === "true");

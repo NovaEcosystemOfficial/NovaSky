@@ -29,4 +29,10 @@ Open `index.html` directly in a browser, or serve the `website` folder with any 
 
 Mission Map (ES modules): use a local server — e.g. `python3 -m http.server 8080` from the `website` folder, then open `http://localhost:8080/pages/mission-map.html`.
 
+Real target photos are fetched from Wikimedia Commons. To refresh assets:
+
+```bash
+python3 website/scripts/fetch-target-photos.py
+```
+
 No backend is required.

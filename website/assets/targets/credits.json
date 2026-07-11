@@ -1,0 +1,245 @@
+{
+  "ngc7000": {
+    "id": "ngc7000",
+    "file": "Cygnus Wall, NGC 7000.jpg",
+    "source": "Wikimedia Commons",
+    "artist": "Chuck Ayoub",
+    "credit": "Own work",
+    "license": "CC BY-SA 4.0",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/b/b6/Cygnus_Wall%2C_NGC_7000.jpg"
+  },
+  "ic1396": {
+    "id": "ic1396",
+    "file": "Elephant's Trunk Nebula, IC 1396A.png",
+    "source": "Wikimedia Commons",
+    "artist": "Chuck Ayoub",
+    "credit": "Own work",
+    "license": "CC BY-SA 4.0",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/f/fa/Elephant%27s_Trunk_Nebula%2C_IC_1396A.png"
+  },
+  "m27": {
+    "id": "m27",
+    "file": "M27, NGC 6853, Dumbbell Nebula (noao-02184).jpg",
+    "source": "Wikimedia Commons",
+    "artist": "Bill Schoening, Nigel Sharp/NOIRLab/ NSF /AURA",
+    "credit": "M27, NGC 6853, Dumbbell Nebula",
+    "license": "CC BY 4.0",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/b/b4/M27%2C_NGC_6853%2C_Dumbbell_Nebula_%28noao-02184%29.jpg"
+  },
+  "m57": {
+    "id": "m57",
+    "file": "Hubble image of the Ring Nebula (Messier 57).jpg",
+    "source": "Wikimedia Commons",
+    "artist": "NASA, ESA, and C. Robert O’Dell (Vanderbilt University)",
+    "credit": "http://www.spacetelescope.org/images/heic1310a/",
+    "license": "Public domain",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/f/fe/Hubble_image_of_the_Ring_Nebula_%28Messier_57%29.jpg"
+  },
+  "m13": {
+    "id": "m13",
+    "file": "Globular Cluster Messier 13 (M13).jpg",
+    "source": "Wikimedia Commons",
+    "artist": "Thedarksideobservatory",
+    "credit": "Own work",
+    "license": "CC BY-SA 4.0",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/0/04/Globular_Cluster_Messier_13_%28M13%29.jpg"
+  },
+  "m31": {
+    "id": "m31",
+    "file": "Andromeda Galaxy (with h-alpha).jpg",
+    "source": "Wikimedia Commons",
+    "artist": "Adam Evans",
+    "credit": "M31, the Andromeda Galaxy (now with h-alpha) Uploaded by NotFromUtrecht",
+    "license": "CC BY 2.0",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/9/98/Andromeda_Galaxy_%28with_h-alpha%29.jpg"
+  },
+  "m51": {
+    "id": "m51",
+    "file": "Messier51.jpg",
+    "source": "Wikimedia Commons",
+    "artist": "NASA, ESA, S. Beckwith (STScI), and The Hubble Heritage Team STScI/AURA)",
+    "credit": "http://www.spacetelescope.org/images/heic0506a/ ([cdn.spacetelescope.org/archives/images/screen/heic0506a.jpg direct link])",
+    "license": "CC BY 3.0",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/1/11/Messier51.jpg"
+  },
+  "m101": {
+    "id": "m101",
+    "file": "M101 The Pinwheel galaxy.png",
+    "source": "Wikimedia Commons",
+    "artist": "Juan lacruz",
+    "credit": "Own work",
+    "license": "CC BY 4.0",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/5/57/M101_The_Pinwheel_galaxy.png"
+  },
+  "m81": {
+    "id": "m81",
+    "file": "Bode and Cigar galaxies.jpg",
+    "source": "Wikimedia Commons",
+    "artist": "Taavi Niittee",
+    "credit": "Own work",
+    "license": "CC0",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/e/e1/Bode_and_Cigar_galaxies.jpg"
+  },
+  "m17": {
+    "id": "m17",
+    "file": "The Omega Nebula, M17 (noao-m17).jpg",
+    "source": "Wikimedia Commons",
+    "artist": "Hillary Mathis, N.A.Sharp, REU program/NOIRLab/ NSF /AURA",
+    "credit": "The Omega Nebula, M17",
+    "license": "CC BY 4.0",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/d/de/The_Omega_Nebula%2C_M17_%28noao-m17%29.jpg"
+  },
+  "m16": {
+    "id": "m16",
+    "file": "Eagle Nebula from ESO.jpg",
+    "source": "Wikimedia Commons",
+    "artist": "ESO",
+    "credit": "http://www.eso.org/public/images/eso0926a/",
+    "license": "CC BY 4.0",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/2/2b/Eagle_Nebula_from_ESO.jpg"
+  },
+  "m20": {
+    "id": "m20",
+    "file": "Trifid Nebula (M20).jpg",
+    "source": "Wikimedia Commons",
+    "artist": "Pedro José Zampella Contreras",
+    "credit": "Own work",
+    "license": "CC BY-SA 4.0",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/d/da/Trifid_Nebula_%28M20%29.jpg"
+  },
+  "m8": {
+    "id": "m8",
+    "file": "Lagoon Nebula (ESO).jpg",
+    "source": "Wikimedia Commons",
+    "artist": "ESO/S. Guisard",
+    "credit": "ESO ( direct link )",
+    "license": "CC BY 4.0",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/1/16/Lagoon_Nebula_%28ESO%29.jpg"
+  },
+  "ic1805": {
+    "id": "ic1805",
+    "file": "Heart Nebula (2020-08-11).jpg",
+    "source": "Wikimedia Commons",
+    "artist": "Ram samudrala",
+    "credit": "Own work",
+    "license": "CC BY 4.0",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/6/64/Heart_Nebula_%282020-08-11%29.jpg"
+  },
+  "ngc2244": {
+    "id": "ngc2244",
+    "file": "The Rosette Nebula, otherwise known as NGC 2244.jpg",
+    "source": "Wikimedia Commons",
+    "artist": "Mystery Ray",
+    "credit": "Own work",
+    "license": "CC BY-SA 4.0",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/f/fb/The_Rosette_Nebula%2C_otherwise_known_as_NGC_2244.jpg"
+  },
+  "m92": {
+    "id": "m92",
+    "file": "M92, NGC 6341 (noao-m92).jpg",
+    "source": "Wikimedia Commons",
+    "artist": "Hillary Mathis, REU program/NOIRLab/ NSF /AURA",
+    "credit": "M92, NGC 6341",
+    "license": "CC BY 4.0",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/7/7d/M92%2C_NGC_6341_%28noao-m92%29.jpg"
+  },
+  "m3": {
+    "id": "m3",
+    "file": "Globular Cluster Messier 3 (M3).jpg",
+    "source": "Wikimedia Commons",
+    "artist": "Thedarksideobservatory",
+    "credit": "Own work",
+    "license": "CC BY-SA 4.0",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/b/b5/Globular_Cluster_Messier_3_%28M3%29.jpg"
+  },
+  "m97": {
+    "id": "m97",
+    "file": "Owl Nebula, M97, NGC 3587 (noao0310a).jpg",
+    "source": "Wikimedia Commons",
+    "artist": "Karen Kwitter (Williams College), Ron Downes (STScI), You-Hua Chu (University of Illinois) and NOIRLab/ NSF /AURA",
+    "credit": "Owl Nebula, M97, NGC 3587",
+    "license": "CC BY 4.0",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/6/69/Owl_Nebula%2C_M97%2C_NGC_3587_%28noao0310a%29.jpg"
+  },
+  "m42": {
+    "id": "m42",
+    "file": "Orion Nebula (M42) part HST 4800px.jpg",
+    "source": "Wikimedia Commons",
+    "artist": "Credit: NASA, ESA, and The Hubble Heritage Team (STScI/AURA) Acknowledgment: NASA, ESA, M. Robberto (Space Telescope Science Institute) and the Hubble Space Telescope Orion Treasury Project Team",
+    "credit": "https://hubblesite.org/contents/media/images/2006/01/1825-Image.html",
+    "license": "Public domain",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/b/b9/Orion_Nebula_%28M42%29_part_HST_4800px.jpg"
+  },
+  "m45": {
+    "id": "m45",
+    "file": "Pleiades large.jpg",
+    "source": "Wikimedia Commons",
+    "artist": "NASA, ESA, AURA/Caltech, Palomar Observatory The science team consists of: D. Soderblom and E. Nelan (STScI), F. Benedict and B. Arthur (U. Texas), and B. Jones (Lick Obs.)",
+    "credit": "https://hubblesite.org/contents/media/images/2004/20/1562-Image.html?Topic=104-stars-and-nebulas&amp;keyword=pleiades ( TIF image link )",
+    "license": "Public domain",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/4/4e/Pleiades_large.jpg"
+  },
+  "b33": {
+    "id": "b33",
+    "file": "Barnard 33.jpg",
+    "source": "Wikimedia Commons",
+    "artist": "Ken Crawford",
+    "credit": "Image description: http://www.imagingdeepsky.com/Nebulae/Horsehead/Horsehead.htm Direct link to the image: http://www.imagingdeepsky.com/Nebulae/Horsehead/FullSizeJpg/Horsehead.jpg",
+    "license": "CC BY-SA 3.0",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/6/68/Barnard_33.jpg"
+  },
+  "ngc6992": {
+    "id": "ngc6992",
+    "file": "Ultraviolet image of the Cygnus Loop Nebula crop.jpg",
+    "source": "Wikimedia Commons",
+    "artist": "NASA/JPL-Caltech",
+    "credit": "This file was derived from: Cygnus Loop Nebula.jpg :",
+    "license": "Public domain",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/5/5b/Ultraviolet_image_of_the_Cygnus_Loop_Nebula_crop.jpg"
+  },
+  "m104": {
+    "id": "m104",
+    "file": "M104 ngc4594 sombrero galaxy hi-res.jpg",
+    "source": "Wikimedia Commons",
+    "artist": "NASA/ESA and The Hubble Heritage Team (STScI/AURA)",
+    "credit": "http://www.spacetelescope.org/images/opo0328a/ ([cdn.spacetelescope.org/archives/images/screen/opo0328a.jpg direct link]) http://hubblesite.org/newscenter/newsdesk/archive/releases/2003/28/image/a",
+    "license": "Public domain",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/5/5e/M104_ngc4594_sombrero_galaxy_hi-res.jpg"
+  },
+  "m78": {
+    "id": "m78",
+    "file": "Messier 78.jpg",
+    "source": "Wikimedia Commons",
+    "artist": "ESO/Igor Chekalin",
+    "credit": "http://www.eso.org/public/images/eso1105a/",
+    "license": "CC BY 4.0",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Messier_78.jpg"
+  },
+  "saturn": {
+    "id": "saturn",
+    "file": "PIA17218 – A Farewell to Saturn, Brightened Version.jpg",
+    "source": "Wikimedia Commons",
+    "artist": "NASA / JPL-Caltech / Space Science Institute",
+    "credit": "Catalog page · Full-res ( JPEG · TIFF )",
+    "license": "Public domain",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/e/e5/PIA17218_%E2%80%93_A_Farewell_to_Saturn%2C_Brightened_Version.jpg"
+  },
+  "m1": {
+    "id": "m1",
+    "file": "A Giant Hubble Mosaic of the Crab Nebula DVIDS693637.jpg",
+    "source": "Wikimedia Commons",
+    "artist": "NASA, ESA, J. Hester and A. Loll (Arizona State University)",
+    "credit": "http://hubblesite.org/news_release/news/2005-37",
+    "license": "Public domain",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/7/70/A_Giant_Hubble_Mosaic_of_the_Crab_Nebula_DVIDS693637.jpg"
+  },
+  "m33": {
+    "id": "m33",
+    "file": "M33 - The Triangulum Galaxy.jpg",
+    "source": "Wikimedia Commons",
+    "artist": "Popcorn4life",
+    "credit": "Own work",
+    "license": "CC BY 4.0",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/a/a7/M33_-_The_Triangulum_Galaxy.jpg"
+  }
+}

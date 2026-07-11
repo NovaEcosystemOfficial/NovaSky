@@ -27,7 +27,7 @@ export class ThumbnailCache {
         try {
           const [miniImg, heroImg] = await Promise.all([
             loadImage(`${this.assetBase}/mini/${target.id}.png`),
-            loadImage(`${this.assetBase}/hero/${target.id}.png`),
+            loadImage(`${this.assetBase}/hero/${target.id}.jpg`),
           ]);
           this.mini.set(target.id, miniImg);
           this.hero.set(target.id, heroImg);

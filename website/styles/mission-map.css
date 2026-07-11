@@ -294,6 +294,19 @@ body.mission-map-page {
   color: var(--danger);
 }
 
+.premium-photo-credit {
+  position: absolute;
+  right: 16px;
+  bottom: 12px;
+  z-index: 2;
+  max-width: 62%;
+  margin: 0;
+  color: rgba(238, 244, 248, 0.55);
+  font-size: 0.62rem;
+  line-height: 1.35;
+  text-align: right;
+}
+
 .premium-hero-titles h2 {
   margin: 0;
   font-size: 1.55rem;
