@@ -329,22 +329,25 @@ export class ObservatoryRenderer {
 
     const { ctx, width, height } = this;
     ctx.save();
-    ctx.fillStyle = `rgba(2, 4, 8, ${0.38 * dim})`;
-    ctx.fillRect(0, 0, width, height);
 
     if (this.selectedId) {
       const target = this.targets.find((t) => t.id === this.selectedId);
       if (target) {
         const pos = this.worldToScreen(target.alt, target.az, 2, this.targetParallaxAz(target));
-        const clear = ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, width * 0.42);
-        clear.addColorStop(0, `rgba(2, 4, 8, ${0.22 * dim})`);
-        clear.addColorStop(0.45, `rgba(2, 4, 8, ${0.08 * dim})`);
-        clear.addColorStop(1, "transparent");
-        ctx.globalCompositeOperation = "destination-out";
-        ctx.fillStyle = clear;
+        const r = Math.max(width, height) * 0.75;
+        const g = ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, r);
+        g.addColorStop(0, `rgba(2, 4, 8, ${0.05 * dim})`);
+        g.addColorStop(0.4, `rgba(2, 4, 8, ${0.24 * dim})`);
+        g.addColorStop(1, `rgba(2, 4, 8, ${0.42 * dim})`);
+        ctx.fillStyle = g;
         ctx.fillRect(0, 0, width, height);
+        ctx.restore();
+        return;
       }
     }
+
+    ctx.fillStyle = `rgba(2, 4, 8, ${0.38 * dim})`;
+    ctx.fillRect(0, 0, width, height);
     ctx.restore();
   }
 
@@ -452,6 +455,7 @@ export class ObservatoryRenderer {
     ctx.globalAlpha = state.presence;
     ctx.filter = `brightness(${state.brightness}) contrast(${state.contrast}) saturate(${state.saturate})`;
     ctx.drawImage(img, -w / 2, -h / 2, w, h);
+    ctx.filter = "none";
     ctx.restore();
 
     // Subtle core luminance
