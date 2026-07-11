@@ -1,6 +1,7 @@
 import { altAzToSky, generateStarField } from "./projection.js";
 import { getCategory } from "../data/categories.js";
 import { glowStrength } from "../ui/target-art.js";
+import { mixRgb, easeOutCubic } from "../ui/target-sprite.js";
 
 const MILKY_CLOUDS = [
   { alt: 55, az: 310, rx: 0.22, ry: 0.09, alpha: 0.045 },
@@ -16,6 +17,7 @@ export class ObservatoryRenderer {
     this.targets = data.targets;
     this.constellations = data.constellations;
     this.thumbnails = data.thumbnails;
+    this.sprites = data.sprites ?? new Map();
     this.stars = generateStarField(2800, 11);
     this.dpr = 1;
     this.width = 0;
@@ -26,7 +28,16 @@ export class ObservatoryRenderer {
     this.missionIds = new Set();
     this.time = 0;
     this.cardAnchor = null;
+    this.anim = {
+      skyDim: 0,
+      emerge: 0,
+      lastSelectedId: null,
+    };
     this.resize();
+  }
+
+  setSprites(sprites) {
+    this.sprites = sprites;
   }
 
   setCardAnchor(point) {
@@ -56,6 +67,10 @@ export class ObservatoryRenderer {
   }
 
   setSelected(id) {
+    if (id !== this.selectedId) {
+      this.anim.emerge = 0;
+      this.anim.lastSelectedId = id;
+    }
     this.selectedId = id;
   }
 
@@ -65,6 +80,13 @@ export class ObservatoryRenderer {
 
   tick(dt) {
     this.time += dt;
+    const dimTarget = this.selectedId ? 1 : 0;
+    this.anim.skyDim += (dimTarget - this.anim.skyDim) * Math.min(1, dt * 0.0028);
+    if (this.selectedId) {
+      this.anim.emerge = Math.min(1, this.anim.emerge + dt * 0.0016);
+    } else {
+      this.anim.emerge = Math.max(0, this.anim.emerge - dt * 0.003);
+    }
   }
 
   parallaxShift(layer) {
@@ -73,9 +95,15 @@ export class ObservatoryRenderer {
     return delta * factors[layer];
   }
 
-  worldToScreen(alt, az, layer = 1) {
+  targetParallaxAz(target) {
+    const sprite = this.sprites.get(target.id);
+    const factor = sprite?.parallax ?? 0.035;
+    return (this.camera.azCenter - 25) * factor;
+  }
+
+  worldToScreen(alt, az, layer = 1, extraAz = 0) {
     const parallax = this.parallaxShift(layer === 0 ? 0 : layer === 1 ? 1 : 2);
-    const sky = altAzToSky(alt, az + parallax, this.camera);
+    const sky = altAzToSky(alt, az + parallax + extraAz, this.camera);
     return {
       x: sky.x * this.width,
       y: sky.y * this.height,
@@ -87,13 +115,13 @@ export class ObservatoryRenderer {
   getTargetScreenPositions() {
     return this.visibleTargets
       .map((target) => {
-        const pos = this.worldToScreen(target.alt, target.az, 2);
+        const pos = this.worldToScreen(target.alt, target.az, 2, this.targetParallaxAz(target));
         const size = this.getTargetSize(target);
         return {
           id: target.id,
           sx: pos.x,
           sy: pos.y,
-          radius: size * 0.55,
+          radius: size * 0.62,
           target,
           visible: pos.visible,
         };
@@ -102,18 +130,52 @@ export class ObservatoryRenderer {
   }
 
   getTargetSize(target) {
-    const depth = 0.88 + (target.alt / 90) * 0.12;
+    const sprite = this.sprites.get(target.id);
+    const depth = sprite?.depth ?? 0.88 + (target.alt / 90) * 0.12;
     const isSelected = target.id === this.selectedId;
     const isHovered = target.id === this.hoveredId;
-    let base = 52 * depth;
-    if (isSelected) base = 68 * depth;
-    else if (isHovered) base = 58 * depth;
+    const bias = sprite?.scaleBias ?? 1;
+    let base = 50 * depth * bias;
+    if (isSelected) base = 66 * depth * bias;
+    else if (isHovered) base = 56 * depth * bias;
     return base;
   }
 
-  breathingScale(seed, isSelected) {
-    const amp = isSelected ? 0.045 : 0.04;
-    return 1 + Math.sin(this.time * 0.0011 + seed * 0.13) * amp;
+  breathingScale(sprite, isSelected) {
+    const phase = sprite?.phase ?? 0;
+    const amp = isSelected ? 0.028 : 0.022;
+    return 1 + Math.sin(this.time * 0.001 + phase) * amp;
+  }
+
+  targetVisualState(target) {
+    const isSelected = target.id === this.selectedId;
+    const isHovered = target.id === this.hoveredId;
+    const hasSelection = Boolean(this.selectedId);
+    const emerge = isSelected ? easeOutCubic(this.anim.emerge) : 0;
+
+    let presence = 1;
+    if (hasSelection && !isSelected) presence = 0.38;
+    else if (isHovered && !isSelected) presence = 0.62;
+
+    let brightness = 0.82;
+    let contrast = 0.88;
+    let saturate = 0.78;
+
+    if (isHovered && !isSelected) {
+      brightness = 0.92;
+      contrast = 0.94;
+      saturate = 0.88;
+    }
+
+    if (isSelected) {
+      const e = emerge;
+      presence = 0.15 + e * 0.85;
+      brightness = 0.55 + e * 0.52;
+      contrast = 0.82 + e * 0.2;
+      saturate = 0.65 + e * 0.38;
+    }
+
+    return { isSelected, isHovered, hasSelection, emerge, presence, brightness, contrast, saturate };
   }
 
   render() {
@@ -255,14 +317,36 @@ export class ObservatoryRenderer {
   }
 
   drawSkyDim() {
-    if (!this.selectedId) return;
+    const dim = this.anim.skyDim;
+    if (dim < 0.01) return;
+
     const { ctx, width, height } = this;
-    ctx.fillStyle = "rgba(2, 4, 7, 0.32)";
+    ctx.save();
+    ctx.fillStyle = `rgba(2, 4, 8, ${0.38 * dim})`;
     ctx.fillRect(0, 0, width, height);
+
+    if (this.selectedId) {
+      const target = this.targets.find((t) => t.id === this.selectedId);
+      if (target) {
+        const pos = this.worldToScreen(target.alt, target.az, 2, this.targetParallaxAz(target));
+        const clear = ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, width * 0.42);
+        clear.addColorStop(0, `rgba(2, 4, 8, ${0.22 * dim})`);
+        clear.addColorStop(0.45, `rgba(2, 4, 8, ${0.08 * dim})`);
+        clear.addColorStop(1, "transparent");
+        ctx.globalCompositeOperation = "destination-out";
+        ctx.fillStyle = clear;
+        ctx.fillRect(0, 0, width, height);
+      }
+    }
+    ctx.restore();
   }
 
   drawTargets() {
-    const sorted = [...this.visibleTargets].sort((a, b) => a.alt - b.alt);
+    const sorted = [...this.visibleTargets].sort((a, b) => {
+      const da = this.sprites.get(a.id)?.depth ?? a.alt;
+      const db = this.sprites.get(b.id)?.depth ?? b.alt;
+      return da - db;
+    });
     for (const target of sorted) {
       if (target.id !== this.selectedId) this.drawSuspendedTarget(target);
     }
@@ -271,71 +355,121 @@ export class ObservatoryRenderer {
   }
 
   drawSuspendedTarget(target) {
-    const { ctx, time, thumbnails } = this;
-    const img = thumbnails?.getMini(target.id);
-    const pos = this.worldToScreen(target.alt, target.az, 2);
-    if (!pos.visible) return;
+    const { ctx, time, thumbnails, sprites } = this;
+    const sprite = sprites.get(target.id);
+    const img = sprite?.canvas ?? thumbnails?.getMini(target.id);
+    const pos = this.worldToScreen(target.alt, target.az, 2, this.targetParallaxAz(target));
+    if (!pos.visible || !img) return;
 
-    const isSelected = target.id === this.selectedId;
-    const isHovered = target.id === this.hoveredId;
-    const hasSelection = Boolean(this.selectedId);
+    const state = this.targetVisualState(target);
     const cat = getCategory(target);
-    const [cr, cg, cb] = cat.rgb;
-    const seed = seedFromId(target.id);
+    const glowRgb = mixRgb(sprite?.glowRgb ?? cat.rgb, cat.rgb, 0.35);
+    const [gr, gg, gb] = glowRgb;
 
+    const breath = this.breathingScale(sprite, state.isSelected);
     const baseSize = this.getTargetSize(target);
-    const breath = this.breathingScale(seed, isSelected);
-    const size = baseSize * breath;
-    const aspect = img ? img.height / img.width : 0.78;
+    const emergeScale = state.isSelected ? 0.88 + state.emerge * 0.14 : 1;
+    const size = baseSize * breath * emergeScale;
+    const aspect = img.height / img.width;
     const w = size;
     const h = size * aspect;
 
-    const floatY = Math.sin(time * 0.00075 + seed) * 3;
-    const floatX = Math.cos(time * 0.00055 + seed * 0.6) * 2;
-
-    const alpha = hasSelection && !isSelected ? 0.48 : isHovered && !isSelected ? 0.78 : 1;
+    const phase = sprite?.phase ?? 0;
+    const floatY = Math.sin(time * 0.00065 + phase) * 2.5 * (0.6 + pos.depth * 0.4);
+    const floatX = Math.cos(time * 0.00048 + phase * 0.7) * 1.8;
+    const tilt = (sprite?.tilt ?? 0) + Math.sin(time * 0.0003 + phase) * 0.006;
 
     ctx.save();
     ctx.translate(pos.x + floatX, pos.y + floatY);
-    ctx.globalAlpha = alpha;
+    ctx.rotate(tilt);
 
-    const glow = glowStrength(target) * (isSelected ? 1.4 : 1);
-    const glowR = Math.max(w, h) * (isSelected ? 1.5 : 1.15);
-    const outer = ctx.createRadialGradient(0, 0, size * 0.15, 0, 0, glowR);
-    outer.addColorStop(0, `rgba(${cr}, ${cg}, ${cb}, ${glow * 0.55})`);
-    outer.addColorStop(0.4, `rgba(${cr}, ${cg}, ${cb}, ${glow * 0.15})`);
+    const glowBase = glowStrength(target);
+    const glowMul = state.isSelected ? 1.35 + state.emerge * 0.55 : state.isHovered ? 1.08 : 0.75;
+
+    // Cosmic haze — wide soft veil behind object
+    ctx.save();
+    ctx.globalCompositeOperation = "screen";
+    const hazeR = Math.max(w, h) * 1.85;
+    const haze = ctx.createRadialGradient(0, 0, hazeR * 0.08, 0, 0, hazeR);
+    haze.addColorStop(0, `rgba(190, 205, 230, ${0.06 * state.presence})`);
+    haze.addColorStop(0.35, `rgba(${gr}, ${gg}, ${gb}, ${0.04 * state.presence})`);
+    haze.addColorStop(1, "transparent");
+    ctx.fillStyle = haze;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, hazeR, hazeR * 0.78, 0.15, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // Dynamic multi-layer glow from dominant object colour
+    ctx.save();
+    ctx.globalCompositeOperation = "screen";
+    const glowR = Math.max(w, h) * (state.isSelected ? 1.75 : 1.35);
+    const inner = ctx.createRadialGradient(0, 0, 0, 0, 0, glowR * 0.55);
+    inner.addColorStop(0, `rgba(${gr}, ${gg}, ${gb}, ${glowBase * 0.42 * glowMul * state.presence})`);
+    inner.addColorStop(0.5, `rgba(${gr}, ${gg}, ${gb}, ${glowBase * 0.12 * glowMul * state.presence})`);
+    inner.addColorStop(1, "transparent");
+    ctx.fillStyle = inner;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, glowR * 0.55, glowR * 0.42, 0.12, 0, Math.PI * 2);
+    ctx.fill();
+
+    const outer = ctx.createRadialGradient(0, 0, glowR * 0.2, 0, 0, glowR);
+    outer.addColorStop(0, `rgba(${gr}, ${gg}, ${gb}, ${glowBase * 0.18 * glowMul * state.presence})`);
+    outer.addColorStop(0.6, `rgba(${gr}, ${gg}, ${gb}, ${glowBase * 0.05 * glowMul * state.presence})`);
     outer.addColorStop(1, "transparent");
     ctx.fillStyle = outer;
     ctx.beginPath();
-    ctx.ellipse(0, 0, glowR, glowR * 0.82, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, 0, glowR, glowR * 0.8, 0.12, 0, Math.PI * 2);
     ctx.fill();
+    ctx.restore();
 
-    if (isSelected) {
-      const orbitAngle = time * 0.00035;
+    // Selected: soft luminous halo pulse — no hard orbit ring
+    if (state.isSelected) {
       ctx.save();
-      ctx.rotate(orbitAngle);
+      ctx.globalCompositeOperation = "screen";
+      const pulse = 0.85 + Math.sin(time * 0.0012 + phase) * 0.15;
+      const haloR = Math.max(w, h) * (0.95 + state.emerge * 0.25) * pulse;
+      const halo = ctx.createRadialGradient(0, 0, haloR * 0.15, 0, 0, haloR);
+      halo.addColorStop(0, `rgba(${gr}, ${gg}, ${gb}, ${0.22 * state.emerge})`);
+      halo.addColorStop(0.55, `rgba(${gr}, ${gg}, ${gb}, ${0.06 * state.emerge})`);
+      halo.addColorStop(1, "transparent");
+      ctx.fillStyle = halo;
       ctx.beginPath();
-      ctx.ellipse(0, 0, w * 0.72, h * 0.52, 0.2, 0, Math.PI * 2);
-      ctx.strokeStyle = `rgba(${cr}, ${cg}, ${cb}, 0.45)`;
-      ctx.lineWidth = 1.2;
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.ellipse(0, 0, w * 0.82, h * 0.6, 0.2, 0, Math.PI * 2);
-      ctx.strokeStyle = "rgba(92, 199, 216, 0.18)";
-      ctx.lineWidth = 0.8;
-      ctx.stroke();
+      ctx.ellipse(0, 0, haloR, haloR * 0.72, 0.1, 0, Math.PI * 2);
+      ctx.fill();
       ctx.restore();
     }
 
-    if (img) {
-      ctx.drawImage(img, -w / 2, -h / 2, w, h);
+    // Object image — feathered, filtered, no hard edges
+    ctx.save();
+    ctx.globalAlpha = state.presence;
+    ctx.filter = `brightness(${state.brightness}) contrast(${state.contrast}) saturate(${state.saturate})`;
+    ctx.drawImage(img, -w / 2, -h / 2, w, h);
+    ctx.restore();
+
+    // Subtle core luminance
+    if (state.presence > 0.45) {
+      ctx.save();
+      ctx.globalCompositeOperation = "screen";
+      const coreR = Math.min(w, h) * 0.12;
+      const core = ctx.createRadialGradient(0, 0, 0, 0, 0, coreR);
+      core.addColorStop(0, `rgba(255, 252, 248, ${0.12 * state.presence * (state.isSelected ? 1.2 : 0.7)})`);
+      core.addColorStop(1, "transparent");
+      ctx.fillStyle = core;
+      ctx.beginPath();
+      ctx.arc(0, 0, coreR, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
     }
 
     if (this.missionIds.has(target.id)) {
+      ctx.save();
+      ctx.globalCompositeOperation = "screen";
       ctx.beginPath();
-      ctx.arc(w / 2 - 4, -h / 2 + 4, 3.5, 0, Math.PI * 2);
-      ctx.fillStyle = "#5cc7d8";
+      ctx.arc(w / 2 - 6, -h / 2 + 6, 4, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(92, 199, 216, ${0.55 * state.presence})`;
       ctx.fill();
+      ctx.restore();
     }
 
     ctx.restore();
@@ -345,22 +479,22 @@ export class ObservatoryRenderer {
     if (!this.selectedId || !this.cardAnchor) return;
     const target = this.targets.find((t) => t.id === this.selectedId);
     if (!target) return;
-    const pos = this.worldToScreen(target.alt, target.az, 2);
+    const pos = this.worldToScreen(target.alt, target.az, 2, this.targetParallaxAz(target));
     if (!pos.visible) return;
 
     const { ctx } = this;
+    const emerge = easeOutCubic(this.anim.emerge);
     const { x: tx, y: ty } = pos;
     const { x: cx, y: cy } = this.cardAnchor;
 
+    ctx.save();
+    ctx.globalAlpha = 0.08 + emerge * 0.14;
     ctx.beginPath();
     ctx.moveTo(tx, ty);
-    ctx.bezierCurveTo(tx + (cx - tx) * 0.45, ty - 12, cx - 40, cy, cx, cy);
-    ctx.strokeStyle = "rgba(92, 199, 216, 0.14)";
-    ctx.lineWidth = 1;
+    ctx.bezierCurveTo(tx + (cx - tx) * 0.42, ty - 18, cx - 48, cy + 8, cx, cy);
+    ctx.strokeStyle = "rgba(180, 210, 225, 0.9)";
+    ctx.lineWidth = 0.8;
     ctx.stroke();
+    ctx.restore();
   }
-}
-
-function seedFromId(id) {
-  return id.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
 }

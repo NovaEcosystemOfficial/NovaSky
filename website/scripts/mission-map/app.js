@@ -8,6 +8,7 @@ import { MapController } from "./map/controller.js";
 import { TargetCard } from "./ui/target-card.js";
 import { MissionTimeline } from "./ui/timeline.js";
 import { ThumbnailCache } from "./ui/thumbnail-cache.js";
+import { buildTargetSprites } from "./ui/target-sprite.js";
 
 class ObservatoryApp {
   constructor() {
@@ -17,6 +18,7 @@ class ObservatoryApp {
     this.targetsById = new Map(TARGETS.map((t) => [t.id, t]));
     this.lastFrame = 0;
     this.thumbnails = new ThumbnailCache(TARGETS);
+    this.sprites = new Map();
     this.renderer = null;
     this.controller = null;
     this.targetCard = null;
@@ -25,6 +27,7 @@ class ObservatoryApp {
 
   async init() {
     await this.thumbnails.load();
+    this.sprites = buildTargetSprites(this.thumbnails, TARGETS);
     this.initMeta();
     this.initRenderer();
     this.initUI();
@@ -60,6 +63,7 @@ class ObservatoryApp {
       targets: TARGETS,
       constellations: CONSTELLATIONS,
       thumbnails: this.thumbnails,
+      sprites: this.sprites,
     });
 
     this.controller = new MapController(this.canvas, this.renderer, {
