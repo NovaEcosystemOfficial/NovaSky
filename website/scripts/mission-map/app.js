@@ -7,6 +7,7 @@ import { ObservatoryRenderer } from "./map/renderer.js";
 import { MapController } from "./map/controller.js";
 import { TargetCard } from "./ui/target-card.js";
 import { MissionTimeline } from "./ui/timeline.js";
+import { ThumbnailCache } from "./ui/thumbnail-cache.js";
 
 class ObservatoryApp {
   constructor() {
@@ -14,6 +15,7 @@ class ObservatoryApp {
     this.mission = [];
     this.targetsById = new Map(TARGETS.map((t) => [t.id, t]));
     this.lastFrame = 0;
+    this.thumbnails = new ThumbnailCache(TARGETS);
 
     this.initMeta();
     this.initRenderer();
@@ -25,7 +27,6 @@ class ObservatoryApp {
     const topTarget = TARGETS.find((t) => t.id === "ngc7000") ?? TARGETS[0];
     this.controller.selectById(topTarget.id);
     this.timeline.setSelected(topTarget.id);
-    document.querySelector("[data-sky-prompt]")?.classList.add("is-hidden");
   }
 
   initMeta() {
@@ -44,6 +45,7 @@ class ObservatoryApp {
     this.renderer = new ObservatoryRenderer(this.canvas, {
       targets: TARGETS,
       constellations: CONSTELLATIONS,
+      thumbnails: this.thumbnails,
     });
 
     this.controller = new MapController(this.canvas, this.renderer, {
@@ -54,6 +56,7 @@ class ObservatoryApp {
 
   initUI() {
     this.targetCard = new TargetCard(document.querySelector("[data-target-card]"), {
+      thumbnails: this.thumbnails,
       onAddToMission: (id) => this.addToMission(id),
     });
 

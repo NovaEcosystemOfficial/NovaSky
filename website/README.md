@@ -16,7 +16,7 @@ website/
 ## Current scope
 
 - Landing page with hero, problem, solution, compatibility, experience, roadmap, and footer.
-- **Mission Map v2** (`pages/mission-map.html`) — presentation-quality observatory screen: natural sky, luminous targets, narrative target dossier, mission timeline hero.
+- **Mission Map v3** (`pages/mission-map.html`) — astronomical preview thumbnails suspended in the sky, premium narrative card, mission timeline hero.
 - Italian-first localization with `data-i18n` keys and locale placeholders in `locales/`.
 - Responsive layout for desktop and mobile.
 - Local generated hero image.

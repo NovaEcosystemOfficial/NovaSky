@@ -1,5 +1,5 @@
 import { altAzToSky, generateStarField } from "./projection.js";
-import { RECOMMENDATION } from "../data/targets.js";
+import { glowStrength } from "../ui/target-art.js";
 
 const NEBULA_PATCHES = [
   { alt: 76, az: 285, rx: 0.14, ry: 0.06, color: [92, 140, 180], alpha: 0.07 },
@@ -16,6 +16,7 @@ export class ObservatoryRenderer {
     this.ctx = canvas.getContext("2d");
     this.targets = data.targets;
     this.constellations = data.constellations;
+    this.thumbnails = data.thumbnails;
     this.stars = generateStarField(480, 7);
     this.dpr = 1;
     this.width = 0;
@@ -86,7 +87,7 @@ export class ObservatoryRenderer {
           id: target.id,
           sx: pos.x,
           sy: pos.y,
-          radius: this.getTargetRadius(target),
+          radius: this.getPreviewSize(target) * 0.52,
           target,
           visible: pos.visible,
         };
@@ -95,10 +96,20 @@ export class ObservatoryRenderer {
   }
 
   getTargetRadius(target) {
-    const base = 10 + (7 - Math.min(target.magnitude, 7)) * 1.4;
-    if (target.id === this.selectedId) return base + 6;
-    if (target.id === this.hoveredId) return base + 3;
+    const base = this.getPreviewSize(target) * 0.55;
+    if (target.id === this.selectedId) return base * 1.2;
+    if (target.id === this.hoveredId) return base * 1.05;
     return base;
+  }
+
+  getPreviewSize(target) {
+    const isSelected = target.id === this.selectedId;
+    const isHovered = target.id === this.hoveredId;
+    const depth = 0.85 + (target.alt / 90) * 0.15;
+    let size = 40 * depth;
+    if (isSelected) size = 58 * depth;
+    else if (isHovered) size = 46 * depth;
+    return size;
   }
 
   render() {
@@ -108,11 +119,10 @@ export class ObservatoryRenderer {
     this.drawMilkyWay();
     this.drawNebulae();
     this.drawHorizon();
-    this.drawAltitudeGrid();
     this.drawConstellations();
     this.drawStars();
+    this.drawSkyDim();
     this.drawTargets();
-    this.drawSelectionLink();
   }
 
   drawDeepSky() {
@@ -210,22 +220,6 @@ export class ObservatoryRenderer {
     ctx.stroke();
   }
 
-  drawAltitudeGrid() {
-    const { ctx, width } = this;
-    for (const alt of [15, 30, 45, 60]) {
-      const left = this.worldToScreen(alt, this.camera.azCenter - 70);
-      const right = this.worldToScreen(alt, this.camera.azCenter + 70);
-      if (!left.visible && !right.visible) continue;
-
-      ctx.beginPath();
-      ctx.moveTo(0, left.y);
-      ctx.bezierCurveTo(width * 0.25, left.y - 2, width * 0.75, right.y - 2, width, right.y);
-      ctx.strokeStyle = `rgba(158, 183, 204, ${alt === 30 ? 0.045 : 0.025})`;
-      ctx.lineWidth = 1;
-      ctx.stroke();
-    }
-  }
-
   drawConstellations() {
     const { ctx } = this;
     ctx.lineWidth = 0.75;
@@ -277,6 +271,14 @@ export class ObservatoryRenderer {
     }
   }
 
+  drawSkyDim() {
+    if (!this.selectedId && !this.hoveredId) return;
+    const { ctx, width, height } = this;
+    const alpha = this.selectedId ? 0.38 : 0.18;
+    ctx.fillStyle = `rgba(3, 5, 8, ${alpha})`;
+    ctx.fillRect(0, 0, width, height);
+  }
+
   drawTargets() {
     const sorted = [...this.visibleTargets].sort((a, b) => {
       const score = (t) => {
@@ -289,105 +291,109 @@ export class ObservatoryRenderer {
     });
 
     for (const target of sorted) {
-      this.drawLuminousTarget(target);
+      if (target.id !== this.selectedId) {
+        this.drawFloatingPreview(target);
+      }
     }
+    const selected = sorted.find((t) => t.id === this.selectedId);
+    if (selected) this.drawFloatingPreview(selected);
   }
 
-  drawLuminousTarget(target) {
-    const { ctx, time } = this;
-    const rec = RECOMMENDATION[target.recommendation];
+  drawFloatingPreview(target) {
+    const { ctx, time, thumbnails } = this;
+    const thumb = thumbnails?.getMini(target.id);
     const pos = this.worldToScreen(target.alt, target.az);
     if (!pos.visible) return;
 
     const isSelected = target.id === this.selectedId;
     const isHovered = target.id === this.hoveredId;
     const inMission = this.missionIds.has(target.id);
-    const radius = this.getTargetRadius(target);
+    const hasFocus = Boolean(this.selectedId || this.hoveredId);
 
-    const pulseRate = target.recommendation === "recommended" ? 0.0012 : 0.0008;
-    const pulse = 1 + Math.sin(time * pulseRate + target.az * 0.05) * (isSelected ? 0.12 : 0.06);
-    const depthScale = 0.75 + pos.depth * 0.35;
-    const r = radius * pulse * depthScale;
+    const pw = this.getPreviewSize(target);
+    const ph = pw * 0.72;
+    const seed = target.id.charCodeAt(0);
+    const floatY = Math.sin(time * 0.00085 + seed) * (isSelected ? 2 : 4);
+    const floatX = Math.cos(time * 0.0006 + seed * 0.7) * 1.5;
+
+    const alpha =
+      hasFocus && !isSelected && !isHovered
+        ? 0.42
+        : isSelected
+          ? 1
+          : isHovered
+            ? 0.92
+            : 0.78;
 
     ctx.save();
-    ctx.translate(pos.x, pos.y);
+    ctx.translate(pos.x + floatX, pos.y + floatY);
+    ctx.globalAlpha = alpha;
 
-    const glowAlpha = isSelected ? 0.5 : isHovered ? 0.32 : 0.22;
-    const outerR = r * (isSelected ? 4.5 : isHovered ? 3.2 : 2.6);
-    const outerGlow = ctx.createRadialGradient(0, 0, r * 0.2, 0, 0, outerR);
-    const hex = rec.color;
-    const rr = parseInt(hex.slice(1, 3), 16);
-    const gg = parseInt(hex.slice(3, 5), 16);
-    const bb = parseInt(hex.slice(5, 7), 16);
-    outerGlow.addColorStop(0, `rgba(${rr}, ${gg}, ${bb}, ${glowAlpha})`);
-    outerGlow.addColorStop(0.35, `rgba(${rr}, ${gg}, ${bb}, ${glowAlpha * 0.25})`);
-    outerGlow.addColorStop(1, "transparent");
-    ctx.fillStyle = outerGlow;
+    const glow = glowStrength(target) * (isSelected ? 1.35 : 1);
+    const [c1, c2] = target.preview;
+    const glowR = pw * (isSelected ? 1.8 : 1.35);
+    const outer = ctx.createRadialGradient(0, 0, pw * 0.2, 0, 0, glowR);
+    outer.addColorStop(0, `${c2}${Math.round(glow * 90).toString(16).padStart(2, "0")}`);
+    outer.addColorStop(0.45, `${c1}22`);
+    outer.addColorStop(1, "transparent");
+    ctx.fillStyle = outer;
     ctx.beginPath();
-    ctx.arc(0, 0, outerR, 0, Math.PI * 2);
+    ctx.ellipse(0, 0, glowR, glowR * 0.85, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    if (isSelected) {
-      const callPulse = 1 + Math.sin(time * 0.002) * 0.15;
-      const callR = r * 6 * callPulse;
-      const call = ctx.createRadialGradient(0, 0, r, 0, 0, callR);
-      call.addColorStop(0, "rgba(92, 199, 216, 0.08)");
-      call.addColorStop(0.5, `${rec.color}06`);
-      call.addColorStop(1, "transparent");
-      ctx.fillStyle = call;
+    const r = 10;
+    const x0 = -pw / 2;
+    const y0 = -ph / 2;
+
+    ctx.shadowColor = isSelected ? "rgba(92, 199, 216, 0.35)" : "rgba(0, 0, 0, 0.45)";
+    ctx.shadowBlur = isSelected ? 28 : 14;
+    ctx.shadowOffsetY = isSelected ? 0 : 6;
+
+    ctx.beginPath();
+    ctx.roundRect(x0, y0, pw, ph, r);
+    ctx.fillStyle = "rgba(8, 10, 14, 0.92)";
+    ctx.fill();
+
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetY = 0;
+
+    if (thumb) {
+      ctx.save();
       ctx.beginPath();
-      ctx.arc(0, 0, callR, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.roundRect(x0, y0, pw, ph, r);
+      ctx.clip();
+      ctx.drawImage(thumb, x0, y0, pw, ph);
+      ctx.restore();
     }
 
-    const midGlow = ctx.createRadialGradient(0, 0, 0, 0, 0, r * 1.8);
-    midGlow.addColorStop(0, "rgba(255, 255, 255, 0.95)");
-    midGlow.addColorStop(0.2, inMission ? "rgba(92, 199, 216, 0.85)" : rec.color);
-    midGlow.addColorStop(0.55, `${rec.color}88`);
-    midGlow.addColorStop(1, "transparent");
-    ctx.fillStyle = midGlow;
+    ctx.strokeStyle = isSelected
+      ? "rgba(92, 199, 216, 0.55)"
+      : isHovered
+        ? "rgba(238, 244, 248, 0.28)"
+        : "rgba(238, 244, 248, 0.12)";
+    ctx.lineWidth = isSelected ? 1.5 : 1;
     ctx.beginPath();
-    ctx.arc(0, 0, r * 1.8, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.roundRect(x0, y0, pw, ph, r);
+    ctx.stroke();
 
-    ctx.beginPath();
-    ctx.arc(0, 0, r * 0.35, 0, Math.PI * 2);
-    ctx.fillStyle = "#ffffff";
-    ctx.fill();
+    if (inMission) {
+      ctx.beginPath();
+      ctx.arc(pw / 2 - 8, -ph / 2 + 8, 4, 0, Math.PI * 2);
+      ctx.fillStyle = "#5cc7d8";
+      ctx.fill();
+      ctx.strokeStyle = "rgba(5, 7, 10, 0.8)";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
 
     if (isSelected || isHovered) {
-      ctx.font = `${isSelected ? 600 : 500} ${isSelected ? 13 : 12}px Inter, sans-serif`;
+      ctx.font = `500 11px Inter, sans-serif`;
       ctx.textAlign = "center";
-      ctx.textBaseline = "bottom";
-      const label = target.name;
-      const tw = ctx.measureText(label).width;
-      const lx = 0;
-      const ly = -r - 14;
-      ctx.fillStyle = "rgba(5, 7, 10, 0.72)";
-      ctx.beginPath();
-      ctx.roundRect(lx - tw / 2 - 10, ly - 18, tw + 20, 22, 8);
-      ctx.fill();
-      ctx.fillStyle = isSelected ? "#eef4f8" : "rgba(238, 244, 248, 0.85)";
-      ctx.fillText(label, lx, ly);
+      ctx.textBaseline = "top";
+      ctx.fillStyle = "rgba(238, 244, 248, 0.9)";
+      ctx.fillText(target.name, 0, ph / 2 + 10);
     }
 
     ctx.restore();
-  }
-
-  drawSelectionLink() {
-    if (!this.selectedId) return;
-    const target = this.targets.find((t) => t.id === this.selectedId);
-    if (!target) return;
-    const pos = this.worldToScreen(target.alt, target.az);
-    if (!pos.visible) return;
-
-    const { ctx, width } = this;
-    const cardEdgeX = width - 2;
-    ctx.beginPath();
-    ctx.moveTo(pos.x, pos.y);
-    ctx.bezierCurveTo(pos.x + (cardEdgeX - pos.x) * 0.4, pos.y - 20, cardEdgeX - 80, pos.y, cardEdgeX, pos.y + 10);
-    ctx.strokeStyle = "rgba(92, 199, 216, 0.12)";
-    ctx.lineWidth = 1;
-    ctx.stroke();
   }
 }

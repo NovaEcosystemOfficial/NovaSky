@@ -546,4 +546,44 @@ for (const target of TARGETS) {
     97,
     Math.max(24, base + Math.round(target.alt * 0.14) - Math.max(0, target.magnitude - 6) * 2),
   );
+  target.expectation = buildExpectation(target);
+}
+
+function buildExpectation(target) {
+  const custom = {
+    ngc7000:
+      "Un campo ampio con struttura a continente ben visibile: una delle nebulose più soddisfacenti per una prima uscita estiva con Seestar.",
+    ic1396:
+      "Tronchi e globuli ben definiti nel campo: con S30 Pro puoi catturare dettagli che S50 suggerisce in mosaico.",
+    m27:
+      "Nucleo brillante e conchiglia ben contrastata: risultato solido in 45–60 minuti anche con Luna presente.",
+    m57:
+      "Anello netto e simmetrico: uno dei target più immediati per valutare trasparenza e focus della sessione.",
+    m31:
+      "Nucleo galattico luminoso e struttura esterna che emerge con sessioni più lunghe: ottimo banco di prova per il cielo.",
+    m13:
+      "Sciame stellare compatto con stelle risolvibili ai bordi: risultato elegante e riconoscibile.",
+    ic1805:
+      "Cuore e filamenti rossi ben leggibili: immagine emozionale e ad alto impatto visivo con dual-band.",
+    ngc2244:
+      "Ammasso giovane incastonato nella nebulosa: composizione ricca e molto gratificante sul campo.",
+  };
+  if (custom[target.id]) return custom[target.id];
+
+  if (target.category.includes("Nebulosa a emissione")) {
+    return "Gas e struttura estesa con buon contrasto: ideali per sessioni Seestar da 60–90 minuti con filtro dual-band.";
+  }
+  if (target.category.includes("planetaria")) {
+    return "Nucleo compatto e conchiglia ben definita: risultato rapido e soddisfacente anche in sessioni brevi.";
+  }
+  if (target.category.includes("Galassia")) {
+    return "Nucleo luminoso e bracci o struttura esterna che emergono con cielo trasparente e tempo sufficiente.";
+  }
+  if (target.category.includes("globulare")) {
+    return "Ammasso compatto con stelle risolvibili ai bordi: risultato classico e sempre riconoscibile.";
+  }
+  if (target.category === "Pianeta") {
+    return "Disco planetario e dettagli atmosferici visibili: ottimo per sessioni brevi o serate di outreach.";
+  }
+  return "Opportunità osservativa adatta al profilo Seestar e alle condizioni di stanotte.";
 }

@@ -1,7 +1,6 @@
 :root {
   color-scheme: dark;
   --bg: #05070a;
-  --surface: rgba(12, 16, 22, 0.72);
   --line: rgba(158, 183, 204, 0.1);
   --text: #eef4f8;
   --muted: #aeb9c5;
@@ -10,9 +9,9 @@
   --amber: #e7b85a;
   --green: #67c98d;
   --danger: #e56f68;
-  --dossier: min(420px, 38vw);
   --deck: clamp(148px, 22vh, 200px);
   --header: 64px;
+  --card-w: min(420px, 92vw);
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -50,8 +49,9 @@ body.mission-map-page {
   gap: 24px;
   padding: 0 clamp(20px, 3vw, 36px);
   border-bottom: 1px solid var(--line);
-  background: rgba(5, 7, 10, 0.55);
+  background: rgba(5, 7, 10, 0.5);
   backdrop-filter: blur(20px);
+  z-index: 10;
 }
 
 .brand {
@@ -133,18 +133,16 @@ body.mission-map-page {
   font-weight: 500;
 }
 
-/* ── Main ── */
+/* ── Sky (full stage) ── */
 
 .observatory-main {
-  display: grid;
-  grid-template-columns: 1fr var(--dossier);
+  position: relative;
   min-height: 0;
 }
 
 .sky-chamber {
-  position: relative;
-  min-width: 0;
-  overflow: hidden;
+  position: absolute;
+  inset: 0;
 }
 
 #mission-canvas {
@@ -157,311 +155,251 @@ body.mission-map-page {
 
 .sky-prompt {
   position: absolute;
-  left: clamp(24px, 4vw, 48px);
-  bottom: clamp(24px, 4vw, 48px);
-  max-width: 320px;
+  left: clamp(28px, 5vw, 56px);
+  bottom: clamp(28px, 5vw, 56px);
+  max-width: 360px;
   pointer-events: none;
-  transition: opacity 480ms ease, transform 480ms ease;
+  transition: opacity 520ms ease, transform 520ms ease;
 }
 
 .sky-prompt p {
   margin: 0;
-  font-size: clamp(1.2rem, 2.2vw, 1.65rem);
+  font-size: clamp(1.25rem, 2.4vw, 1.75rem);
   font-weight: 600;
   letter-spacing: -0.03em;
   line-height: 1.25;
-  color: rgba(238, 244, 248, 0.88);
+  color: rgba(238, 244, 248, 0.9);
 }
 
 .sky-prompt.is-hidden {
   opacity: 0;
-  transform: translateY(8px);
+  transform: translateY(10px);
 }
 
-/* ── Target dossier ── */
+/* ── Premium card (floating) ── */
 
-.target-dossier {
-  position: relative;
-  border-left: 1px solid var(--line);
-  background: rgba(6, 8, 12, 0.82);
-  backdrop-filter: blur(24px);
+.premium-card {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  bottom: 16px;
+  width: var(--card-w);
+  z-index: 5;
+  border-radius: 20px;
+  border: 1px solid rgba(158, 183, 204, 0.14);
+  background: rgba(6, 8, 12, 0.88);
+  backdrop-filter: blur(28px);
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(92, 199, 216, 0.06) inset;
   overflow: hidden;
+  transform: translateX(calc(100% + 24px));
+  opacity: 0;
+  transition:
+    transform 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 420ms ease;
 }
 
-.dossier-empty {
-  display: grid;
-  place-content: center;
-  height: 100%;
-  padding: 32px;
-  text-align: center;
+.premium-card.is-open {
+  transform: translateX(0);
+  opacity: 1;
 }
 
-.dossier-empty-glow {
-  width: 80px;
-  height: 80px;
-  margin: 0 auto 20px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(92, 199, 216, 0.12), transparent 70%);
-  animation: breathe 6s ease-in-out infinite;
+.premium-card.is-entering .premium-card-inner {
+  animation: card-in 560ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.dossier-empty p {
-  margin: 0 0 6px;
-  font-weight: 600;
-}
-
-.dossier-empty small {
-  color: var(--quiet);
-  font-size: 0.84rem;
-}
-
-.dossier-content {
+.premium-card-inner {
   display: flex;
   flex-direction: column;
   height: 100%;
   overflow: auto;
 }
 
-.dossier-content.is-entering,
-.target-dossier.is-active .dossier-content {
-  animation: dossier-in 520ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.target-dossier.is-active .dossier-empty {
-  display: none;
-}
-
-.dossier-hero {
+.premium-hero {
   position: relative;
   flex-shrink: 0;
   aspect-ratio: 16 / 10;
   overflow: hidden;
 }
 
-.dossier-hero canvas {
+.premium-hero canvas {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.dossier-hero-vignette {
+.premium-hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, transparent 40%, rgba(5, 7, 10, 0.85) 100%);
-  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 20px;
+  background: linear-gradient(180deg, transparent 25%, rgba(5, 7, 10, 0.88) 100%);
 }
 
-.dossier-body {
-  padding: 22px clamp(18px, 2vw, 26px) 28px;
+.premium-badge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  backdrop-filter: blur(8px);
 }
 
-.dossier-head h2 {
+.premium-badge[data-level="recommended"] {
+  background: rgba(103, 201, 141, 0.18);
+  color: var(--green);
+}
+
+.premium-badge[data-level="possible"] {
+  background: rgba(231, 184, 90, 0.18);
+  color: var(--amber);
+}
+
+.premium-badge[data-level="discouraged"] {
+  background: rgba(229, 111, 104, 0.18);
+  color: var(--danger);
+}
+
+.premium-hero-titles h2 {
   margin: 0;
-  font-size: 1.45rem;
+  font-size: 1.55rem;
   font-weight: 700;
   letter-spacing: -0.03em;
 }
 
-.dossier-head p {
+.premium-hero-titles p {
   margin: 4px 0 0;
-  color: var(--muted);
-  font-size: 0.88rem;
+  color: rgba(238, 244, 248, 0.75);
+  font-size: 0.9rem;
 }
 
-.dossier-conviction {
-  margin: 18px 0 20px;
+.premium-body {
+  padding: 22px 22px 26px;
+  flex: 1;
 }
 
-.dossier-conviction p {
-  margin: 0;
-  font-size: 0.95rem;
-  line-height: 1.6;
-  color: rgba(238, 244, 248, 0.92);
-}
-
-.dossier-score-row {
-  display: flex;
-  align-items: center;
-  gap: 14px;
+.premium-block {
   margin-bottom: 20px;
 }
 
-.nova-score {
-  position: relative;
-  width: 72px;
-  height: 72px;
-  flex-shrink: 0;
-}
-
-.nova-score svg {
-  width: 100%;
-  height: 100%;
-  transform: rotate(-90deg);
-}
-
-.nova-score .score-bg {
-  fill: none;
-  stroke: rgba(158, 183, 204, 0.12);
-  stroke-width: 4;
-}
-
-.nova-score .score-fill {
-  fill: none;
-  stroke: var(--green);
-  stroke-width: 4;
-  stroke-linecap: round;
-  stroke-dasharray: 188.5;
-  stroke-dashoffset: calc(188.5 * (1 - var(--score-pct, 0.8)));
-  transition: stroke-dashoffset 700ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.nova-score[data-level="possible"] .score-fill {
-  stroke: var(--amber);
-}
-
-.nova-score[data-level="discouraged"] .score-fill {
-  stroke: var(--danger);
-}
-
-.nova-score strong {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-content: center;
-  font-size: 1.2rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-
-.nova-score span {
-  position: absolute;
-  left: 50%;
-  bottom: 6px;
-  transform: translateX(-50%);
-  color: var(--quiet);
-  font-size: 0.58rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.dossier-badge {
-  padding: 8px 14px;
-  border-radius: 999px;
-  font-size: 0.78rem;
-  font-weight: 700;
-}
-
-.dossier-badge[data-level="recommended"] {
-  background: rgba(103, 201, 141, 0.12);
-  color: var(--green);
-}
-
-.dossier-badge[data-level="possible"] {
-  background: rgba(231, 184, 90, 0.12);
-  color: var(--amber);
-}
-
-.dossier-badge[data-level="discouraged"] {
-  background: rgba(229, 111, 104, 0.12);
-  color: var(--danger);
-}
-
-.dossier-seestar {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.dossier-seestar div {
-  padding: 12px 14px;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.02);
-}
-
-.dossier-seestar span {
-  display: block;
+.premium-block h3 {
+  margin: 0 0 8px;
   color: var(--quiet);
   font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
 }
 
-.dossier-seestar strong {
-  display: block;
-  margin-top: 4px;
-  font-size: 0.84rem;
-  line-height: 1.35;
+.premium-block p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.62;
+  color: rgba(238, 244, 248, 0.92);
 }
 
-.dossier-specs {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px 16px;
-  margin: 0 0 24px;
-  padding-top: 18px;
-  border-top: 1px solid var(--line);
+.premium-block-emphasis p {
+  font-size: 1rem;
+  color: var(--text);
 }
 
-.dossier-specs dt {
-  color: var(--quiet);
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.dossier-specs dd {
-  margin: 3px 0 0;
-  font-size: 0.84rem;
-  font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-weight: 500;
-}
-
-.btn-mission {
+.btn-mission-primary {
   width: 100%;
-  padding: 16px 20px;
-  border: 1px solid rgba(92, 199, 216, 0.45);
+  margin-bottom: 18px;
+  padding: 17px 22px;
+  border: 1px solid rgba(92, 199, 216, 0.5);
   border-radius: 16px;
-  background: linear-gradient(180deg, rgba(92, 199, 216, 0.2), rgba(92, 199, 216, 0.06));
+  background: linear-gradient(180deg, rgba(92, 199, 216, 0.22), rgba(92, 199, 216, 0.07));
   color: var(--text);
   font: inherit;
-  font-size: 0.95rem;
+  font-size: 0.96rem;
   font-weight: 700;
   letter-spacing: -0.01em;
   cursor: pointer;
   transition:
     transform 220ms ease,
     box-shadow 220ms ease,
-    border-color 220ms ease,
     opacity 220ms ease;
 }
 
-.btn-mission:hover:not(:disabled) {
+.btn-mission-primary:hover:not(:disabled) {
   transform: translateY(-1px);
-  border-color: rgba(92, 199, 216, 0.7);
-  box-shadow: 0 12px 40px rgba(92, 199, 216, 0.15);
+  box-shadow: 0 14px 44px rgba(92, 199, 216, 0.18);
 }
 
-.btn-mission:disabled,
-.btn-mission.is-added {
-  opacity: 0.55;
+.btn-mission-primary:disabled,
+.btn-mission-primary.is-added {
+  opacity: 0.5;
   cursor: default;
   transform: none;
-  box-shadow: none;
 }
 
-/* ── Mission deck (timeline hero) ── */
+.premium-specs {
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+
+.premium-specs summary {
+  color: var(--quiet);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.premium-specs summary::-webkit-details-marker {
+  display: none;
+}
+
+.premium-specs summary::after {
+  content: " +";
+  color: var(--cyan);
+}
+
+.premium-specs[open] summary::after {
+  content: " −";
+}
+
+.premium-specs dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 16px;
+  margin: 14px 0 0;
+}
+
+.premium-specs dt {
+  color: var(--quiet);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.premium-specs dd {
+  margin: 3px 0 0;
+  font-size: 0.82rem;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+}
+
+.premium-specs .spec-wide {
+  grid-column: 1 / -1;
+}
+
+/* ── Mission deck ── */
 
 .mission-deck {
   padding: 18px clamp(20px, 3vw, 36px) 22px;
   border-top: 1px solid var(--line);
   background: rgba(4, 6, 9, 0.92);
   backdrop-filter: blur(20px);
+  z-index: 10;
 }
 
 .mission-deck-head {
@@ -476,7 +414,6 @@ body.mission-map-page {
   margin: 0;
   font-size: 0.92rem;
   font-weight: 700;
-  letter-spacing: -0.01em;
 }
 
 .mission-deck-head p {
@@ -488,7 +425,6 @@ body.mission-map-page {
 .mission-deck-count {
   color: var(--quiet);
   font-size: 0.78rem;
-  white-space: nowrap;
 }
 
 .mission-deck-count strong {
@@ -500,7 +436,7 @@ body.mission-map-page {
   display: grid;
   place-content: center;
   min-height: 72px;
-  border: 1px dashed rgba(158, 183, 204, 0.12);
+  border: 1px dashed rgba(158, 183, 204, 0.1);
   border-radius: 16px;
 }
 
@@ -518,7 +454,6 @@ body.mission-map-page {
   display: flex;
   justify-content: space-between;
   margin-bottom: 10px;
-  padding: 0 2px;
   color: var(--quiet);
   font-family: "JetBrains Mono", ui-monospace, monospace;
   font-size: 0.72rem;
@@ -578,10 +513,7 @@ body.mission-map-page {
   text-align: left;
   cursor: pointer;
   overflow: hidden;
-  transition:
-    transform 220ms ease,
-    box-shadow 220ms ease,
-    border-color 220ms ease;
+  transition: transform 220ms ease, box-shadow 220ms ease;
   animation: block-rise 400ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -589,7 +521,6 @@ body.mission-map-page {
   position: absolute;
   inset: 0;
   background: radial-gradient(circle at 30% 50%, color-mix(in srgb, var(--block-color) 25%, transparent), transparent 70%);
-  opacity: 0.8;
   pointer-events: none;
 }
 
@@ -616,7 +547,6 @@ body.mission-map-page {
 
 .mission-block.is-selected {
   border-color: color-mix(in srgb, var(--block-color) 70%, white);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--block-color) 30%, transparent);
 }
 
 .mission-block-remove {
@@ -641,28 +571,10 @@ body.mission-map-page {
   opacity: 1;
 }
 
-.mission-block-remove:hover {
-  color: var(--danger);
-}
-
-/* ── Animations ── */
-
-@keyframes breathe {
-  0%,
-  100% {
-    opacity: 0.6;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.06);
-  }
-}
-
-@keyframes dossier-in {
+@keyframes card-in {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(14px);
   }
   to {
     opacity: 1;
@@ -681,56 +593,19 @@ body.mission-map-page {
   }
 }
 
-/* ── Responsive ── */
-
 @media (max-width: 960px) {
-  .observatory {
-    grid-template-rows: auto 1fr auto;
+  .premium-card {
+    top: auto;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    width: auto;
+    max-height: 52vh;
+    transform: translateY(calc(100% + 16px));
   }
 
-  .observatory-header {
-    flex-wrap: wrap;
-    padding-top: 12px;
-    padding-bottom: 12px;
-    min-height: auto;
-  }
-
-  .header-verdict {
-    order: 3;
-    flex-basis: 100%;
-  }
-
-  .observatory-main {
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr auto;
-  }
-
-  .target-dossier {
-    border-left: 0;
-    border-top: 1px solid var(--line);
-    max-height: 42vh;
-  }
-
-  .dossier-hero {
-    aspect-ratio: 21 / 9;
-  }
-
-  .mission-deck {
-    --deck: auto;
-  }
-
-  .mission-rail {
-    height: 64px;
-  }
-}
-
-@media (max-width: 560px) {
-  .dossier-specs {
-    grid-template-columns: 1fr;
-  }
-
-  .dossier-seestar {
-    grid-template-columns: 1fr;
+  .premium-card.is-open {
+    transform: translateY(0);
   }
 
   .sky-prompt p {
