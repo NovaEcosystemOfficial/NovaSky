@@ -119,9 +119,9 @@ export function computeTargetSky(entry, observer, now, twilight, moonContext) {
   };
 }
 
-/** Targets to render on the map at the current instant. */
+/** Targets on the map: above horizon at the simulated instant. */
 export function filterSkyTargets(computedTargets) {
-  return computedTargets.filter((t) => t.aboveHorizon && t.visibleTonight);
+  return computedTargets.filter((t) => t.aboveHorizon);
 }
 
 /** Best target to auto-select on load. */

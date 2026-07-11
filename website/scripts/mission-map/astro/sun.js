@@ -36,15 +36,46 @@ function findCrossing(latDeg, lonDeg, startDate, targetAlt, direction, maxSteps 
 }
 
 /**
- * Astronomical twilight for the night containing `date`.
+ * Astronomical night bounds that contain `date` (even after midnight).
  * @returns {{ evening: Date|null, morning: Date|null }}
  */
 export function astronomicalTwilight(latDeg, lonDeg, date) {
-  const noon = new Date(date);
-  noon.setHours(12, 0, 0, 0);
-  const evening = findCrossing(latDeg, lonDeg, noon, -18, "down");
-  const morningStart = evening ? addMinutes(evening, 360) : addMinutes(noon, 720);
-  const morning = findCrossing(latDeg, lonDeg, morningStart, -18, "up");
+  const at = sunAltAz(latDeg, lonDeg, date).alt;
+
+  // Walk backward to find start of current/previous night
+  let probe = new Date(date);
+  let evening = null;
+  for (let i = 0; i < 288; i++) {
+    probe = addMinutes(probe, -10);
+    const alt = sunAltAz(latDeg, lonDeg, probe).alt;
+    if (alt > -18) {
+      evening = findCrossing(latDeg, lonDeg, probe, -18, "down");
+      break;
+    }
+  }
+
+  // Walk forward to find end of night
+  probe = new Date(date);
+  let morning = null;
+  for (let i = 0; i < 288; i++) {
+    probe = addMinutes(probe, 10);
+    const alt = sunAltAz(latDeg, lonDeg, probe).alt;
+    if (alt > -18) {
+      morning = findCrossing(latDeg, lonDeg, addMinutes(probe, -10), -18, "up");
+      break;
+    }
+  }
+
+  // Daytime fallback: next night
+  if (!evening && at > -18) {
+    const noon = new Date(date);
+    noon.setHours(12, 0, 0, 0);
+    evening = findCrossing(latDeg, lonDeg, noon, -18, "down");
+    if (evening) {
+      morning = findCrossing(latDeg, lonDeg, addMinutes(evening, 360), -18, "up");
+    }
+  }
+
   return { evening, morning };
 }
 

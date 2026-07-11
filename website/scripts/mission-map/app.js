@@ -131,6 +131,7 @@ class ObservatoryApp {
     if (timeLabel) timeLabel.textContent = this.session.meta.time;
 
     this.updateHeader(this.session.meta);
+    this.renderer.resize();
     this.applySessionToMap();
 
     const stillVisible = this.session.visibleTargets.find((t) => t.id === this.selectedId);
@@ -222,6 +223,7 @@ class ObservatoryApp {
     const frame = (now) => {
       const dt = now - this.lastFrame;
       this.lastFrame = now;
+      if (this.renderer.width < 2) this.renderer.resize();
       this.renderer.tick(dt);
       this.controller.applyInertia();
       this.renderer.render();
