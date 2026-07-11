@@ -117,6 +117,60 @@ body.mission-map-page {
   font-size: 0.76rem;
 }
 
+.header-location-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.btn-location {
+  padding: 4px 10px;
+  border: 1px solid rgba(92, 199, 216, 0.35);
+  border-radius: 999px;
+  background: rgba(92, 199, 216, 0.08);
+  color: var(--cyan);
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 200ms ease, border-color 200ms ease;
+}
+
+.btn-location:hover {
+  background: rgba(92, 199, 216, 0.16);
+  border-color: rgba(92, 199, 216, 0.55);
+}
+
+.header-moon {
+  color: var(--muted);
+}
+
+.header-time {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  margin-top: 4px;
+  width: min(220px, 40vw);
+}
+
+.header-time span {
+  font-size: 0.68rem;
+}
+
+.header-time strong {
+  color: var(--text);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+}
+
+.header-time input[type="range"] {
+  width: 100%;
+  accent-color: var(--cyan);
+  height: 4px;
+}
+
 .header-meta {
   display: flex;
   flex-direction: column;
@@ -365,6 +419,38 @@ body.mission-map-page {
 
 .premium-block-emphasis p {
   font-size: 1rem;
+  color: var(--text);
+}
+
+.premium-sky-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.premium-sky-stats div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.premium-sky-stats span {
+  color: var(--quiet);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.premium-sky-stats strong {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.82rem;
+  font-weight: 500;
   color: var(--text);
 }
 

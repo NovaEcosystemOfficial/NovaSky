@@ -15,7 +15,7 @@ export class ObservatoryRenderer {
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
     this.targets = data.targets;
-    this.constellations = data.constellations;
+    this.constellations = data.constellations ?? [];
     this.thumbnails = data.thumbnails;
     this.sprites = data.sprites ?? new Map();
     this.stars = generateStarField(2800, 11);
@@ -38,6 +38,13 @@ export class ObservatoryRenderer {
 
   setSprites(sprites) {
     this.sprites = sprites;
+  }
+
+  setTargets(targets) {
+    this.targets = targets;
+    if (this.selectedId && !targets.find((t) => t.id === this.selectedId)) {
+      this.selectedId = null;
+    }
   }
 
   setCardAnchor(point) {

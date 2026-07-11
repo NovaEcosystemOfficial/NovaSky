@@ -25,12 +25,22 @@
           <span class="brand-word">NovaSky</span>
         </a>
         <div class="header-verdict">
-          <p data-verdict>Buona notte per nebulose a emissione</p>
-          <span data-location>Osservatorio di casa · 45.4°N</span>
+          <p data-verdict>Calcolo del cielo in corso…</p>
+          <span class="header-location-row">
+            <span data-location>—</span>
+            <button type="button" class="btn-location" data-location-request title="Usa la posizione del browser">
+              Usa la mia posizione
+            </button>
+          </span>
         </div>
         <div class="header-meta">
-          <time data-date>Sabato 11 luglio 2026</time>
-          <span class="header-window">Finestra <strong data-window>22:10 – 01:35</strong></span>
+          <time data-date>—</time>
+          <span class="header-moon" data-moon>—</span>
+          <span class="header-window">Crepuscolo <strong data-window>—</strong></span>
+          <label class="header-time">
+            <span>Ora simulata <strong data-time-label>—</strong></span>
+            <input type="range" data-time-slider min="0" max="0" value="0" step="1" aria-label="Simula un'ora della notte" />
+          </label>
         </div>
       </header>
 
@@ -67,6 +77,25 @@
                 <p data-target-expectation>Risultato atteso dalla sessione.</p>
               </section>
 
+              <div class="premium-sky-stats">
+                <div>
+                  <span>Altezza attuale</span>
+                  <strong data-target-altitude>—</strong>
+                </div>
+                <div>
+                  <span>Azimut</span>
+                  <strong data-target-azimuth>—</strong>
+                </div>
+                <div>
+                  <span>Culminazione</span>
+                  <strong data-target-culmination>—</strong>
+                </div>
+                <div>
+                  <span>Distanza Luna</span>
+                  <strong data-target-moon-sep>—</strong>
+                </div>
+              </div>
+
               <div class="premium-window">
                 <span>Finestra osservativa</span>
                 <strong data-target-window>22:00 – 03:40</strong>
@@ -90,10 +119,10 @@
               <details class="premium-specs">
                 <summary>Dettagli tecnici</summary>
                 <dl>
-                  <div><dt>NovaScore</dt><dd data-target-score>91</dd></div>
+                  <div><dt>Stato</dt><dd data-target-state>—</dd></div>
+                  <div><dt>NovaScore</dt><dd data-target-score>—</dd></div>
                   <div><dt>Magnitudine</dt><dd data-target-magnitude>4.0</dd></div>
                   <div><dt>Filtro</dt><dd data-target-filter>Dual-band</dd></div>
-                  <div><dt>Altezza</dt><dd data-target-altitude>78°</dd></div>
                   <div><dt>Difficoltà</dt><dd data-target-difficulty>Facile</dd></div>
                 </dl>
               </details>

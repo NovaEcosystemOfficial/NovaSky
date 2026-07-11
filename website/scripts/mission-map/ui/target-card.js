@@ -1,11 +1,10 @@
-import { RECOMMENDATION } from "../data/targets.js";
+import { RECOMMENDATION } from "../data/catalog.js";
 import { PHOTO_CREDITS } from "../data/photo-credits.js";
 
 export class TargetCard {
   constructor(root, callbacks) {
     this.root = root;
     this.callbacks = callbacks;
-    this.thumbnails = callbacks.thumbnails;
     this.currentId = null;
 
     this.els = {
@@ -21,6 +20,10 @@ export class TargetCard {
       magnitude: root.querySelector("[data-target-magnitude]"),
       filter: root.querySelector("[data-target-filter]"),
       altitude: root.querySelector("[data-target-altitude]"),
+      azimuth: root.querySelector("[data-target-azimuth]"),
+      culmination: root.querySelector("[data-target-culmination]"),
+      moonSep: root.querySelector("[data-target-moon-sep]"),
+      state: root.querySelector("[data-target-state]"),
       difficulty: root.querySelector("[data-target-difficulty]"),
       score: root.querySelector("[data-target-score]"),
       photoCredit: root.querySelector("[data-target-photo-credit]"),
@@ -61,6 +64,12 @@ export class TargetCard {
     this.els.magnitude.textContent = String(target.magnitude);
     this.els.filter.textContent = target.filter;
     this.els.altitude.textContent = `${target.alt}°`;
+    if (this.els.azimuth) this.els.azimuth.textContent = `${Math.round(target.az)}°`;
+    if (this.els.culmination) {
+      this.els.culmination.textContent = `${target.culmination.time} · ${target.culmination.alt}°`;
+    }
+    if (this.els.moonSep) this.els.moonSep.textContent = `${target.moonSeparation}°`;
+    if (this.els.state) this.els.state.textContent = target.stateLabel;
     this.els.difficulty.textContent = target.difficulty;
     if (this.els.score) this.els.score.textContent = String(target.novaScore);
 
@@ -81,7 +90,6 @@ export class TargetCard {
     this.updateMissionButton(this.els.addBtn?.dataset.inMission === "true");
   }
 
-  /** @returns {{ x: number, y: number } | null} anchor point for sky connection line */
   getAnchorPoint() {
     if (!this.root.classList.contains("is-open")) return null;
     const rect = this.root.getBoundingClientRect();

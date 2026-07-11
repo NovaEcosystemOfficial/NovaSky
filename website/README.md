@@ -16,7 +16,7 @@ website/
 ## Current scope
 
 - Landing page with hero, problem, solution, compatibility, experience, roadmap, and footer.
-- **Mission Map Premium** (`pages/mission-map.html`) — transparent PNG targets suspended in space with category glow, cosmic sky with parallax, narrative dossier card, connected mission timeline.
+- **Mission Map Premium** (`pages/mission-map.html`) — real-sky astronomy engine, immersive targets, narrative card, mission timeline.
 - Italian-first localization with `data-i18n` keys and locale placeholders in `locales/`.
 - Responsive layout for desktop and mobile.
 - Local generated hero image.
@@ -34,5 +34,13 @@ Real target photos are fetched from Wikimedia Commons. To refresh assets:
 ```bash
 python3 website/scripts/fetch-target-photos.py
 ```
+
+Astronomy engine tests:
+
+```bash
+node website/scripts/mission-map/tests/run-tests.mjs
+```
+
+See `website/scripts/mission-map/astro/README.md` for formulas and limitations.
 
 No backend is required.

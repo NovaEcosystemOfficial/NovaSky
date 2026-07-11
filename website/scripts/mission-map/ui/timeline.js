@@ -1,4 +1,4 @@
-import { sortByWindowStart, parseTime, formatTime } from "../map/projection.js";
+import { parseTime, formatTime } from "../map/projection.js";
 import { getCategory } from "../data/categories.js";
 
 const MARKERS = ["22:00", "23:10", "00:40", "01:20"];
@@ -13,6 +13,13 @@ function windowDuration(start, end) {
   if (h === 0) return `${m} min`;
   if (m === 0) return `${h}h`;
   return `${h}h ${m}m`;
+}
+
+function sortTargetsByWindow(a, b) {
+  if (a.window?.startDate && b.window?.startDate) {
+    return a.window.startDate - b.window.startDate;
+  }
+  return parseTime(a.window.start) - parseTime(b.window.start);
 }
 
 export class MissionTimeline {
@@ -38,6 +45,11 @@ export class MissionTimeline {
     }
   }
 
+  setCatalog(targets) {
+    this.allTargets = targets;
+    this.render();
+  }
+
   setSelected(id) {
     this.selectedId = id;
     this.render();
@@ -52,7 +64,7 @@ export class MissionTimeline {
     const targets = this.missionIds
       .map((id) => this.allTargets.find((t) => t.id === id))
       .filter(Boolean)
-      .sort(sortByWindowStart);
+      .sort(sortTargetsByWindow);
 
     if (this.els.count) this.els.count.textContent = String(targets.length);
 
