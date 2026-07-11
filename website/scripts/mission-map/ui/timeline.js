@@ -104,7 +104,9 @@ export class MissionTimeline {
       card.setAttribute("role", "button");
       card.setAttribute("aria-label", `${target.name}, ${target.window.start} – ${target.window.end}`);
 
-      const thumbSrc = `../assets/targets/mini/${target.id}.png`;
+      const thumbSrc =
+        this.thumbnails?.getMiniUrl(target.id) ||
+        `/assets/targets/mini/${target.id}.png`;
       card.innerHTML = `
         <div class="chain-thumb">
           <img src="${thumbSrc}" alt="" width="48" height="38" loading="lazy" />

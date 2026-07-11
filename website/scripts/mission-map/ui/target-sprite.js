@@ -43,10 +43,11 @@ export function buildFeatheredSprite(source) {
       const radial = 1 - smoothstep(0.42, 1.0, dist);
 
       const lum = luminance(r, g, b);
-      const darkFade = smoothstep(0, 22, lum);
+      // Astro photos are mostly dark — keep a visible floor so nebulae stay on the sky
+      const darkFade = 0.42 + smoothstep(0, 40, lum) * 0.58;
       const edgeFade = a / 255;
 
-      a = a * radial * darkFade * (0.55 + edgeFade * 0.45);
+      a = a * radial * darkFade * (0.62 + edgeFade * 0.38);
       px[i + 3] = Math.round(a);
     }
   }
@@ -113,11 +114,12 @@ export function buildTargetSprites(thumbnails, targets) {
     const feathered = buildFeatheredSprite(raw);
     const glowRgb = extractDominantGlow(raw);
 
+    const alt = Number.isFinite(target.alt) ? target.alt : 45 + (seed % 30);
     sprites.set(target.id, {
       canvas: feathered,
       glowRgb,
-      depth: 0.72 + (target.alt / 90) * 0.28 + (seed % 9) * 0.012,
-      parallax: 0.028 + (seed % 11) * 0.004 + (target.alt / 90) * 0.018,
+      depth: 0.72 + (alt / 90) * 0.28 + (seed % 9) * 0.012,
+      parallax: 0.028 + (seed % 11) * 0.004 + (alt / 90) * 0.018,
       tilt: ((seed % 17) - 8) * 0.004,
       scaleBias: 0.94 + (seed % 13) * 0.008,
       phase: (seed % 100) * 0.07,

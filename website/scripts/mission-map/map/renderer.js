@@ -138,7 +138,8 @@ export class ObservatoryRenderer {
 
   getTargetSize(target) {
     const sprite = this.sprites.get(target.id);
-    const depth = sprite?.depth ?? 0.88 + (target.alt / 90) * 0.12;
+    let depth = sprite?.depth ?? 0.88 + (target.alt / 90) * 0.12;
+    if (!Number.isFinite(depth)) depth = 0.88 + (target.alt / 90) * 0.12;
     const isSelected = target.id === this.selectedId;
     const isHovered = target.id === this.hoveredId;
     const bias = sprite?.scaleBias ?? 1;
@@ -355,7 +356,9 @@ export class ObservatoryRenderer {
     const sorted = [...this.visibleTargets].sort((a, b) => {
       const da = this.sprites.get(a.id)?.depth ?? a.alt;
       const db = this.sprites.get(b.id)?.depth ?? b.alt;
-      return da - db;
+      const safeA = Number.isFinite(da) ? da : a.alt;
+      const safeB = Number.isFinite(db) ? db : b.alt;
+      return safeA - safeB;
     });
     for (const target of sorted) {
       if (target.id !== this.selectedId) this.drawSuspendedTarget(target);

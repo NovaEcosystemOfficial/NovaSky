@@ -92,6 +92,7 @@ class ObservatoryApp {
 
   initUI() {
     this.targetCard = new TargetCard(document.querySelector("[data-target-card]"), {
+      thumbnails: this.thumbnails,
       onAddToMission: (id) => this.addToMission(id),
     });
 
@@ -119,6 +120,10 @@ class ObservatoryApp {
 
     this.session = session;
     this.nightSteps = buildNightHours(when, this.session.meta.twilight);
+
+    // Ricostruisci sprite con altitudini calcolate (evita depth NaN al primo init)
+    this.sprites = buildTargetSprites(this.thumbnails, this.session.targets);
+    this.renderer.setSprites(this.sprites);
 
     const slider = document.querySelector("[data-time-slider]");
     if (slider) {

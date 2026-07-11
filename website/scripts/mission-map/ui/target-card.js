@@ -5,6 +5,7 @@ export class TargetCard {
   constructor(root, callbacks) {
     this.root = root;
     this.callbacks = callbacks;
+    this.thumbnails = callbacks.thumbnails ?? null;
     this.currentId = null;
 
     this.els = {
@@ -73,7 +74,9 @@ export class TargetCard {
     this.els.difficulty.textContent = target.difficulty;
     if (this.els.score) this.els.score.textContent = String(target.novaScore);
 
-    const heroPath = `../assets/targets/hero/${target.id}.jpg`;
+    const heroPath =
+      this.thumbnails?.getHeroUrl(target.id) ||
+      `/assets/targets/hero/${target.id}.jpg`;
     if (this.els.heroImg) {
       this.els.heroImg.src = heroPath;
       this.els.heroImg.alt = target.name;
