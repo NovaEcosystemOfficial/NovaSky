@@ -10,6 +10,10 @@ const MILKY_CLOUDS = [
   { alt: 38, az: 250, rx: 0.2, ry: 0.08, alpha: 0.028 },
 ];
 
+function finiteOr(value, fallback) {
+  return Number.isFinite(value) ? value : fallback;
+}
+
 export class ObservatoryRenderer {
   constructor(canvas, data) {
     this.canvas = canvas;
@@ -67,6 +71,10 @@ export class ObservatoryRenderer {
 
   setCamera(patch) {
     this.camera = { ...this.camera, ...patch };
+    this.camera.azCenter = finiteOr(this.camera.azCenter, 25);
+    this.camera.zoom = Math.min(2.2, Math.max(0.7, finiteOr(this.camera.zoom, 1)));
+    this.camera.fov = finiteOr(this.camera.fov, 118);
+    this.camera.lift = finiteOr(this.camera.lift, 0);
   }
 
   setHovered(id) {
@@ -104,18 +112,20 @@ export class ObservatoryRenderer {
 
   targetParallaxAz(target) {
     const sprite = this.sprites.get(target.id);
-    const factor = sprite?.parallax ?? 0.035;
+    const factor = finiteOr(sprite?.parallax, 0.035);
     return (this.camera.azCenter - 25) * factor;
   }
 
   worldToScreen(alt, az, layer = 1, extraAz = 0) {
+    const safeAlt = finiteOr(alt, 0);
+    const safeAz = finiteOr(az, 0) + finiteOr(extraAz, 0);
     const parallax = this.parallaxShift(layer === 0 ? 0 : layer === 1 ? 1 : 2);
-    const sky = altAzToSky(alt, az + parallax + extraAz, this.camera);
+    const sky = altAzToSky(safeAlt, safeAz + parallax, this.camera);
     return {
-      x: sky.x * this.width,
-      y: sky.y * this.height,
-      depth: sky.depth,
-      visible: sky.visible,
+      x: finiteOr(sky.x, 0.5) * this.width,
+      y: finiteOr(sky.y, 0.5) * this.height,
+      depth: finiteOr(sky.depth, 0.5),
+      visible: sky.visible && Number.isFinite(sky.x) && Number.isFinite(sky.y),
     };
   }
 
@@ -138,15 +148,15 @@ export class ObservatoryRenderer {
 
   getTargetSize(target) {
     const sprite = this.sprites.get(target.id);
-    let depth = sprite?.depth ?? 0.88 + (target.alt / 90) * 0.12;
-    if (!Number.isFinite(depth)) depth = 0.88 + (target.alt / 90) * 0.12;
+    const alt = finiteOr(target.alt, 45);
+    let depth = finiteOr(sprite?.depth, 0.88 + (alt / 90) * 0.12);
     const isSelected = target.id === this.selectedId;
     const isHovered = target.id === this.hoveredId;
-    const bias = sprite?.scaleBias ?? 1;
+    const bias = finiteOr(sprite?.scaleBias, 1);
     let base = 50 * depth * bias;
     if (isSelected) base = 66 * depth * bias;
     else if (isHovered) base = 56 * depth * bias;
-    return base;
+    return finiteOr(base, 50);
   }
 
   breathingScale(sprite, isSelected) {
@@ -335,6 +345,12 @@ export class ObservatoryRenderer {
       const target = this.targets.find((t) => t.id === this.selectedId);
       if (target) {
         const pos = this.worldToScreen(target.alt, target.az, 2, this.targetParallaxAz(target));
+        if (!Number.isFinite(pos.x) || !Number.isFinite(pos.y)) {
+          ctx.fillStyle = `rgba(2, 4, 8, ${0.38 * dim})`;
+          ctx.fillRect(0, 0, width, height);
+          ctx.restore();
+          return;
+        }
         const r = Math.max(width, height) * 0.75;
         const g = ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, r);
         g.addColorStop(0, `rgba(2, 4, 8, ${0.05 * dim})`);

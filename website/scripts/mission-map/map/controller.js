@@ -51,7 +51,8 @@ export class MapController {
       this.lastPointer = { x: event.clientX, y: event.clientY };
 
       const cam = this.renderer.camera;
-      const sensitivity = (cam.fov / cam.zoom) / this.renderer.width;
+      const w = Math.max(this.renderer.width, 1);
+      const sensitivity = (cam.fov / cam.zoom) / w;
       this.renderer.setCamera({
         azCenter: cam.azCenter - dx * sensitivity * 1.15,
       });
@@ -126,7 +127,7 @@ export class MapController {
     this.callbacks.onSelect(id);
 
     const target = this.renderer.targets.find((t) => t.id === id);
-    if (target) {
+    if (target && Number.isFinite(target.az)) {
       const cam = this.renderer.camera;
       let dAz = target.az - cam.azCenter;
       while (dAz > 180) dAz -= 360;
@@ -143,7 +144,8 @@ export class MapController {
       return;
     }
     const cam = this.renderer.camera;
-    const sensitivity = (cam.fov / cam.zoom) / this.renderer.width;
+    const w = Math.max(this.renderer.width, 1);
+    const sensitivity = (cam.fov / cam.zoom) / w;
     this.renderer.setCamera({
       azCenter: cam.azCenter - this.velocity * sensitivity * 0.35,
     });

@@ -11,19 +11,25 @@ const DEG = Math.PI / 180;
  * @param {{ azCenter: number, fov: number, lift: number }} camera
  */
 export function altAzToSky(alt, az, camera) {
-  let dAz = az - camera.azCenter;
+  const safeAlt = Number.isFinite(alt) ? alt : 0;
+  const safeAz = Number.isFinite(az) ? az : 0;
+  const azCenter = Number.isFinite(camera.azCenter) ? camera.azCenter : 25;
+  const zoom = Number.isFinite(camera.zoom) && camera.zoom > 0 ? camera.zoom : 1;
+  const lift = Number.isFinite(camera.lift) ? camera.lift : 0;
+
+  let dAz = safeAz - azCenter;
   while (dAz > 180) dAz -= 360;
   while (dAz < -180) dAz += 360;
 
-  const fov = camera.fov / camera.zoom;
+  const fov = (Number.isFinite(camera.fov) ? camera.fov : 118) / zoom;
   const x = 0.5 + (dAz / fov) * 0.92;
 
-  const altNorm = Math.pow(Math.max(0, alt) / 90, 0.82);
-  const y = 0.94 - altNorm * 0.78 + camera.lift * 0.001;
+  const altNorm = Math.pow(Math.max(0, safeAlt) / 90, 0.82);
+  const y = 0.94 - altNorm * 0.78 + lift * 0.001;
 
-  const depth = 0.15 + (alt / 90) * 0.85;
+  const depth = 0.15 + (Math.max(0, safeAlt) / 90) * 0.85;
 
-  return { x, y, depth, visible: x > -0.08 && x < 1.08 && alt >= 0 };
+  return { x, y, depth, visible: x > -0.08 && x < 1.08 && safeAlt >= 0 };
 }
 
 /**
