@@ -1,6 +1,6 @@
 /** Geolocation with explicit consent — no persistence without approval. */
 
-import { DEMO_OBSERVER } from "./config.js";
+import { DEMO_OBSERVER } from "../data/config.js";
 
 /**
  * @typedef {{ lat: number, lon: number, label: string, source: 'gps'|'demo' }} ObserverLocation
@@ -32,7 +32,7 @@ export class LocationService {
           resolve(this.current);
         },
         () => resolve(this.useDemo()),
-        { enableHighAccuracy: false, timeout: 12_000, maximumAge: 0 },
+        { enableHighAccuracy: false, timeout: 8_000, maximumAge: 60_000 },
       );
     });
   }

@@ -31,21 +31,32 @@ class ObservatoryApp {
   }
 
   async init() {
-    await this.thumbnails.load();
-    this.sprites = buildTargetSprites(this.thumbnails, CATALOG);
-    this.initLocationUI();
-    this.initTimeUI();
-    this.initRenderer();
-    this.initUI();
+    try {
+      await this.thumbnails.load();
+      this.sprites = buildTargetSprites(this.thumbnails, CATALOG);
+      this.initLocationUI();
+      this.initTimeUI();
+      this.initRenderer();
+      this.initUI();
 
-    await this.locationService.requestLocation();
-    this.refreshSky();
+      // Mostra subito il cielo demo — non bloccare su GPS
+      this.locationService.useDemo();
+      this.refreshSky();
+      this.startLoop();
 
-    this.startLoop();
-    window.addEventListener("resize", () => {
-      this.renderer.resize();
-      this.updateCardAnchor();
-    });
+      this.locationService.requestLocation().then(() => {
+        this.refreshSky();
+      });
+
+      window.addEventListener("resize", () => {
+        this.renderer.resize();
+        this.updateCardAnchor();
+      });
+    } catch (err) {
+      console.error("NovaSky init failed:", err);
+      const verdict = document.querySelector("[data-verdict]");
+      if (verdict) verdict.textContent = "Errore di caricamento — ricarica la pagina";
+    }
   }
 
   initLocationUI() {
