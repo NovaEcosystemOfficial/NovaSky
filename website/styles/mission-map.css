@@ -543,9 +543,134 @@ body.mission-map-page {
   transform: none;
 }
 
+/* ── Sky Briefing ── */
+
+.premium-briefing {
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+  margin-top: 14px;
+}
+
+.premium-briefing summary {
+  color: var(--quiet);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.premium-briefing summary::-webkit-details-marker {
+  display: none;
+}
+
+.premium-briefing summary::after {
+  content: " +";
+  color: var(--cyan);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.premium-briefing[open] summary::after {
+  content: " −";
+}
+
+.briefing-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 14px;
+}
+
+.briefing-section h4 {
+  margin: 0 0 8px;
+  color: var(--cyan);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.briefing-section p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+
+.briefing-placeholder {
+  color: var(--quiet);
+  font-size: 0.82rem;
+  font-style: italic;
+}
+
+.briefing-quick {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 14px;
+  margin: 0;
+}
+
+.briefing-quick dt {
+  color: var(--quiet);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.briefing-quick dd {
+  margin: 2px 0 0;
+  font-size: 0.82rem;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  color: var(--text);
+}
+
+.briefing-quick-wide {
+  grid-column: 1 / -1;
+}
+
+.briefing-levels {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.briefing-level-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.briefing-level-value {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.68rem;
+  color: var(--cyan);
+}
+
+.briefing-level-track {
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(158, 183, 204, 0.12);
+  overflow: hidden;
+}
+
+.briefing-level-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(92, 199, 216, 0.55), var(--cyan));
+  transition: width 0.45s ease;
+}
+
 .premium-specs {
   border-top: 1px solid var(--line);
   padding-top: 14px;
+  margin-top: 14px;
 }
 
 .premium-specs summary {

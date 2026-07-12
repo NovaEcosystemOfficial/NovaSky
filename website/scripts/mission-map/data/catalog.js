@@ -1,6 +1,11 @@
 /**
  * Curated deep-sky catalog — equatorial coordinates (J2000).
  * No alt/az or visibility: computed by the astronomy engine.
+ *
+ * skyMeta — metadati editoriali per Sky Briefing (opzionali, non usati dal motore).
+ * @property {string} [skyMeta.constellation]
+ * @property {string} [skyMeta.distance]
+ * @property {string} [skyMeta.bestSeason]
  */
 
 export const CATALOG = [
@@ -17,6 +22,7 @@ export const CATALOG = [
     difficulty: "Facile",
     filter: "Dual-band consigliato",
     preview: ["#1a3a4a", "#67c98d", "#0a1520"],
+    skyMeta: { constellation: "Cigno", distance: "~1.600 a.l.", bestSeason: "Estate – Autunno" },
   },
   {
     id: "ic1396",
@@ -31,6 +37,7 @@ export const CATALOG = [
     difficulty: "Facile",
     filter: "Dual-band",
     preview: ["#2a1a30", "#5cc7d8", "#120818"],
+    skyMeta: { constellation: "Cefeo", distance: "~2.400 a.l.", bestSeason: "Estate – Autunno" },
   },
   {
     id: "m27",
@@ -45,6 +52,7 @@ export const CATALOG = [
     difficulty: "Facile",
     filter: "Nessuno / UHC opzionale",
     preview: ["#1e2838", "#67c98d", "#0c1218"],
+    skyMeta: { constellation: "Volpe", distance: "~1.360 a.l.", bestSeason: "Estate – Autunno" },
   },
   {
     id: "m57",
@@ -59,6 +67,7 @@ export const CATALOG = [
     difficulty: "Facile",
     filter: "UHC opzionale",
     preview: ["#141c28", "#5cc7d8", "#080c14"],
+    skyMeta: { constellation: "Lira", distance: "~2.300 a.l.", bestSeason: "Estate" },
   },
   {
     id: "m13",
@@ -73,6 +82,7 @@ export const CATALOG = [
     difficulty: "Facile",
     filter: "Nessuno",
     preview: ["#181420", "#e7b85a", "#0a0810"],
+    skyMeta: { constellation: "Ercole", distance: "~22.000 a.l.", bestSeason: "Primavera – Estate" },
   },
   {
     id: "m31",
@@ -87,6 +97,7 @@ export const CATALOG = [
     difficulty: "Media",
     filter: "Nessuno",
     preview: ["#1a1828", "#aeb9c5", "#0c0a14"],
+    skyMeta: { constellation: "Andromeda", distance: "~2,5 milioni a.l.", bestSeason: "Autunno – Inverno" },
   },
   {
     id: "m51",
@@ -101,6 +112,7 @@ export const CATALOG = [
     difficulty: "Media",
     filter: "Nessuno",
     preview: ["#141828", "#74808d", "#080c14"],
+    skyMeta: { constellation: "Cani da Caccia", distance: "~23 milioni a.l.", bestSeason: "Primavera – Estate" },
   },
   {
     id: "m101",
@@ -115,6 +127,7 @@ export const CATALOG = [
     difficulty: "Impegnativa",
     filter: "Nessuno",
     preview: ["#121820", "#5cc7d8", "#060810"],
+    skyMeta: { constellation: "Orsa Maggiore", distance: "~21 milioni a.l.", bestSeason: "Primavera – Estate" },
   },
   {
     id: "m81",
@@ -129,6 +142,7 @@ export const CATALOG = [
     difficulty: "Media",
     filter: "Nessuno",
     preview: ["#181828", "#e7b85a", "#0a0a12"],
+    skyMeta: { constellation: "Orsa Maggiore", distance: "~12 milioni a.l.", bestSeason: "Tutto l'anno (boreale)" },
   },
   {
     id: "m17",
@@ -143,6 +157,7 @@ export const CATALOG = [
     difficulty: "Media",
     filter: "Dual-band",
     preview: ["#281818", "#e56f68", "#100808"],
+    skyMeta: { constellation: "Sagittario", distance: "~5.500 a.l.", bestSeason: "Estate" },
   },
   {
     id: "m16",
@@ -157,6 +172,7 @@ export const CATALOG = [
     difficulty: "Media",
     filter: "Dual-band",
     preview: ["#2a2018", "#e7b85a", "#100c08"],
+    skyMeta: { constellation: "Serpente", distance: "~7.000 a.l.", bestSeason: "Estate" },
   },
   {
     id: "m20",
@@ -171,6 +187,7 @@ export const CATALOG = [
     difficulty: "Impegnativa",
     filter: "Dual-band",
     preview: ["#281820", "#74808d", "#0c0808"],
+    skyMeta: { constellation: "Sagittario", distance: "~5.200 a.l.", bestSeason: "Estate" },
   },
   {
     id: "m8",
@@ -185,6 +202,7 @@ export const CATALOG = [
     difficulty: "Media",
     filter: "Dual-band",
     preview: ["#201818", "#67c98d", "#0c0808"],
+    skyMeta: { constellation: "Sagittario", distance: "~4.100 a.l.", bestSeason: "Estate" },
   },
   {
     id: "ic1805",
@@ -199,6 +217,7 @@ export const CATALOG = [
     difficulty: "Media",
     filter: "Dual-band",
     preview: ["#301820", "#e56f68", "#140810"],
+    skyMeta: { constellation: "Cassiopea", distance: "~7.500 a.l.", bestSeason: "Autunno – Inverno" },
   },
   {
     id: "ngc2244",
@@ -213,6 +232,7 @@ export const CATALOG = [
     difficulty: "Media",
     filter: "Dual-band",
     preview: ["#281828", "#5cc7d8", "#100810"],
+    skyMeta: { constellation: "Monoceros", distance: "~5.200 a.l.", bestSeason: "Inverno – Primavera" },
   },
   {
     id: "m92",
@@ -227,6 +247,7 @@ export const CATALOG = [
     difficulty: "Facile",
     filter: "Nessuno",
     preview: ["#141820", "#e7b85a", "#080c10"],
+    skyMeta: { constellation: "Ercole", distance: "~26.700 a.l.", bestSeason: "Primavera – Estate" },
   },
   {
     id: "m3",
@@ -241,6 +262,7 @@ export const CATALOG = [
     difficulty: "Facile",
     filter: "Nessuno",
     preview: ["#181420", "#74808d", "#0a0810"],
+    skyMeta: { constellation: "Cani Venatici", distance: "~33.900 a.l.", bestSeason: "Primavera" },
   },
   {
     id: "m97",
@@ -255,6 +277,7 @@ export const CATALOG = [
     difficulty: "Impegnativa",
     filter: "UHC / OIII",
     preview: ["#141828", "#5cc7d8", "#080810"],
+    skyMeta: { constellation: "Orsa Maggiore", distance: "~2.600 a.l.", bestSeason: "Primavera – Estate" },
   },
   {
     id: "m33",
@@ -269,6 +292,7 @@ export const CATALOG = [
     difficulty: "Impegnativa",
     filter: "Nessuno",
     preview: ["#181820", "#e56f68", "#0a0a10"],
+    skyMeta: { constellation: "Triangolo", distance: "~2,7 milioni a.l.", bestSeason: "Autunno" },
   },
   {
     id: "m42",
@@ -283,6 +307,7 @@ export const CATALOG = [
     difficulty: "Facile",
     filter: "Dual-band",
     preview: ["#281818", "#e56f68", "#100808"],
+    skyMeta: { constellation: "Orione", distance: "~1.344 a.l.", bestSeason: "Inverno" },
   },
   {
     id: "m45",
@@ -297,6 +322,7 @@ export const CATALOG = [
     difficulty: "Facile",
     filter: "Nessuno",
     preview: ["#202028", "#74808d", "#0c0c12"],
+    skyMeta: { constellation: "Toro", distance: "~444 a.l.", bestSeason: "Inverno" },
   },
   {
     id: "b33",
@@ -311,6 +337,7 @@ export const CATALOG = [
     difficulty: "Impegnativa",
     filter: "Ha / OIII",
     preview: ["#181008", "#e56f68", "#080404"],
+    skyMeta: { constellation: "Orione", distance: "~1.375 a.l.", bestSeason: "Inverno" },
   },
   {
     id: "ngc6992",
@@ -325,6 +352,7 @@ export const CATALOG = [
     difficulty: "Impegnativa",
     filter: "OIII",
     preview: ["#101820", "#e56f68", "#060810"],
+    skyMeta: { constellation: "Cigno", distance: "~1.470 a.l.", bestSeason: "Estate – Autunno" },
   },
   {
     id: "m104",
@@ -339,6 +367,7 @@ export const CATALOG = [
     difficulty: "Media",
     filter: "Nessuno",
     preview: ["#181820", "#74808d", "#0a0a10"],
+    skyMeta: { constellation: "Vergine", distance: "~29 milioni a.l.", bestSeason: "Primavera" },
   },
   {
     id: "m78",
@@ -353,6 +382,7 @@ export const CATALOG = [
     difficulty: "Impegnativa",
     filter: "Nessuno",
     preview: ["#182028", "#e56f68", "#080c10"],
+    skyMeta: { constellation: "Orione", distance: "~1.350 a.l.", bestSeason: "Inverno" },
   },
   {
     id: "saturn",
@@ -368,6 +398,7 @@ export const CATALOG = [
     difficulty: "Facile",
     filter: "Nessuno",
     preview: ["#282018", "#e7b85a", "#100c08"],
+    skyMeta: { constellation: "Eclittica (variabile)", distance: "~1,4 mld km", bestSeason: "Quando sopra l'orizzonte" },
   },
   {
     id: "m1",
@@ -382,6 +413,7 @@ export const CATALOG = [
     difficulty: "Media",
     filter: "UHC opzionale",
     preview: ["#201818", "#5cc7d8", "#0c0808"],
+    skyMeta: { constellation: "Toro", distance: "~6.500 a.l.", bestSeason: "Inverno – Primavera" },
   },
 ];
 

@@ -1,5 +1,6 @@
 import { RECOMMENDATION } from "../data/catalog.js";
 import { PHOTO_CREDITS } from "../data/photo-credits.js";
+import { populateSkyBriefing } from "./sky-briefing.js";
 
 export class TargetCard {
   constructor(root, callbacks) {
@@ -29,6 +30,7 @@ export class TargetCard {
       score: root.querySelector("[data-target-score]"),
       photoCredit: root.querySelector("[data-target-photo-credit]"),
       addBtn: root.querySelector("[data-add-mission]"),
+      briefing: root.querySelector("[data-sky-briefing]"),
     };
 
     this.els.addBtn?.addEventListener("click", () => {
@@ -89,6 +91,8 @@ export class TargetCard {
     } else if (this.els.photoCredit) {
       this.els.photoCredit.hidden = true;
     }
+
+    populateSkyBriefing(this.els.briefing, target);
 
     this.updateMissionButton(this.els.addBtn?.dataset.inMission === "true");
   }
