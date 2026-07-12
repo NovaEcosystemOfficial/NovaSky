@@ -4,32 +4,119 @@
   "use strict";
 
   const INTRO_KEY = "novasky-intro-seen";
+  const AUDIO_MUTE_KEY = "novasky-intro-muted";
   const INTRO_LINES = [
     "Mission Control Online",
-    "Analisi del cielo...",
-    "Calcolo della finestra osservativa...",
-    "Briefing pronto.",
+    "Analisi del cielo completata",
+    "Briefing della notte pronto",
   ];
-  const INTRO_LINE_MS = 520;
-  const INTRO_FADE_MS = 480;
 
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const isMobileIntro = window.matchMedia("(max-width: 640px)").matches;
 
-  /* ── Intro ─────────────────────────────────────────────── */
+  /* ── Intro audio (Web Audio — no external files) ─────────── */
+
+  function createIntroAudio(muted) {
+    let ctx = null;
+    let mutedState = muted;
+
+    function ensureCtx() {
+      if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+      return ctx;
+    }
+
+    async function resume() {
+      const c = ensureCtx();
+      if (c.state === "suspended") await c.resume();
+      return c;
+    }
+
+    async function powerOn() {
+      if (mutedState) return;
+      try {
+        const c = await resume();
+        const t = c.currentTime;
+        const osc = c.createOscillator();
+        const gain = c.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(72, t);
+        osc.frequency.exponentialRampToValueAtTime(168, t + 0.38);
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.exponentialRampToValueAtTime(0.028, t + 0.12);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.55);
+        osc.connect(gain);
+        gain.connect(c.destination);
+        osc.start(t);
+        osc.stop(t + 0.58);
+      } catch {
+        /* autoplay blocked — user can enable via audio toggle */
+      }
+    }
+
+    async function ping() {
+      if (mutedState) return;
+      try {
+        const c = await resume();
+        const t = c.currentTime;
+        const osc = c.createOscillator();
+        const gain = c.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(880, t);
+        osc.frequency.exponentialRampToValueAtTime(620, t + 0.12);
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.exponentialRampToValueAtTime(0.018, t + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+        osc.connect(gain);
+        gain.connect(c.destination);
+        osc.start(t);
+        osc.stop(t + 0.24);
+      } catch {
+        /* silent fallback */
+      }
+    }
+
+    return {
+      setMuted(v) {
+        mutedState = v;
+      },
+      powerOn,
+      ping,
+      resume,
+    };
+  }
+
+  /* ── Intro Level 2 ─────────────────────────────────────── */
 
   function buildIntroOverlay() {
     const overlay = document.createElement("div");
     overlay.className = "cinematic-intro";
-    overlay.setAttribute("role", "presentation");
-    overlay.setAttribute("aria-hidden", "true");
+    overlay.setAttribute("role", "dialog");
+    overlay.setAttribute("aria-label", "Avvio osservatorio NovaSky");
     overlay.innerHTML = `
+      <canvas class="cinematic-intro__canvas" aria-hidden="true"></canvas>
+      <div class="cinematic-intro__vignette" aria-hidden="true"></div>
+      <div class="cinematic-intro__scan" aria-hidden="true"></div>
+      <div class="cinematic-intro__coords" aria-hidden="true">
+        <span>RA 12h 34m · Dec +42°</span>
+        <span>Alt 58° · Az 184°</span>
+      </div>
       <div class="cinematic-intro__inner">
+        <svg class="cinematic-intro__orbit" viewBox="0 0 200 120" aria-hidden="true">
+          <ellipse cx="100" cy="72" rx="78" ry="28" fill="none"
+            stroke="rgba(92, 199, 216, 0.55)" stroke-width="0.75"
+            stroke-dasharray="420" stroke-dashoffset="420" pathLength="420" />
+        </svg>
         <div class="cinematic-intro__brand brand" aria-hidden="true">
           <span class="brand-mark"><span></span></span>
           <span class="brand-word">NovaSky</span>
         </div>
         <p class="cinematic-intro__line" data-intro-line></p>
       </div>
+      <button type="button" class="cinematic-intro__skip" data-intro-skip hidden>Salta</button>
+      <button type="button" class="cinematic-intro__audio" data-intro-audio
+        aria-label="Audio intro attivo" title="Audio intro">
+        <span aria-hidden="true">♪</span>
+      </button>
     `;
     document.body.appendChild(overlay);
     return overlay;
@@ -39,35 +126,178 @@
     if (sessionStorage.getItem(INTRO_KEY)) return Promise.resolve();
 
     const overlay = buildIntroOverlay();
+    const canvas = overlay.querySelector(".cinematic-intro__canvas");
+    const ctx = canvas.getContext("2d", { alpha: true });
     const lineEl = overlay.querySelector("[data-intro-line]");
+    const skipBtn = overlay.querySelector("[data-intro-skip]");
+    const audioBtn = overlay.querySelector("[data-intro-audio]");
+    const scanEl = overlay.querySelector(".cinematic-intro__scan");
+    const coordsEl = overlay.querySelector(".cinematic-intro__coords");
+    const orbitEl = overlay.querySelector(".cinematic-intro__orbit ellipse");
+    const brandEl = overlay.querySelector(".cinematic-intro__brand");
+    const mainEl = document.getElementById("main");
+
+    const mutedPref = localStorage.getItem(AUDIO_MUTE_KEY) === "1";
+    const audio = createIntroAudio(mutedPref);
+    if (mutedPref) audioBtn.classList.add("is-muted");
+
+    const timeline = isMobileIntro
+      ? { total: 1800, orbit: [180, 520], logo: 520, l1: 720, scan: 920, l2: 1120, l3: 1320, reveal: 1520 }
+      : { total: 3200, orbit: [350, 950], logo: 950, l1: 1350, scan: 1750, l2: 2150, l3: 2550, reveal: 2950 };
+
+    const rand = seededRandom(17);
+    const introStars = Array.from({ length: 90 }, () => ({
+      x: rand(),
+      y: rand(),
+      r: 0.4 + rand() * 1.1,
+      a: 0.08 + rand() * 0.35,
+    }));
+
+    let w = 0;
+    let h = 0;
+    let dpr = 1;
+    let start = 0;
+    let raf = 0;
+    let finished = false;
+    let lineShown = -1;
+    let powerPlayed = false;
+    let pingPlayed = false;
+
     document.body.classList.add("is-intro-active");
 
-    return new Promise((resolve) => {
-      let step = 0;
+    function resize() {
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = window.innerWidth;
+      h = window.innerHeight;
+      canvas.width = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
+      canvas.style.width = `${w}px`;
+      canvas.style.height = `${h}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
 
-      const showLine = () => {
-        if (step >= INTRO_LINES.length) {
-          overlay.classList.add("is-exiting");
-          window.setTimeout(() => {
-            overlay.remove();
-            document.body.classList.remove("is-intro-active");
-            sessionStorage.setItem(INTRO_KEY, "1");
-            resolve();
-          }, INTRO_FADE_MS);
-          return;
+    function drawSky(elapsed) {
+      ctx.fillStyle = "#020304";
+      ctx.fillRect(0, 0, w, h);
+
+      const skyAlpha = Math.min(0.42, elapsed / timeline.orbit[0] * 0.28);
+      for (const s of introStars) {
+        ctx.beginPath();
+        ctx.arc(s.x * w, s.y * h, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(210, 225, 240, ${s.a * skyAlpha})`;
+        ctx.fill();
+      }
+
+      const neb = ctx.createRadialGradient(w * 0.5, h * 0.38, 0, w * 0.5, h * 0.38, w * 0.55);
+      neb.addColorStop(0, `rgba(92, 199, 216, ${0.04 * skyAlpha})`);
+      neb.addColorStop(1, "transparent");
+      ctx.fillStyle = neb;
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    function setLine(idx) {
+      if (lineShown === idx) return;
+      lineShown = idx;
+      lineEl.classList.remove("is-visible");
+      void lineEl.offsetWidth;
+      lineEl.textContent = INTRO_LINES[idx];
+      lineEl.classList.add("is-visible");
+    }
+
+    let resolveIntro = null;
+
+    function finishIntro() {
+      if (finished) return;
+      finished = true;
+      cancelAnimationFrame(raf);
+      overlay.classList.add("is-revealing");
+      document.body.classList.add("is-observatory-awakening");
+      if (mainEl) mainEl.classList.add("is-awakening");
+
+      window.setTimeout(() => {
+        overlay.remove();
+        document.body.classList.remove("is-intro-active", "is-observatory-awakening");
+        if (mainEl) mainEl.classList.remove("is-awakening");
+        sessionStorage.setItem(INTRO_KEY, "1");
+        resolveIntro?.();
+      }, isMobileIntro ? 380 : 480);
+    }
+
+    function tick(now) {
+      if (finished) return;
+      if (!start) start = now;
+      const elapsed = now - start;
+      const t = elapsed;
+
+      drawSky(elapsed);
+
+      /* Orbit trace */
+      if (t >= timeline.orbit[0] && t <= timeline.orbit[1]) {
+        const p = (t - timeline.orbit[0]) / (timeline.orbit[1] - timeline.orbit[0]);
+        orbitEl.style.strokeDashoffset = String(420 * (1 - p));
+        overlay.classList.add("is-orbit-visible");
+      }
+
+      /* Logo emerge */
+      if (t >= timeline.logo) {
+        brandEl.classList.add("is-visible");
+        if (!powerPlayed && t >= timeline.logo + 40) {
+          powerPlayed = true;
+          audio.powerOn();
         }
+      }
 
-        lineEl.classList.remove("is-visible");
-        void lineEl.offsetWidth;
-        lineEl.textContent = INTRO_LINES[step];
-        lineEl.classList.add("is-visible");
-        step += 1;
-        window.setTimeout(showLine, INTRO_LINE_MS);
-      };
+      /* Lines + scan */
+      if (t >= timeline.l1 && t < timeline.l2) setLine(0);
+      if (t >= timeline.scan) {
+        const sp = Math.min(1, (t - timeline.scan) / (timeline.l2 - timeline.scan));
+        scanEl.style.setProperty("--scan-y", String(sp * 100));
+        overlay.classList.add("is-scanning");
+        coordsEl.classList.add("is-visible");
+        if (!pingPlayed && sp > 0.45) {
+          pingPlayed = true;
+          audio.ping();
+        }
+      }
+      if (t >= timeline.l2 && t < timeline.l3) setLine(1);
+      if (t >= timeline.l3 && t < timeline.reveal) setLine(2);
 
-      window.requestAnimationFrame(() => {
+      /* Reveal observatory */
+      if (t >= timeline.reveal) {
+        finishIntro();
+        return;
+      }
+
+      raf = requestAnimationFrame(tick);
+    }
+
+    resize();
+    window.addEventListener("resize", resize, { passive: true });
+
+    skipBtn.addEventListener("click", () => {
+      audio.resume();
+      finishIntro();
+    });
+
+    audioBtn.addEventListener("click", () => {
+      const next = !audioBtn.classList.contains("is-muted");
+      audioBtn.classList.toggle("is-muted", next);
+      audioBtn.setAttribute("aria-label", next ? "Audio intro disattivato" : "Audio intro attivo");
+      audio.setMuted(next);
+      localStorage.setItem(AUDIO_MUTE_KEY, next ? "1" : "0");
+      if (!next) audio.resume();
+    });
+
+    window.setTimeout(() => {
+      skipBtn.hidden = false;
+      skipBtn.classList.add("is-visible");
+    }, 700);
+
+    return new Promise((resolve) => {
+      resolveIntro = resolve;
+      requestAnimationFrame(() => {
         overlay.classList.add("is-active");
-        window.setTimeout(showLine, 180);
+        raf = requestAnimationFrame(tick);
       });
     });
   }

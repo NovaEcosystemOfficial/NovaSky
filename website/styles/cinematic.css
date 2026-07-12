@@ -1,17 +1,16 @@
 /* NovaSky — cinematic visual layer (no layout / content changes) */
 
-/* ── Intro overlay ─────────────────────────────────────── */
+/* ── Intro Level 2 — mission control boot ──────────────── */
 
 .cinematic-intro {
   position: fixed;
   inset: 0;
   z-index: 9999;
-  display: grid;
-  place-items: center;
-  background: #000;
+  overflow: hidden;
+  background: #020304;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 420ms ease;
+  transition: opacity 320ms ease;
 }
 
 .cinematic-intro.is-active {
@@ -19,47 +18,87 @@
   pointer-events: auto;
 }
 
-.cinematic-intro.is-exiting {
-  opacity: 0;
+.cinematic-intro__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
-  transition: opacity 480ms ease;
+}
+
+.cinematic-intro__vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 70% 60% at 50% 42%, transparent 0%, rgba(2, 3, 4, 0.72) 100%);
 }
 
 .cinematic-intro__inner {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 28px;
+  justify-content: center;
+  min-height: 100vh;
+  gap: 22px;
   text-align: center;
+  padding: 24px;
+}
+
+.cinematic-intro__orbit {
+  width: min(280px, 72vw);
+  height: auto;
+  opacity: 0;
+  transform: scale(0.96);
+  transition: opacity 480ms ease;
+}
+
+.cinematic-intro.is-orbit-visible .cinematic-intro__orbit {
+  opacity: 1;
 }
 
 .cinematic-intro__brand {
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
   font-size: 1.35rem;
   opacity: 0;
-  transform: translateY(8px) scale(0.96);
-  animation: intro-logo-in 680ms cubic-bezier(0.22, 1, 0.36, 1) 80ms forwards;
+  transform: translateY(10px) scale(0.94);
+  filter: blur(4px);
+  transition:
+    opacity 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 520ms ease;
+}
+
+.cinematic-intro__brand.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+  text-shadow: 0 0 40px rgba(92, 199, 216, 0.35);
 }
 
 .cinematic-intro__brand .brand-mark {
   width: 52px;
   height: 52px;
+  box-shadow:
+    0 0 36px rgba(92, 199, 216, 0.32),
+    inset 0 0 20px rgba(92, 199, 216, 0.1);
 }
 
 .cinematic-intro__line {
   min-height: 1.4em;
   margin: 0;
-  color: var(--muted);
-  font-size: 0.82rem;
+  color: #aeb9c5;
+  font-size: 0.78rem;
   font-weight: 650;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   opacity: 0;
-  transform: translateY(6px);
+  transform: translateY(8px);
   transition:
-    opacity 320ms ease,
-    transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 360ms ease,
+    transform 360ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .cinematic-intro__line.is-visible {
@@ -67,15 +106,153 @@
   transform: translateY(0);
 }
 
+.cinematic-intro__coords {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  pointer-events: none;
+  opacity: 0;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  color: rgba(92, 199, 216, 0.45);
+  transition: opacity 280ms ease;
+}
+
+.cinematic-intro__coords.is-visible {
+  opacity: 1;
+}
+
+.cinematic-intro__coords span:last-child {
+  color: rgba(231, 184, 90, 0.42);
+}
+
+.cinematic-intro__scan {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(
+    180deg,
+    transparent calc(var(--scan-y, 0) * 1% - 2px),
+    rgba(92, 199, 216, 0.22) calc(var(--scan-y, 0) * 1%),
+    rgba(92, 199, 216, 0.06) calc(var(--scan-y, 0) * 1% + 3px),
+    transparent calc(var(--scan-y, 0) * 1% + 14px)
+  );
+  mix-blend-mode: screen;
+}
+
+.cinematic-intro.is-scanning .cinematic-intro__scan {
+  opacity: 1;
+}
+
+.cinematic-intro__skip,
+.cinematic-intro__audio {
+  position: absolute;
+  z-index: 4;
+  border: 1px solid rgba(92, 199, 216, 0.28);
+  border-radius: 999px;
+  background: rgba(5, 7, 10, 0.72);
+  color: #aeb9c5;
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  transition:
+    border-color 180ms ease,
+    color 180ms ease,
+    opacity 280ms ease;
+}
+
+.cinematic-intro__skip {
+  right: 20px;
+  bottom: 20px;
+  padding: 9px 16px;
+  opacity: 0;
+}
+
+.cinematic-intro__skip.is-visible {
+  opacity: 1;
+}
+
+.cinematic-intro__skip:hover,
+.cinematic-intro__skip:focus-visible,
+.cinematic-intro__audio:hover,
+.cinematic-intro__audio:focus-visible {
+  border-color: rgba(92, 199, 216, 0.55);
+  color: #eef4f8;
+}
+
+.cinematic-intro__audio {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+}
+
+.cinematic-intro__audio span {
+  position: relative;
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.cinematic-intro__audio.is-muted {
+  opacity: 0.45;
+}
+
+.cinematic-intro__audio.is-muted span::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 1px;
+  background: currentColor;
+  transform: rotate(-35deg);
+}
+
+/* Observatory reveal — home powers on */
+.cinematic-intro.is-revealing {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 480ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+body.is-observatory-awakening #main {
+  animation: observatory-awaken 480ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes observatory-awaken {
+  from {
+    filter: brightness(0.12) contrast(0.92);
+    opacity: 0.35;
+  }
+  to {
+    filter: brightness(1) contrast(1);
+    opacity: 1;
+  }
+}
+
 body.is-intro-active {
   overflow: hidden;
 }
 
-@keyframes intro-logo-in {
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+body.is-intro-active .cosmic-bg-canvas {
+  opacity: 0;
+  transition: opacity 600ms ease 200ms;
+}
+
+body.is-observatory-awakening .cosmic-bg-canvas {
+  opacity: 0.85;
 }
 
 /* ── Living cosmic background ──────────────────────────── */
@@ -239,8 +416,10 @@ body.cosmic-parallax::before {
 /* ── Reduced motion ────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
-  .cinematic-intro,
-  .cinematic-intro__brand,
+  .cinematic-intro {
+    display: none !important;
+  }
+
   .cinematic-reveal {
     animation: none !important;
     transition: none !important;
