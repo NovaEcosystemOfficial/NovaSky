@@ -14,12 +14,18 @@ export {
   registerDevice,
   editDevice,
   HUB_EVENT,
-  DEVICE_CATEGORIES,
-  deviceStatusLabel,
-  deviceDisplayName,
-  resolveDeviceImage,
   getDeviceHub,
 } from "./device-hub/index.js";
+
+export {
+  DEVICE_CATEGORIES,
+  deviceStatusLabel,
+  devicePowerLabel,
+  deviceConnectionLabel,
+  deviceDisplayName,
+} from "./device-hub/schemas.js";
+
+export { resolveDeviceImage, DEVICE_PHOTO_CATALOG } from "./device-hub/images.js";
 
 import { getDeviceSummary as hubGetSummary } from "./device-hub/index.js";
 

@@ -38,9 +38,9 @@ const ROUTES = {
     missionMap: false,
   },
   attrezzatura: {
-    title: "Attrezzatura",
-    subtitle: "Device Hub — infrastruttura dispositivi",
-    panelTitle: "Device Hub",
+    title: "Osservatorio",
+    subtitle: "Digital Observatory — centro di controllo",
+    panelTitle: "Digital Observatory",
     mount: mountAttrezzatura,
     unmount: null,
     missionMap: false,

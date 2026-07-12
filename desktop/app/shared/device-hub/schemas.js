@@ -1,21 +1,27 @@
 /** Device Hub — schemi, enum e sanitizzazione (desktop-only). */
 
 export const HUB_STORAGE_KEY = "novasky.device-hub.v1";
-export const HUB_VERSION = 1;
+export const HUB_VERSION = 2;
 
 export const DEVICE_CATEGORIES = {
-  telescope: { key: "telescope", label: "Telescopio", icon: "🔭" },
-  mount: { key: "mount", label: "Montatura", icon: "⛰" },
-  camera_main: { key: "camera_main", label: "Camera principale", icon: "📷" },
-  camera_guide: { key: "camera_guide", label: "Camera guida", icon: "◎" },
-  seestar: { key: "seestar", label: "Seestar", icon: "✦" },
-  focuser: { key: "focuser", label: "Focheggiatore", icon: "↕" },
-  filter_wheel: { key: "filter_wheel", label: "Ruota portafiltri", icon: "◉" },
-  computer: { key: "computer", label: "Computer astronomico", icon: "🖥" },
-  weather: { key: "weather", label: "Meteo", icon: "🌤" },
-  power: { key: "power", label: "Alimentazione", icon: "⚡" },
-  observatory: { key: "observatory", label: "Osservatorio", icon: "🏠" },
-  accessory: { key: "accessory", label: "Accessorio", icon: "🔧" },
+  mount: { key: "mount", label: "Montatura", section: "mounts" },
+  telescope: { key: "telescope", label: "OTA", section: "ota" },
+  ota: { key: "ota", label: "OTA", section: "ota" },
+  guide_scope: { key: "guide_scope", label: "Telescopio guida", section: "guide_scopes" },
+  camera_main: { key: "camera_main", label: "Camera", section: "cameras" },
+  camera_cooled: { key: "camera_cooled", label: "Camera refrigerata", section: "cameras" },
+  camera_guide: { key: "camera_guide", label: "Camera guida", section: "guide_cameras" },
+  seestar: { key: "seestar", label: "Smart telescope", section: "cameras" },
+  controller: { key: "controller", label: "Controller", section: "controllers" },
+  focuser: { key: "focuser", label: "Focheggiatore", section: "accessories" },
+  filter_wheel: { key: "filter_wheel", label: "Ruota portafiltri", section: "accessories" },
+  rotator: { key: "rotator", label: "Rotatore", section: "accessories" },
+  computer: { key: "computer", label: "Computer astronomico", section: "computers" },
+  weather: { key: "weather", label: "Meteo", section: "accessories" },
+  power: { key: "power", label: "Alimentazione", section: "power" },
+  eyepiece: { key: "eyepiece", label: "Oculare", section: "eyepieces" },
+  observatory: { key: "observatory", label: "Osservatorio", section: "accessories" },
+  accessory: { key: "accessory", label: "Accessorio", section: "accessories" },
 };
 
 export const CONNECTION_STATES = {
@@ -48,19 +54,53 @@ export const CAPABILITIES = [
 ];
 
 const CATEGORY_CAPABILITIES = {
-  telescope: ["connect", "disconnect"],
   mount: ["connect", "disconnect", "goto", "sync", "park", "unpark"],
+  telescope: ["connect", "disconnect"],
+  ota: ["connect", "disconnect"],
+  guide_scope: ["connect", "disconnect"],
   camera_main: ["connect", "disconnect", "capture", "liveView"],
+  camera_cooled: ["connect", "disconnect", "capture", "liveView", "setTemperature"],
   camera_guide: ["connect", "disconnect", "capture", "liveView"],
   seestar: ["connect", "disconnect", "goto", "capture", "liveView", "readBattery"],
+  controller: ["connect", "disconnect", "readBattery"],
   focuser: ["connect", "disconnect", "autofocus"],
   filter_wheel: ["connect", "disconnect"],
+  rotator: ["connect", "disconnect"],
   computer: ["connect", "disconnect", "readBattery"],
   weather: ["connect", "disconnect", "readWeather"],
   power: ["connect", "disconnect", "readBattery"],
+  eyepiece: ["connect", "disconnect"],
   observatory: ["connect", "disconnect", "openRoof", "closeRoof", "emergencyStop"],
   accessory: ["connect", "disconnect"],
 };
+
+function defaultTelemetry(raw = {}) {
+  return {
+    power: {
+      state: raw.telemetry?.power?.state || raw.powerState || "standby",
+      drawWatts: raw.telemetry?.power?.drawWatts ?? null,
+      batteryPct: raw.telemetry?.power?.batteryPct ?? null,
+    },
+    temperature: {
+      celsius: raw.telemetry?.temperature?.celsius ?? null,
+      sensor: raw.telemetry?.temperature?.sensor || null,
+    },
+    firmware: {
+      version: raw.telemetry?.firmware?.version || raw.firmware || "—",
+      channel: raw.telemetry?.firmware?.channel || "stable",
+    },
+  };
+}
+
+function defaultLayout(raw = {}) {
+  const l = raw.layout || raw.metadata?.layout || {};
+  return {
+    zone: l.zone || "floor",
+    x: typeof l.x === "number" ? l.x : 50,
+    y: typeof l.y === "number" ? l.y : 50,
+    scale: typeof l.scale === "number" ? l.scale : 1,
+  };
+}
 
 export function capabilitiesForCategory(category) {
   return CATEGORY_CAPABILITIES[category] || ["connect", "disconnect"];
@@ -126,10 +166,21 @@ export function sanitizeDevice(raw) {
     imageKey,
     imageUrl: typeof raw.imageUrl === "string" ? raw.imageUrl : null,
     notes: typeof raw.notes === "string" ? raw.notes : "",
-    integrationStatus: ["profile_only", "in_development", "simulated", "live"].includes(raw.integrationStatus)
+    integrationStatus: ["profile_only", "in_development", "simulated", "live", "registered"].includes(raw.integrationStatus)
       ? raw.integrationStatus
-      : "in_development",
+      : "registered",
     dataSource: raw.dataSource === "live" ? "live" : "simulated",
+    serial: typeof raw.serial === "string" ? raw.serial : "",
+    ports: Array.isArray(raw.ports) ? raw.ports : [],
+    usb: Array.isArray(raw.usb) ? raw.usb : [],
+    manualUrl: typeof raw.manualUrl === "string" ? raw.manualUrl : null,
+    compatibility: Array.isArray(raw.compatibility) ? raw.compatibility : [],
+    upcomingUpdates: Array.isArray(raw.upcomingUpdates) ? raw.upcomingUpdates : [],
+    history: Array.isArray(raw.history) ? raw.history : [],
+    lastUsedAt: raw.lastUsedAt || null,
+    specs: raw.specs && typeof raw.specs === "object" ? raw.specs : {},
+    telemetry: defaultTelemetry(raw),
+    layout: defaultLayout(raw),
     createdAt: raw.createdAt || new Date().toISOString(),
     updatedAt: raw.updatedAt || new Date().toISOString(),
   };
@@ -189,10 +240,18 @@ export function sanitizePayload(raw) {
 
 export function migratePayload(raw) {
   if (!raw || typeof raw !== "object") return emptyPayload();
-  if (!raw.version || raw.version < HUB_VERSION) {
-    return sanitizePayload({ ...raw, version: HUB_VERSION });
+  const migrated = { ...raw, version: HUB_VERSION };
+  if (!raw.version || raw.version < 2) {
+    migrated.seeded = false;
+    if (Array.isArray(migrated.devices)) {
+      migrated.devices = migrated.devices.map((d) => ({
+        ...d,
+        integrationStatus: d.integrationStatus === "in_development" ? "registered" : d.integrationStatus,
+        connectionState: d.connectionState === "configured" ? "disconnected" : d.connectionState,
+      }));
+    }
   }
-  return sanitizePayload(raw);
+  return sanitizePayload(migrated);
 }
 
 export function createDefaultHub() {
@@ -246,16 +305,25 @@ export function createSetup(input = {}) {
 
 export function deviceStatusLabel(device) {
   if (!device) return "—";
-  if (device.integrationStatus === "in_development" && device.connectionState === "configured") {
-    return "Profilo configurato – integrazione in sviluppo";
+  if (device.connectionState === "connected" || device.connectionState === "operational") {
+    return device.dataSource === "live" ? "Online" : "Online · Simulazione";
   }
-  if (device.integrationStatus === "profile_only") {
-    return INTEGRATION_STATUS.profile_only;
-  }
-  if (device.connectionState === "connected" && device.dataSource !== "live") {
-    return "Connesso (simulazione)";
-  }
-  return CONNECTION_STATES[device.connectionState]?.label || "—";
+  if (device.connectionState === "connecting") return "Connessione in corso";
+  if (device.connectionState === "attention") return "Richiede attenzione";
+  if (device.connectionState === "error") return "Errore";
+  return "Standby";
+}
+
+export function devicePowerLabel(device) {
+  const state = device?.telemetry?.power?.state || "standby";
+  const map = { on: "Alimentato", off: "Spento", standby: "Standby", battery: "Batteria" };
+  return map[state] || "Standby";
+}
+
+export function deviceConnectionLabel(device) {
+  const type = device?.connection?.type;
+  if (!type || type === "Non definita") return "Non collegato";
+  return type;
 }
 
 export function deviceDisplayName(device) {

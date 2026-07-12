@@ -16,8 +16,8 @@ import {
   getSummary,
 } from "./store.js";
 
-export { HUB_STORAGE_KEY, DEVICE_CATEGORIES, deviceStatusLabel, deviceDisplayName } from "./schemas.js";
-export { resolveDeviceImage, DEVICE_IMAGE_CATALOG } from "./images.js";
+export { HUB_STORAGE_KEY, DEVICE_CATEGORIES, deviceStatusLabel, devicePowerLabel, deviceConnectionLabel, deviceDisplayName } from "./schemas.js";
+export { resolveDeviceImage, DEVICE_PHOTO_CATALOG } from "./images.js";
 
 export const HUB_EVENT = "novasky-device-hub-updated";
 

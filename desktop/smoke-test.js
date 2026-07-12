@@ -197,7 +197,7 @@ async function runTests() {
   `);
   const setupCount = await wc.executeJavaScript('document.querySelectorAll("[data-setup-id]").length');
   const gearCards = await wc.executeJavaScript("document.querySelectorAll('.gear-card').length");
-  const simBadge = await wc.executeJavaScript('!!document.querySelector(".device-hub-badge--sim")');
+  const simBadge = await wc.executeJavaScript('!!document.querySelector("[data-sim-badge]")');
   const canon2000dUnassigned = await wc.executeJavaScript(`
     (() => {
       const cards = [...document.querySelectorAll(".device-hub-unassigned .gear-card")];
@@ -412,7 +412,7 @@ async function runTests() {
   log("Test C: Canon 2000D libera nel Hub", dhC === true);
 
   const dhD = await wc4.executeJavaScript(`
-    document.querySelectorAll('.device-hub-setup [data-device-id]').length >= 7
+    document.querySelectorAll('.obs-card[data-device-id]').length >= 10
   `);
   log("Test D: Card dispositivi nei setup", dhD === true);
 
@@ -421,9 +421,9 @@ async function runTests() {
   `);
   await new Promise((r) => setTimeout(r, 300));
   const dhE = await wc4.executeJavaScript(`
-    document.querySelector('[data-panel-body]')?.textContent?.includes('Seestar S50')
+    document.querySelector('[data-obs-detail]')?.textContent?.includes('Seestar S50')
   `);
-  log("Test E: Pannello dettaglio dispositivo", dhE === true);
+  log("Test E: Scheda dettaglio dispositivo", dhE === true);
 
   await wc4.executeJavaScript(`
     document.querySelector('[data-connect="dev-seestar-s50"]')?.click();
@@ -440,6 +440,8 @@ async function runTests() {
   `);
   log("Test F: Simulazione connette dispositivo", dhF === true);
 
+  await wc4.executeJavaScript(`document.querySelector('[data-obs-back]')?.click();`);
+  await new Promise((r) => setTimeout(r, 350));
   await wc4.executeJavaScript(`
     document.querySelector('[data-obs-name]').value = 'Osservatorio Test';
     document.querySelector('[data-obs-name]').dispatchEvent(new Event('change', { bubbles: true }));
@@ -454,17 +456,17 @@ async function runTests() {
   `);
   log("Test G: Profilo osservatorio persistente", dhG === true);
 
+  const dhI = await wc4.executeJavaScript(`
+    [...document.querySelectorAll('.obs-card img')].every(img => img.src.includes('photos/'))
+  `);
+  log("Test I: Asset fotografici catalogo", dhI === true);
+
   await clickNav(wc4, "dashboard");
   await new Promise((r) => setTimeout(r, 600));
   const dhH = await wc4.executeJavaScript(`
     document.body.innerText.includes('2 setup + 4 dispositivi')
   `);
   log("Test H: Dashboard legge Device Hub", dhH === true);
-
-  const dhI = await wc4.executeJavaScript(`
-    [...document.querySelectorAll('.gear-card img')].every(img => img.src.includes('.svg'))
-  `);
-  log("Test I: Placeholder SVG sostituibili", dhI === true);
 
   win4.close();
 
