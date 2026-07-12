@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="it" data-runtime="desktop-shell">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#05070a" />
+    <title>NovaSky</title>
+    <link rel="stylesheet" href="./styles/fonts.css" />
+    <link rel="stylesheet" href="./styles/tokens.css" />
+    <link rel="stylesheet" href="./styles/shell.css" />
+  </head>
+  <body>
+    <div class="nova-app" data-nova-app>
+      <aside class="nova-sidebar" data-sidebar aria-label="Navigazione">
+        <div class="nova-sidebar-brand">
+          <span class="nova-mark" aria-hidden="true"></span>
+          <span class="nova-word">NovaSky</span>
+        </div>
+        <nav class="nova-nav" data-nav>
+          <button type="button" class="nova-nav-item is-active" data-route="dashboard">Dashboard</button>
+          <button type="button" class="nova-nav-item" data-route="mission-map">Mission Map</button>
+          <button type="button" class="nova-nav-item" data-route="missione">Missione</button>
+          <button type="button" class="nova-nav-item" data-route="catalogo">Catalogo</button>
+          <button type="button" class="nova-nav-item" data-route="attrezzatura">Attrezzatura</button>
+          <button type="button" class="nova-nav-item" data-route="diario">Diario</button>
+          <button type="button" class="nova-nav-item" data-route="impostazioni">Impostazioni</button>
+        </nav>
+        <p class="nova-sidebar-foot">Osservatorio personale</p>
+      </aside>
+
+      <div class="nova-main">
+        <header class="nova-header" data-shell-header>
+          <div class="nova-header-title">
+            <h1 data-view-title>Dashboard</h1>
+            <p data-view-subtitle>Centro di controllo della notte</p>
+          </div>
+          <div class="nova-header-meta">
+            <time data-header-clock>—</time>
+            <span data-header-date>—</span>
+          </div>
+        </header>
+
+        <div class="nova-body">
+          <main class="nova-workspace" data-workspace aria-live="polite"></main>
+
+          <aside class="nova-panel" data-context-panel aria-label="Pannello contestuale">
+            <div class="nova-panel-head">
+              <h2 data-panel-title>Contesto</h2>
+              <button type="button" class="nova-panel-toggle" data-panel-toggle aria-expanded="true" title="Chiudi pannello">
+                <span aria-hidden="true">›</span>
+              </button>
+            </div>
+            <div class="nova-panel-body" data-panel-body>
+              <p class="nova-panel-empty">Seleziona una vista per i dettagli operativi.</p>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="./shell/shell.js"></script>
+  </body>
+</html>

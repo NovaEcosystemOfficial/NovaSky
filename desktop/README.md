@@ -1,31 +1,38 @@
-# NovaSky Desktop (Windows MVP)
+# NovaSky Desktop
 
-Applicazione Electron che riutilizza `../website/` senza duplicare asset o logica.
+Software Windows per l'osservatorio personale. UI dedicata in `app/`; motore astronomico condiviso da `../website/` (sola lettura).
 
-## Architettura
+## Architettura Sprint 1
 
 ```text
 NovaSky/
-├── website/          ← sito statico (Vercel + sorgente UI desktop)
+├── website/              ← sito Vercel + motore condiviso (engine)
 └── desktop/
-    ├── main.js       ← processo Electron, protocollo nova://
-    ├── preload.js  ← contextBridge (isDesktop)
-    ├── package.json
-    └── resources/    ← icona installer
+    ├── main.js           ← Electron, protocollo nova://
+    ├── preload.js
+    └── app/              ← shell software (Dashboard, Mission Map, …)
+        ├── index.html
+        ├── shell/
+        ├── views/
+        ├── styles/
+        └── assets/fonts/ ← Inter offline
 ```
 
-- **Web (Vercel):** invariato, servito come static site.
-- **Desktop:** carica `website/` via protocollo personalizzato `nova://app/` — **nessun localhost**, nessun Python.
-- **Condivisione:** tutta l'UI, CSS, JS, immagini target restano in `website/`.
+### Protocollo
 
-## Sicurezza
+| URL | Origine | Uso |
+|-----|---------|-----|
+| `nova://desktop/` | `desktop/app/` | UI software |
+| `nova://engine/` | `website/` | Motore, catalogo, asset target |
 
-- `contextIsolation: true`
-- `nodeIntegration: false`
-- `sandbox: true`
-- Preload espone solo `window.novaSkyDesktop`
-- Link http(s) aperti nel browser di sistema
-- Navigazione interna limitata a `nova://`
+Nessun localhost. Nessuna dipendenza da Internet (font Inter locale).
+
+### Shell
+
+- Sidebar: Dashboard, Mission Map, Missione, Catalogo, Attrezzatura, Diario, Impostazioni
+- Header operativo (nascosto in Mission Map — mantiene look osservatorio)
+- Pannello destro collassabile
+- Dashboard con dati reali da `computeSkySession` + mission store
 
 ## Sviluppo
 
@@ -35,34 +42,30 @@ npm install
 npm start
 ```
 
-## Build installer Windows (x64)
-
-Su macOS/Linux (richiede Wine 64-bit per NSIS) oppure su Windows:
+## Test
 
 ```bash
-cd desktop
-npm install
-# Linux: wine64 + nsis (vedi nota sotto)
+npm run test:smoke
+```
+
+## Build Windows (x64)
+
+```bash
 npm run build:win
 ```
 
-**Nota Linux:** per generare l'installer NSIS serve Wine 64-bit configurato (`WINEARCH=win64 wineboot --init`) e opzionalmente `USE_SYSTEM_NSIS=true`.
-
 Output: `desktop/dist/NovaSky-Setup-0.1.0.exe`
 
-Build cartella non installata (test rapido):
+Su Linux: `WINEARCH=win64 wineboot --init` prima della build NSIS.
 
-```bash
-npm run build:dir
-```
+## Condivisione con website
 
-## Runtime desktop vs browser
+Import ES module da `nova://engine/scripts/mission-map/…` — nessuna duplicazione del motore.
 
-`preload.js` imposta `window.novaSkyDesktop.isDesktop` e `data-runtime="desktop"` sull'`<html>`.
-La versione web ignora questi flag — nessuna rottura.
+Modifica minima in `website/scripts/mission-map/app.js`: export `ObservatoryApp` + skip auto-init nella shell desktop. Il sito Vercel resta invariato.
 
-## Limiti MVP
+## Limiti Sprint 1
 
-- Nessun controllo hardware (Seestar, ASCOM, SynScan, Eagle)
-- Richiede rete per Google Fonts (come il sito web)
-- Geolocalizzazione opzionale via API browser (permesso OS)
+- Attrezzatura: solo UI placeholder (8 dispositivi)
+- Missione, Catalogo, Diario, Impostazioni: placeholder
+- Nessun controllo hardware

@@ -1,0 +1,21 @@
+/* Adatta Mission Map al workspace desktop (look osservatorio invariato) */
+
+.nova-workspace.is-mission-map {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.nova-workspace.is-mission-map .observatory {
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  max-height: 100%;
+}
+
+.nova-workspace.is-mission-map .observatory-header .brand {
+  text-decoration: none;
+  color: inherit;
+  cursor: default;
+}

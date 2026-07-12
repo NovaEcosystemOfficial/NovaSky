@@ -1,6 +1,6 @@
 /**
  * NovaSky Desktop — processo principale Electron.
- * Serve website/ via protocollo nova:// (nessun localhost).
+ * nova://desktop/ → UI software | nova://engine/ → motore condiviso (website/)
  */
 
 const { app, BrowserWindow, Menu, shell, protocol } = require("electron");
@@ -22,8 +22,13 @@ protocol.registerSchemesAsPrivileged([
   },
 ]);
 
-/** @returns {string} Percorso assoluto alla cartella website */
-function getWebsiteRoot() {
+/** @returns {string} */
+function getDesktopRoot() {
+  return path.join(__dirname, "app");
+}
+
+/** @returns {string} */
+function getEngineRoot() {
   if (app.isPackaged) {
     return path.join(process.resourcesPath, "website");
   }
@@ -31,24 +36,26 @@ function getWebsiteRoot() {
 }
 
 /**
- * Risolve pathname nova:// → file system (anti path traversal).
+ * @param {string} host
  * @param {string} pathname
  */
-function resolveWebsiteFile(pathname) {
-  const websiteRoot = path.resolve(getWebsiteRoot());
+function resolveProtocolFile(host, pathname) {
   let requestPath = decodeURIComponent(pathname || "/");
   if (requestPath === "/" || requestPath === "") requestPath = "/index.html";
 
   const relative = requestPath.replace(/^\/+/, "");
   const normalized = path.normalize(relative);
 
+  const isEngine = host === "engine" || host === "app";
+  const root = path.resolve(isEngine ? getEngineRoot() : getDesktopRoot());
+
   if (normalized.startsWith("..") || path.isAbsolute(normalized)) {
-    return path.join(websiteRoot, "index.html");
+    return path.join(root, "index.html");
   }
 
-  const absolute = path.resolve(websiteRoot, normalized);
-  if (!absolute.startsWith(websiteRoot)) {
-    return path.join(websiteRoot, "index.html");
+  const absolute = path.resolve(root, normalized);
+  if (!absolute.startsWith(root)) {
+    return path.join(root, "index.html");
   }
 
   return absolute;
@@ -57,8 +64,9 @@ function resolveWebsiteFile(pathname) {
 function registerNovaProtocol() {
   protocol.registerFileProtocol(APP_SCHEME, (request, callback) => {
     try {
-      const { pathname } = new URL(request.url);
-      callback({ path: resolveWebsiteFile(pathname) });
+      const url = new URL(request.url);
+      const host = url.hostname || "desktop";
+      callback({ path: resolveProtocolFile(host, url.pathname) });
     } catch {
       callback({ error: -2 });
     }
@@ -68,8 +76,7 @@ function registerNovaProtocol() {
 /** @param {string} targetUrl */
 function isInternalNovaUrl(targetUrl) {
   try {
-    const parsed = new URL(targetUrl);
-    return parsed.protocol === `${APP_SCHEME}:`;
+    return new URL(targetUrl).protocol === `${APP_SCHEME}:`;
   } catch {
     return false;
   }
@@ -80,9 +87,7 @@ function attachNavigationGuards(win) {
   const webContents = win.webContents;
 
   webContents.setWindowOpenHandler(({ url }) => {
-    if (isInternalNovaUrl(url)) {
-      return { action: "allow" };
-    }
+    if (isInternalNovaUrl(url)) return { action: "allow" };
     shell.openExternal(url);
     return { action: "deny" };
   });
@@ -115,9 +120,7 @@ function createMainWindow() {
 
   attachNavigationGuards(win);
 
-  win.once("ready-to-show", () => {
-    win.show();
-  });
+  win.once("ready-to-show", () => win.show());
 
   win.webContents.on("before-input-event", (_event, input) => {
     if (input.type === "keyDown" && input.key === "F11") {
@@ -125,13 +128,7 @@ function createMainWindow() {
     }
   });
 
-  win.loadURL(`${APP_SCHEME}://app/index.html`);
-
-  if (!app.isPackaged) {
-    // DevTools solo in sviluppo — nessun menu tecnico visibile
-    // win.webContents.openDevTools({ mode: "detach" });
-  }
-
+  win.loadURL(`${APP_SCHEME}://desktop/index.html`);
   return win;
 }
 
@@ -141,20 +138,14 @@ app.whenReady().then(() => {
   createMainWindow();
 
   app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createMainWindow();
-    }
+    if (BrowserWindow.getAllWindows().length === 0) createMainWindow();
   });
 });
 
 app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") {
-    app.quit();
-  }
+  if (process.platform !== "darwin") app.quit();
 });
 
 app.on("web-contents-created", (_event, contents) => {
-  contents.on("will-attach-webview", (event) => {
-    event.preventDefault();
-  });
+  contents.on("will-attach-webview", (event) => event.preventDefault());
 });

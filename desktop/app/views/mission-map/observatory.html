@@ -1,0 +1,165 @@
+<!-- Markup observatory — desktop-owned, compatibile con ObservatoryApp -->
+<div class="observatory" data-observatory>
+  <header class="observatory-header">
+    <div class="brand" aria-label="NovaSky Osservatorio">
+      <span class="brand-mark" aria-hidden="true"><span></span></span>
+      <span class="brand-word">Osservatorio</span>
+    </div>
+    <div class="header-verdict">
+      <p data-verdict>Calcolo del cielo in corso…</p>
+      <span class="header-location-row">
+        <span data-location>—</span>
+        <button type="button" class="btn-location" data-location-request title="Usa la posizione del browser">
+          Usa la mia posizione
+        </button>
+      </span>
+    </div>
+    <div class="header-meta">
+      <time data-date>—</time>
+      <span class="header-moon" data-moon>—</span>
+      <span class="header-window">Crepuscolo <strong data-window>—</strong></span>
+      <label class="header-time">
+        <span class="header-time-row">
+          <span><span data-time-mode>Ora reale</span> <strong data-time-label>—</strong></span>
+          <button type="button" class="btn-time-sync" data-time-sync hidden title="Sincronizza con data e ora reali">
+            Ora reale
+          </button>
+        </span>
+        <input type="range" data-time-slider min="0" max="0" value="0" step="1" aria-label="Simula un'ora della notte" />
+      </label>
+    </div>
+  </header>
+
+  <main class="observatory-main">
+    <section class="sky-chamber" aria-label="Opportunità della notte">
+      <canvas id="mission-canvas" aria-label="Cielo con oggetti astronomici sospesi"></canvas>
+      <div class="sky-prompt" data-sky-prompt>
+        <p>Il cielo mostra le opportunità di stanotte.</p>
+      </div>
+    </section>
+
+    <aside class="premium-card" data-target-card aria-label="Scheda target" hidden>
+      <article class="premium-card-inner">
+        <div class="premium-hero">
+          <img data-target-hero-img src="" alt="" width="800" height="500" />
+          <div class="premium-hero-fade" aria-hidden="true"></div>
+          <span class="premium-badge" data-target-badge data-level="recommended">Consigliato</span>
+          <p class="premium-photo-credit" data-target-photo-credit hidden></p>
+        </div>
+
+        <div class="premium-body">
+          <header class="premium-head">
+            <h2 data-target-name>NGC 7000</h2>
+            <p data-target-subtitle>Nebulosa Nord America</p>
+          </header>
+
+          <section class="premium-block">
+            <h3>Perché stanotte</h3>
+            <p data-target-reason>Motivazione del consiglio.</p>
+          </section>
+
+          <section class="premium-block premium-block-emphasis">
+            <h3>Cosa otterrai fotografandolo</h3>
+            <p data-target-expectation>Risultato atteso dalla sessione.</p>
+          </section>
+
+          <div class="premium-sky-stats">
+            <div><span>Altezza attuale</span><strong data-target-altitude>—</strong></div>
+            <div><span>Azimut</span><strong data-target-azimuth>—</strong></div>
+            <div><span>Culminazione</span><strong data-target-culmination>—</strong></div>
+            <div><span>Distanza Luna</span><strong data-target-moon-sep>—</strong></div>
+          </div>
+
+          <div class="premium-window">
+            <span>Finestra osservativa</span>
+            <strong data-target-window>22:00 – 03:40</strong>
+          </div>
+
+          <div class="premium-seestar">
+            <div><span>Seestar S50</span><strong data-target-s50>Ottimo</strong></div>
+            <div><span>S30 Pro</span><strong data-target-s30>Ottimo</strong></div>
+          </div>
+
+          <button type="button" class="btn-mission btn-mission-primary" data-add-mission>
+            Aggiungi alla missione
+          </button>
+
+          <details class="premium-briefing" data-sky-briefing>
+            <summary>Sky Briefing</summary>
+            <div class="briefing-content">
+              <section class="briefing-section">
+                <h4>Cosa stai osservando</h4>
+                <p data-briefing-observing>Briefing in preparazione.</p>
+              </section>
+              <section class="briefing-section">
+                <h4>Identità</h4>
+                <dl class="briefing-quick" data-briefing-identity></dl>
+              </section>
+              <section class="briefing-section">
+                <h4>Perché stanotte</h4>
+                <p data-briefing-tonight>Calcolo in corso…</p>
+              </section>
+              <section class="briefing-section">
+                <h4>Cosa vedrai con il Seestar</h4>
+                <p data-briefing-seestar>Briefing in preparazione.</p>
+              </section>
+              <section class="briefing-section">
+                <h4>Curiosità</h4>
+                <p data-briefing-curiosity>Briefing in preparazione.</p>
+              </section>
+              <section class="briefing-section briefing-section-levels">
+                <h4>Valutazione osservativa</h4>
+                <div class="briefing-levels" data-briefing-levels></div>
+              </section>
+            </div>
+          </details>
+
+          <details class="premium-specs">
+            <summary>Dettagli tecnici</summary>
+            <dl>
+              <div><dt>Stato</dt><dd data-target-state>—</dd></div>
+              <div><dt>NovaScore</dt><dd data-target-score>—</dd></div>
+              <div><dt>Magnitudine</dt><dd data-target-magnitude>4.0</dd></div>
+              <div><dt>Filtro</dt><dd data-target-filter>Dual-band</dd></div>
+              <div><dt>Difficoltà</dt><dd data-target-difficulty>Facile</dd></div>
+            </dl>
+          </details>
+        </div>
+      </article>
+    </aside>
+  </main>
+
+  <footer class="mission-deck" data-mission-timeline aria-label="Timeline della missione" data-mission-ready="false">
+    <div class="mission-deck-head">
+      <div>
+        <h2>La missione di stanotte</h2>
+        <p>Costruisci la tua notte, target dopo target</p>
+      </div>
+      <div class="mission-deck-actions">
+        <button type="button" class="btn-mission-clear" data-mission-clear hidden>Svuota missione</button>
+        <span class="mission-deck-count"><strong data-mission-count>0</strong> target</span>
+      </div>
+    </div>
+    <div class="mission-deck-empty" data-timeline-empty>
+      <p>Scegli un'opportunità nel cielo e inizia a comporre la serata.</p>
+    </div>
+    <div class="mission-deck-filled" data-timeline-filled hidden>
+      <div class="night-markers" data-timeline-markers></div>
+      <div class="night-chain-wrap">
+        <div class="night-chain" data-timeline-chain></div>
+      </div>
+    </div>
+  </footer>
+
+  <div class="mission-rollover" data-mission-rollover hidden role="dialog" aria-labelledby="mission-rollover-title" aria-modal="true">
+    <div class="mission-rollover-card">
+      <p class="mission-rollover-kicker">Missione salvata</p>
+      <h3 id="mission-rollover-title">È presente una missione del giorno precedente.</h3>
+      <p class="mission-rollover-meta">Salvata il <span data-mission-rollover-date>—</span></p>
+      <div class="mission-rollover-actions">
+        <button type="button" class="btn-mission btn-mission-primary" data-mission-rollover-continue>Continua questa missione</button>
+        <button type="button" class="btn-mission btn-mission-secondary" data-mission-rollover-new>Crea una nuova missione</button>
+      </div>
+    </div>
+  </div>
+</div>

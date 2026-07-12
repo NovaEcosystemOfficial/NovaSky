@@ -12,5 +12,5 @@ contextBridge.exposeInMainWorld("novaSkyDesktop", {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-  document.documentElement.dataset.runtime = "desktop";
+  document.documentElement.dataset.runtime = "desktop-shell";
 });
