@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="120" y2="120">
+      <stop offset="0%" stop-color="#121418"/>
+      <stop offset="100%" stop-color="#080a0e"/>
+    </linearGradient>
+    <linearGradient id="body" x1="40" y1="30" x2="80" y2="90">
+      <stop offset="0%" stop-color="#2c3038"/>
+      <stop offset="100%" stop-color="#181c22"/>
+    </linearGradient>
+  </defs>
+  <rect width="120" height="120" rx="16" fill="url(#bg)"/>
+  <rect x="38" y="32" width="44" height="56" rx="6" fill="url(#body)" stroke="rgba(158,183,204,0.2)" stroke-width="1"/>
+  <rect x="44" y="38" width="32" height="22" rx="2" fill="#0a0c10" stroke="rgba(92,199,216,0.2)" stroke-width="0.8"/>
+  <circle cx="60" cy="72" r="10" stroke="#5cc7d8" stroke-width="1.5" opacity="0.7"/>
+  <text x="60" y="78" text-anchor="middle" fill="#5cc7d8" font-family="Inter, sans-serif" font-size="7" font-weight="600">CANON</text>
+  <text x="60" y="102" text-anchor="middle" fill="#6b7785" font-family="Inter, sans-serif" font-size="7.5" letter-spacing="0.06em">EOS DSLR</text>
+</svg>
