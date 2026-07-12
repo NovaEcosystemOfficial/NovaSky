@@ -7,6 +7,7 @@ import {
   disconnectDevice,
   getUnassignedDevices,
 } from "../../shared/device-registry.js";
+import { setPhotoRedesignEnabled } from "../../shared/ui-preferences.js";
 import { renderDashboard } from "./dashboard.js";
 import { renderFloorPlan } from "./floor-plan.js";
 import { renderDeviceDetail } from "./device-detail.js";
@@ -126,6 +127,10 @@ function bindEvents(root) {
 
   root.querySelectorAll("[data-manual-link]").forEach((a) => {
     a.addEventListener("click", (e) => e.preventDefault());
+  });
+
+  root.querySelector("[data-enable-photo-layout]")?.addEventListener("click", () => {
+    setPhotoRedesignEnabled(true);
   });
 }
 

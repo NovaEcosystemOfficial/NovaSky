@@ -73,6 +73,10 @@ export function renderDashboard() {
       <div data-setup-registry style="display:none" aria-hidden="true">
         ${hub.setups.map((s) => `<span data-setup-id="${s.id}"></span>`).join("")}
       </div>
+
+      <footer class="obs-layout-switch">
+        <button type="button" class="obs-btn obs-btn--ghost" data-enable-photo-layout>Layout fotografico (beta)</button>
+      </footer>
     </div>
   `;
 }

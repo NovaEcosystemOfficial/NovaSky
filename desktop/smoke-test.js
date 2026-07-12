@@ -189,6 +189,12 @@ async function runTests() {
   log("Missione persistente", missionCount === 1, `count=${missionCount}`);
 
   await clickNav(wc, "attrezzatura");
+  await wc.executeJavaScript(`
+    localStorage.setItem('novasky.desktop.ui.v1', JSON.stringify({ digitalObservatoryRedesign: false }));
+    location.reload();
+  `);
+  await new Promise((r) => setTimeout(r, 900));
+  await wc.executeJavaScript(`document.querySelector('[data-route="attrezzatura"]').click()`);
   await new Promise((r) => setTimeout(r, 800));
 
   const hubActive = await wc.executeJavaScript('!!document.querySelector(".device-hub-view")');
@@ -374,6 +380,18 @@ async function runTests() {
   const wc4 = win4.webContents;
   await loadUrl(wc4, `${APP_SCHEME}://desktop/index.html`);
   await new Promise((r) => setTimeout(r, 1200));
+  await wc4.executeJavaScript(`
+    (() => {
+      try {
+        localStorage.setItem('novasky.desktop.ui.v1', JSON.stringify({ digitalObservatoryRedesign: false }));
+        const raw = localStorage.getItem('novasky.device-hub.v1');
+        if (!raw) return;
+        const hub = JSON.parse(raw);
+        hub.observatory.name = 'Osservatorio Roma';
+        localStorage.setItem('novasky.device-hub.v1', JSON.stringify(hub));
+      } catch {}
+    })();
+  `);
   await clickNav(wc4, "attrezzatura");
   await new Promise((r) => setTimeout(r, 900));
 

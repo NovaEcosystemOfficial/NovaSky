@@ -654,6 +654,18 @@
   border-top: 1px solid var(--line);
 }
 
+.obs-layout-switch {
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.obs-btn--ghost {
+  color: var(--muted);
+  font-size: 0.75rem;
+  border-color: transparent;
+}
+
 /* Legacy test hooks */
 .device-hub-badge--sim,
 [data-sim-badge] { }
