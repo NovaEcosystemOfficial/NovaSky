@@ -14,7 +14,7 @@ function luminance(r, g, b) {
 }
 
 /**
- * Soft radial feather + edge dissolve so photos melt into the sky.
+ * Soft radial feather + key dello sfondo scuro PNG → dissolve nel cielo.
  * @param {CanvasImageSource} source
  */
 export function buildFeatheredSprite(source) {
@@ -29,7 +29,7 @@ export function buildFeatheredSprite(source) {
   const px = data.data;
   const cx = sw * 0.5;
   const cy = sh * 0.48;
-  const maxR = Math.hypot(cx, cy) * 0.96;
+  const maxR = Math.hypot(cx, cy) * 0.98;
 
   for (let y = 0; y < sh; y++) {
     for (let x = 0; x < sw; x++) {
@@ -39,16 +39,24 @@ export function buildFeatheredSprite(source) {
       const b = px[i + 2];
       let a = px[i + 3];
 
-      const dist = Math.hypot(x - cx, y - cy) / maxR;
-      const radial = 1 - smoothstep(0.42, 1.0, dist);
-
       const lum = luminance(r, g, b);
-      // Astro photos are mostly dark — keep a visible floor so nebulae stay on the sky
-      const darkFade = 0.42 + smoothstep(0, 40, lum) * 0.58;
-      const edgeFade = a / 255;
+      const maxCh = Math.max(r, g, b);
 
-      a = a * radial * darkFade * (0.62 + edgeFade * 0.38);
-      px[i + 3] = Math.round(a);
+      // Key out black letterbox / sfondo PNG rettangolare
+      if (maxCh < 18 && lum < 14) {
+        px[i + 3] = 0;
+        continue;
+      }
+
+      const dist = Math.hypot(x - cx, y - cy) / maxR;
+      const radial = 1 - smoothstep(0.38, 0.98, dist);
+
+      // Bordi scuri semi-opachi → dissolve (evita il “riquadro”)
+      const edgeDark = smoothstep(0, 28, lum);
+      const darkFade = 0.28 + edgeDark * 0.72;
+
+      a = a * radial * darkFade;
+      px[i + 3] = Math.round(Math.min(255, a));
     }
   }
 

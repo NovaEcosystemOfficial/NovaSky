@@ -469,12 +469,14 @@ export class ObservatoryRenderer {
       ctx.restore();
     }
 
-    // Object image — feathered, filtered, no hard edges
+    // Object image — screen blend: lo sfondo nero del PNG si fonde col cielo
     ctx.save();
-    ctx.globalAlpha = state.presence;
+    ctx.globalCompositeOperation = "screen";
+    ctx.globalAlpha = state.presence * 0.92;
     ctx.filter = `brightness(${state.brightness}) contrast(${state.contrast}) saturate(${state.saturate})`;
     ctx.drawImage(img, -w / 2, -h / 2, w, h);
     ctx.filter = "none";
+    ctx.globalCompositeOperation = "source-over";
     ctx.restore();
 
     // Subtle core luminance
