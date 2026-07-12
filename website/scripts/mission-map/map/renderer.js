@@ -384,24 +384,25 @@ export class ObservatoryRenderer {
   }
 
   drawSuspendedTarget(target) {
-    const { ctx, time, thumbnails, sprites } = this;
+    const { ctx, time, sprites } = this;
     const sprite = sprites.get(target.id);
-    const img = sprite?.canvas ?? thumbnails?.getMini(target.id);
     const pos = this.worldToScreen(target.alt, target.az, 2, this.targetParallaxAz(target));
-    if (!pos.visible || !img) return;
+    if (!pos.visible || !sprite) return;
 
     const state = this.targetVisualState(target);
     const cat = getCategory(target);
-    const glowRgb = mixRgb(sprite?.glowRgb ?? cat.rgb, cat.rgb, 0.35);
+    const glowRgb = mixRgb(sprite.glowRgb ?? cat.rgb, cat.rgb, 0.35);
+    const accentRgb = mixRgb(sprite.accentRgb ?? glowRgb, glowRgb, 0.4);
     const [gr, gg, gb] = glowRgb;
+    const [ar, ag, ab] = accentRgb;
 
     const breath = this.breathingScale(sprite, state.isSelected);
     const baseSize = this.getTargetSize(target);
     const emergeScale = state.isSelected ? 0.88 + state.emerge * 0.14 : 1;
     const size = baseSize * breath * emergeScale;
-    const aspect = img.height / img.width;
+    const stretch = sprite.stretch ?? 0.78;
     const w = size;
-    const h = size * aspect;
+    const h = size * stretch;
 
     const phase = sprite?.phase ?? 0;
     const floatY = Math.sin(time * 0.00065 + phase) * 2.5 * (0.6 + pos.depth * 0.4);
@@ -469,30 +470,8 @@ export class ObservatoryRenderer {
       ctx.restore();
     }
 
-    // Object image — screen blend: lo sfondo nero del PNG si fonde col cielo
-    ctx.save();
-    ctx.globalCompositeOperation = "screen";
-    ctx.globalAlpha = state.presence * 0.92;
-    ctx.filter = `brightness(${state.brightness}) contrast(${state.contrast}) saturate(${state.saturate})`;
-    ctx.drawImage(img, -w / 2, -h / 2, w, h);
-    ctx.filter = "none";
-    ctx.globalCompositeOperation = "source-over";
-    ctx.restore();
-
-    // Subtle core luminance
-    if (state.presence > 0.45) {
-      ctx.save();
-      ctx.globalCompositeOperation = "screen";
-      const coreR = Math.min(w, h) * 0.12;
-      const core = ctx.createRadialGradient(0, 0, 0, 0, 0, coreR);
-      core.addColorStop(0, `rgba(255, 252, 248, ${0.12 * state.presence * (state.isSelected ? 1.2 : 0.7)})`);
-      core.addColorStop(1, "transparent");
-      ctx.fillStyle = core;
-      ctx.beginPath();
-      ctx.arc(0, 0, coreR, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    }
+    // Nebulosa omogenea — solo gradienti radiali, nessuna texture rettangolare
+    this.drawSkyObjectGlow(ctx, w, h, gr, gg, gb, ar, ag, ab, state, glowBase, glowMul);
 
     if (this.missionIds.has(target.id)) {
       ctx.save();
@@ -502,6 +481,52 @@ export class ObservatoryRenderer {
       ctx.fillStyle = `rgba(92, 199, 216, ${0.55 * state.presence})`;
       ctx.fill();
       ctx.restore();
+    }
+
+    ctx.restore();
+  }
+
+  /** Veli radiali puri — stesso linguaggio visivo di Via Lattea / nubi. */
+  drawSkyObjectGlow(ctx, w, h, gr, gg, gb, ar, ag, ab, state, glowBase, glowMul) {
+    const presence = state.presence;
+    if (presence < 0.02) return;
+
+    ctx.save();
+    ctx.globalCompositeOperation = "screen";
+
+    const layers = [
+      { rx: 1.05, ry: 0.82, alpha: 0.14, rgb: [gr, gg, gb] },
+      { rx: 0.62, ry: 0.48, alpha: 0.22, rgb: [gr, gg, gb] },
+      { rx: 0.38, ry: 0.3, alpha: 0.28, rgb: [ar, ag, ab] },
+      { rx: 0.18, ry: 0.14, alpha: 0.32, rgb: [gr, gg, gb] },
+    ];
+
+    for (const layer of layers) {
+      const rx = Math.max(w, h) * layer.rx;
+      const ry = Math.max(w, h) * layer.ry;
+      const [lr, lg, lb] = layer.rgb;
+      const a = layer.alpha * glowBase * glowMul * presence;
+      const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, Math.max(rx, ry));
+      grad.addColorStop(0, `rgba(${lr}, ${lg}, ${lb}, ${a})`);
+      grad.addColorStop(0.45, `rgba(${lr}, ${lg}, ${lb}, ${a * 0.35})`);
+      grad.addColorStop(1, "transparent");
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, rx, ry, 0.1, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    if (presence > 0.35) {
+      const coreR = Math.min(w, h) * (state.isSelected ? 0.14 : 0.1);
+      const coreA = 0.1 * presence * (state.isSelected ? 1.25 : 0.75);
+      const core = ctx.createRadialGradient(0, 0, 0, 0, 0, coreR);
+      core.addColorStop(0, `rgba(255, 252, 248, ${coreA})`);
+      core.addColorStop(0.55, `rgba(${gr}, ${gg}, ${gb}, ${coreA * 0.45})`);
+      core.addColorStop(1, "transparent");
+      ctx.fillStyle = core;
+      ctx.beginPath();
+      ctx.arc(0, 0, coreR, 0, Math.PI * 2);
+      ctx.fill();
     }
 
     ctx.restore();
