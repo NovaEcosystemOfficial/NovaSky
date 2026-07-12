@@ -24,7 +24,7 @@ const ROUTES = {
   missione: {
     title: "Missione",
     subtitle: "Piano osservativo della serata",
-    panelTitle: "Missione",
+    panelTitle: "Assistente NovaSky",
     mount: mountMissione,
     unmount: unmountMissione,
     missionMap: false,
