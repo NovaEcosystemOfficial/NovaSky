@@ -217,6 +217,107 @@ async function runTests() {
 
   win2.close();
 
+  // ── Vista Missione operativa (Test A–G) ──
+  const win3 = await createWindow();
+  const wc3 = win3.webContents;
+  await loadUrl(wc3, `${APP_SCHEME}://desktop/index.html`);
+  await new Promise((r) => setTimeout(r, 1200));
+
+  await wc3.executeJavaScript(`
+    localStorage.setItem('novasky.mission.v1', JSON.stringify({
+      version: 1,
+      missionDate: new Date().toISOString().slice(0, 10),
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
+      updatedAt: new Date().toISOString(),
+      items: [
+        { targetId: 'm31', order: 0, durationMinutes: 45, plannedStart: '22:30', addedAt: new Date().toISOString() },
+        { targetId: 'm51', order: 1, durationMinutes: 30, plannedStart: '23:15', addedAt: new Date().toISOString() }
+      ]
+    }));
+    localStorage.removeItem('novasky.mission.desktop-meta.v1');
+  `);
+
+  await clickNav(wc3, "missione");
+  await new Promise((r) => setTimeout(r, 800));
+
+  const missioneView = await wc3.executeJavaScript('!!document.querySelector(".missione:not(.missione-empty)")');
+  const stepCount = await wc3.executeJavaScript('document.querySelectorAll(".missione-step").length');
+  log("Test A: Missione con 2 target", missioneView && stepCount === 2, `steps=${stepCount}`);
+
+  const firstBefore = await wc3.executeJavaScript(`
+    document.querySelector('.missione-step')?.dataset.stepId
+  `);
+  await wc3.executeJavaScript(`
+    document.querySelector('.missione-step[data-step-id="m31"] [data-move-down]')?.click();
+  `);
+  await new Promise((r) => setTimeout(r, 400));
+  const firstAfter = await wc3.executeJavaScript(`
+    document.querySelector('.missione-step')?.dataset.stepId
+  `);
+  log("Test B: Riordino aggiorna sequenza", firstBefore === "m31" && firstAfter === "m51", `${firstBefore}→${firstAfter}`);
+
+  const totalBefore = await wc3.executeJavaScript(`
+    document.querySelector('.missione-summary strong')?.textContent
+  `);
+  await wc3.executeJavaScript(`
+    document.querySelector('.missione-step[data-step-id="m51"] [data-dur="60"]')?.click();
+  `);
+  await new Promise((r) => setTimeout(r, 400));
+  const totalAfter = await wc3.executeJavaScript(`
+    (() => {
+      const cells = document.querySelectorAll('.missione-summary strong');
+      return cells[1]?.textContent;
+    })()
+  `);
+  const endTime = await wc3.executeJavaScript(`
+    (() => {
+      const cells = document.querySelectorAll('.missione-summary strong');
+      return cells[3]?.textContent;
+    })()
+  `);
+  log("Test C: Durata aggiorna totale", totalBefore !== totalAfter && !!endTime, `total=${totalAfter}`);
+
+  const persisted = await wc3.executeJavaScript(`
+    JSON.parse(localStorage.getItem('novasky.mission.v1')).items.length
+  `);
+  log("Test D: Persistenza localStorage", persisted === 2, `items=${persisted}`);
+
+  await wc3.executeJavaScript(`
+    document.querySelector('.missione-step[data-step-id="m31"] [data-remove]')?.click();
+  `);
+  await new Promise((r) => setTimeout(r, 400));
+  const afterRemove = await wc3.executeJavaScript('document.querySelectorAll(".missione-step").length');
+  const storedAfterRemove = await wc3.executeJavaScript(`
+    JSON.parse(localStorage.getItem('novasky.mission.v1')).items.map(i => i.targetId).join(',')
+  `);
+  log("Test E: Rimozione target", afterRemove === 1 && !storedAfterRemove.includes('m31'), storedAfterRemove);
+
+  await wc3.executeJavaScript(`
+    (() => {
+      const orig = window.confirm;
+      window.confirm = () => true;
+      document.querySelector('[data-clear]')?.click();
+      window.confirm = orig;
+    })();
+  `);
+  await new Promise((r) => setTimeout(r, 400));
+  const emptyState = await wc3.executeJavaScript('!!document.querySelector(".missione-empty")');
+  const storedEmpty = await wc3.executeJavaScript(`
+    (() => {
+      const raw = localStorage.getItem('novasky.mission.v1');
+      if (!raw) return 0;
+      return JSON.parse(raw).items.length;
+    })()
+  `);
+  log("Test F: Svuota missione", emptyState && storedEmpty === 0);
+
+  const nanCheck = await wc3.executeJavaScript(`
+    !document.body.innerText.match(/\\bNaN\\b|undefined/)
+  `);
+  log("Test G: Nessun NaN/undefined", nanCheck === true);
+
+  win3.close();
+
   const critical = errors.filter(
     (e) => !/favicon|DevTools|NetworkManager|GPU|Insecure Content-Security/i.test(e)
   );

@@ -174,19 +174,22 @@ export async function mountDashboard(container, ctx) {
   const onStorage = (event) => {
     if (event.key === MISSION_STORAGE_KEY) refresh(container, ctx);
   };
+  const onMissionEvent = () => refresh(container, ctx);
   window.addEventListener("storage", onStorage);
+  window.addEventListener("novasky-mission-updated", onMissionEvent);
 
   return {
-    unmount: () => unmountDashboard(onStorage),
+    unmount: () => unmountDashboard(onStorage, onMissionEvent),
   };
 }
 
-export function unmountDashboard(onStorage) {
+export function unmountDashboard(onStorage, onMissionEvent) {
   if (refreshTimer) {
     clearInterval(refreshTimer);
     refreshTimer = null;
   }
   if (onStorage) window.removeEventListener("storage", onStorage);
+  if (onMissionEvent) window.removeEventListener("novasky-mission-updated", onMissionEvent);
   locationService = null;
   missionStore = null;
 }

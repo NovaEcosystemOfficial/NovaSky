@@ -40,7 +40,7 @@ function registerProtocol() {
   });
 }
 
-async function capture(label) {
+async function capture(label, route = "mission-map") {
   fs.mkdirSync(outDir, { recursive: true });
   const win = new BrowserWindow({
     width: 1440,
@@ -55,8 +55,24 @@ async function capture(label) {
 
   await win.loadURL(`${APP_SCHEME}://desktop/index.html`);
   await new Promise((r) => setTimeout(r, 1200));
-  await win.webContents.executeJavaScript(`document.querySelector('[data-route="mission-map"]').click()`);
-  await new Promise((r) => setTimeout(r, 4000));
+
+  if (route === "missione") {
+    await win.webContents.executeJavaScript(`
+      localStorage.setItem('novasky.mission.v1', JSON.stringify({
+        version: 1,
+        missionDate: new Date().toISOString().slice(0, 10),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
+        updatedAt: new Date().toISOString(),
+        items: [
+          { targetId: 'm31', order: 0, durationMinutes: 45, plannedStart: '22:30', addedAt: new Date().toISOString() },
+          { targetId: 'm51', order: 1, durationMinutes: 30, plannedStart: '23:15', addedAt: new Date().toISOString() }
+        ]
+      }));
+    `);
+  }
+
+  await win.webContents.executeJavaScript(`document.querySelector('[data-route="${route}"]').click()`);
+  await new Promise((r) => setTimeout(r, route === "mission-map" ? 4000 : 1200));
 
   const image = await win.capturePage();
   const file = path.join(outDir, `${label}.png`);
@@ -68,7 +84,9 @@ async function capture(label) {
 app.whenReady().then(async () => {
   registerProtocol();
   try {
-    await capture(process.argv[2] || "mission-map-after");
+    const arg = process.argv[2] || "mission-map-after";
+    const route = process.argv[3] || "mission-map";
+    await capture(arg, route);
     app.exit(0);
   } catch (err) {
     console.error(err);
