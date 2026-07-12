@@ -1,0 +1,132 @@
+.dash-loading {
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.dash-hero {
+  margin-bottom: 32px;
+}
+
+.dash-kicker {
+  margin: 0 0 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--cyan);
+}
+
+.dash-status {
+  margin: 0 0 12px;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.dash-status-optimal {
+  color: var(--green);
+}
+
+.dash-status-ready {
+  color: var(--cyan);
+}
+
+.dash-status-opening,
+.dash-status-prep {
+  color: var(--amber);
+}
+
+.dash-status-closing {
+  color: var(--muted);
+}
+
+.dash-verdict {
+  margin: 0;
+  max-width: 640px;
+  font-size: 1.0625rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.dash-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.dash-card {
+  padding: 24px;
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.dash-card-primary {
+  grid-column: span 1;
+  border-color: rgba(92, 199, 216, 0.2);
+  background: linear-gradient(145deg, rgba(92, 199, 216, 0.06), transparent), var(--surface-raised);
+}
+
+.dash-card-label {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--quiet);
+}
+
+.dash-card h3 {
+  margin: 0 0 6px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.dash-card p {
+  margin: 0 0 16px;
+  color: var(--muted);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.dash-meta {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 0;
+}
+
+.dash-meta dt {
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--quiet);
+}
+
+.dash-meta dd {
+  margin: 4px 0 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.dash-link {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--cyan);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.dash-link:hover {
+  text-decoration: underline;
+}
+
+@media (min-width: 900px) {
+  .dash-card-primary {
+    grid-column: span 2;
+  }
+}
