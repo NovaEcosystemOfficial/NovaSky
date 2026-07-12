@@ -90,67 +90,84 @@
             </div>
           </div>
 
-          <aside class="mission-panel" aria-label="Anteprima briefing della notte">
+          <aside class="mission-panel" data-mission-panel aria-label="Mission Control — briefing operativo della notte">
             <div class="panel-scanline" aria-hidden="true"></div>
             <div class="nova-orbit-signature" aria-hidden="true">
               <span></span>
               <span></span>
               <span></span>
             </div>
-            <div class="panel-header">
-              <span data-i18n="mission.title">Mission control</span>
-              <span class="status-dot" data-mission-badge data-i18n="mission.badge">Anteprima live</span>
-            </div>
 
-            <div class="mission-clock">
-              <span data-i18n="mission.clockLabel">Ora locale</span>
-              <strong data-mission-clock>22:10</strong>
-            </div>
-
-            <div class="mission-target">
-              <span data-i18n="mission.targetLabel">Target consigliato</span>
-              <strong data-mission-target>NGC 7000</strong>
-              <small data-mission-target-note>Nebulosa Nord America · alta nel cielo</small>
-            </div>
-
-            <div class="score-block">
-              <span class="score-label" data-i18n="mission.windowLabel">Finestra osservativa</span>
-              <strong data-mission-window>22:10 - 01:35</strong>
-            </div>
-
-            <div class="mission-metrics">
-              <div>
-                <span data-i18n="mission.moonLabel">Luna</span>
-                <strong data-i18n="mission.moonValue">Gestibile</strong>
+            <header class="mcp-header">
+              <span class="mcp-kicker">Mission Status</span>
+              <div class="mcp-status-row">
+                <strong class="mcp-status" data-mcp-status data-level="is-prep">In preparazione</strong>
+                <span class="mcp-demo-tag" data-mcp-demo-tag hidden>Demo · Milano</span>
               </div>
-              <div>
-                <span data-i18n="mission.skyLabel">Cielo</span>
-                <strong data-mission-sky data-i18n="mission.skyValue">Trasparenza buona</strong>
+            </header>
+
+            <div class="mcp-clock-block">
+              <div class="mcp-clock">
+                <span class="mcp-label">Ora locale</span>
+                <time data-mcp-clock datetime="">—</time>
               </div>
-              <div>
-                <span data-i18n="mission.deviceLabel">Profilo</span>
-                <strong data-i18n="mission.deviceValue">S50 / S30 Pro</strong>
-              </div>
+              <dl class="mcp-window-grid">
+                <div><dt>Inizio</dt><dd data-mcp-window-start>—</dd></div>
+                <div><dt>Picco</dt><dd data-mcp-window-peak>—</dd></div>
+                <div><dt>Fine</dt><dd data-mcp-window-end>—</dd></div>
+                <div class="mcp-window-wide"><dt>Tempo utile</dt><dd data-mcp-window-remaining>—</dd></div>
+              </dl>
             </div>
 
-            <div class="mission-status-row" aria-label="Stato simulato della sessione">
-              <span><i aria-hidden="true"></i><b data-i18n="mission.statusPlan">Piano pronto</b></span>
-              <span><i aria-hidden="true"></i><b data-i18n="mission.statusTarget">Target in finestra</b></span>
-            </div>
-
-            <div class="mission-progress" aria-label="Avanzamento simulato della sessione">
-              <div>
-                <span data-i18n="mission.progressLabel">Sessione</span>
-                <strong data-mission-progress-label>34%</strong>
+            <section class="mcp-target" aria-label="Target principale">
+              <span class="mcp-label">Target principale</span>
+              <strong class="mcp-target-id" data-mcp-target-id>—</strong>
+              <span class="mcp-target-name" data-mcp-target-name>—</span>
+              <span class="mcp-target-category" data-mcp-target-category>—</span>
+              <p class="mcp-target-verdict" data-mcp-target-verdict>—</p>
+              <div class="mcp-target-foot">
+                <span class="mcp-rec-badge" data-mcp-target-rec>—</span>
+                <span class="mcp-target-alt" data-mcp-target-alt>—</span>
               </div>
-              <span class="progress-track"><i data-mission-progress></i></span>
-            </div>
+              <div class="mcp-device-row">
+                <span><b>S50</b> <span data-mcp-target-s50>—</span></span>
+                <span><b>S30 Pro</b> <span data-mcp-target-s30>—</span></span>
+              </div>
+            </section>
 
-            <div class="orbit-graph" aria-hidden="true">
-              <span></span>
-              <span></span>
-              <span></span>
-              <span></span>
+            <section class="mcp-conditions" aria-label="Condizioni della notte">
+              <div class="mcp-condition" data-mcp-condition="moon" data-state="good">
+                <span class="mcp-label">Luna</span>
+                <strong data-mcp-condition-value>—</strong>
+                <small data-mcp-condition-hint></small>
+              </div>
+              <div class="mcp-condition" data-mcp-condition="seeing" data-state="warn">
+                <span class="mcp-label">Seeing</span>
+                <strong data-mcp-condition-value>—</strong>
+                <small data-mcp-condition-hint></small>
+              </div>
+              <div class="mcp-condition" data-mcp-condition="clouds" data-state="good">
+                <span class="mcp-label">Nuvole</span>
+                <strong data-mcp-condition-value>—</strong>
+                <small data-mcp-condition-hint></small>
+              </div>
+              <div class="mcp-condition" data-mcp-condition="transparency" data-state="good">
+                <span class="mcp-label">Trasparenza</span>
+                <strong data-mcp-condition-value>—</strong>
+                <small data-mcp-condition-hint></small>
+              </div>
+            </section>
+
+            <section class="mcp-advice">
+              <span class="mcp-kicker">Consiglio NovaSky</span>
+              <p data-mcp-advice>Calcolo del cielo in corso…</p>
+            </section>
+
+            <div class="mcp-horizon" data-mcp-horizon aria-hidden="true">
+              <canvas data-mcp-horizon-canvas width="320" height="72"></canvas>
+              <span class="mcp-horizon-e">E</span>
+              <span class="mcp-horizon-s">S</span>
+              <span class="mcp-horizon-o">O</span>
             </div>
           </aside>
         </div>
@@ -399,6 +416,10 @@
     </footer>
 
     <script src="./scripts/main.js"></script>
+    <script type="module">
+      import { initMissionControlPanel } from "./scripts/mission-control-panel.js";
+      initMissionControlPanel();
+    </script>
     <script src="./scripts/cinematic.js" defer></script>
   </body>
 </html>
