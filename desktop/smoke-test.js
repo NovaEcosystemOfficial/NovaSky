@@ -142,6 +142,26 @@ async function runTests() {
   const canvas = await wc.executeJavaScript('!!document.getElementById("mission-canvas")');
   log("Mission Map canvas", canvas);
 
+  const compactCard = await wc.executeJavaScript('!!document.querySelector(".desktop-target-card")');
+  log("Card target compatta", compactCard);
+
+  const sidebarWidth = await wc.executeJavaScript(`
+    getComputedStyle(document.documentElement).getPropertyValue('--sidebar-w').trim()
+  `);
+  log("Sidebar compatta", sidebarWidth === "188px" || sidebarWidth === "172px", sidebarWidth);
+
+  await wc.executeJavaScript(`
+    document.querySelector('[data-panel-toggle]').click();
+  `);
+  await new Promise((r) => setTimeout(r, 300));
+  const panelCollapsed = await wc.executeJavaScript(
+    'document.querySelector("[data-nova-app]").classList.contains("is-panel-collapsed")'
+  );
+  log("Pannello destro collassabile", panelCollapsed === true);
+  await wc.executeJavaScript(`
+    document.querySelector('[data-panel-toggle]').click();
+  `);
+
   const targetImg = await wc.executeJavaScript(`
     fetch('nova://engine/assets/targets/mini/m31.png').then(r => r.ok).catch(() => false)
   `);

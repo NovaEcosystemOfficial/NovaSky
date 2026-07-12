@@ -90,6 +90,9 @@ class NovaShell {
       const collapsed = this.app.classList.toggle("is-panel-collapsed");
       this.panelToggle.setAttribute("aria-expanded", String(!collapsed));
       this.panelToggle.title = collapsed ? "Apri pannello" : "Chiudi pannello";
+      if (this.route === "mission-map") {
+        requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
+      }
     });
 
     this.startClock();

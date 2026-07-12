@@ -1,6 +1,10 @@
 import { ObservatoryApp } from "nova://engine/scripts/mission-map/app.js";
+import { installDesktopSkyEnhancement } from "./mission-map/sky-immersive.js";
+import { installPanelBridge } from "./mission-map/panel-bridge.js";
 
 let activeApp = null;
+let teardownSky = null;
+let teardownPanel = null;
 let missionMapCssLoaded = false;
 let engineBaseEl = null;
 
@@ -49,18 +53,17 @@ export async function mountMissionMap(container, ctx) {
   activeApp = new ObservatoryApp();
   await activeApp.init();
 
+  teardownSky = installDesktopSkyEnhancement(activeApp) || null;
+  teardownPanel = installPanelBridge(activeApp, {
+    panelBody: ctx.panelBody,
+    appEl: container,
+  });
+
   requestAnimationFrame(() => {
     activeApp.renderer?.resize();
     activeApp.refreshSky?.();
     window.dispatchEvent(new Event("resize"));
   });
-
-  if (ctx.panelBody) {
-    ctx.panelBody.innerHTML = `
-      <p><strong>Mission Map</strong> — vista osservatorio attiva.</p>
-      <p style="margin-top:12px;color:var(--quiet);font-size:0.8125rem">La missione è sincronizzata via localStorage con la stessa chiave del motore condiviso.</p>
-    `;
-  }
 
   return {
     unmount: unmountMissionMap,
@@ -68,6 +71,14 @@ export async function mountMissionMap(container, ctx) {
 }
 
 export async function unmountMissionMap() {
+  if (teardownPanel) {
+    teardownPanel();
+    teardownPanel = null;
+  }
+  if (teardownSky) {
+    teardownSky();
+    teardownSky = null;
+  }
   if (activeApp) {
     activeApp.destroy();
     activeApp = null;

@@ -1,9 +1,10 @@
 :root {
   color-scheme: dark;
   --bg-optical: #05070a;
-  --surface: #0a0e14;
-  --surface-raised: #101620;
-  --line: rgba(158, 183, 204, 0.1);
+  --surface: #080b10;
+  --surface-raised: #0e1218;
+  --line: rgba(158, 183, 204, 0.08);
+  --line-strong: rgba(158, 183, 204, 0.14);
   --text: #e8ecf0;
   --muted: #9aa8b5;
   --quiet: #6b7785;
@@ -11,9 +12,9 @@
   --amber: #e8a838;
   --green: #67c98d;
   --danger: #e56f68;
-  --sidebar-w: 240px;
-  --panel-w: 320px;
-  --header-h: 72px;
+  --sidebar-w: 188px;
+  --panel-w: 272px;
+  --header-h: 64px;
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
 }
 
