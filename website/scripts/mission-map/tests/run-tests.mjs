@@ -11,6 +11,12 @@ import { classifyAltitude, TARGET_STATE } from "../astro/states.js";
 import { SKY_LIMITS } from "../data/config.js";
 import { computeSkySession } from "../services/sky-compute.js";
 import { DEMO_OBSERVER } from "../data/config.js";
+import {
+  sanitizeMissionPayload,
+  createMissionStore,
+  MISSION_STORAGE_KEY,
+  windowDurationMinutes,
+} from "../services/mission-store.js";
 
 let passed = 0;
 let failed = 0;
@@ -78,6 +84,74 @@ test("GMST increases with time", () => {
   const d2 = new Date("2025-01-01T01:00:00Z");
   assert.ok(gmstDegrees(d2) > gmstDegrees(d1));
 });
+
+test("mission store: dedupe and drop invalid targetIds", () => {
+  const valid = new Set(["m27", "m13"]);
+  const payload = sanitizeMissionPayload(
+    {
+      version: 1,
+      missionDate: "2026-07-11",
+      timezone: "Europe/Rome",
+      items: [
+        { targetId: "m27", order: 1, durationMinutes: 90, plannedStart: "22:00", addedAt: "x" },
+        { targetId: "m27", order: 2, durationMinutes: 90, plannedStart: "22:00", addedAt: "y" },
+        { targetId: "bogus", order: 3, durationMinutes: 10, plannedStart: "23:00", addedAt: "z" },
+        { targetId: "m13", order: 0, durationMinutes: 60, plannedStart: "21:00", addedAt: "w" },
+      ],
+    },
+    valid,
+  );
+  assert.equal(payload.items.length, 2);
+  assert.equal(payload.items[0].targetId, "m13");
+  assert.equal(payload.items[1].targetId, "m27");
+});
+
+test("mission store: corrupt JSON yields empty mission", () => {
+  const store = createMissionStore(["m27"]);
+  const payload = store.parse("{not-json");
+  assert.deepEqual(payload.items, []);
+});
+
+test("mission store: save and load roundtrip", () => {
+  globalThis.localStorage = createMemoryStorage();
+  const store = createMissionStore(["m27", "m13"]);
+  store.save(
+    [
+      {
+        targetId: "m27",
+        order: 0,
+        durationMinutes: 95,
+        plannedStart: "22:10",
+        addedAt: "2026-07-12T20:00:00.000Z",
+      },
+    ],
+    "2026-07-12",
+  );
+  const loaded = store.load();
+  assert.equal(loaded.items.length, 1);
+  assert.equal(loaded.items[0].targetId, "m27");
+  assert.equal(loaded.missionDate, "2026-07-12");
+  assert.equal(localStorage.getItem(MISSION_STORAGE_KEY)?.includes("m27"), true);
+});
+
+test("windowDurationMinutes handles overnight window", () => {
+  assert.equal(windowDurationMinutes("22:10", "01:35"), 205);
+});
+
+function createMemoryStorage() {
+  const data = new Map();
+  return {
+    setItem(k, v) {
+      data.set(k, String(v));
+    },
+    getItem(k) {
+      return data.has(k) ? data.get(k) : null;
+    },
+    removeItem(k) {
+      data.delete(k);
+    },
+  };
+}
 
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed > 0 ? 1 : 0);

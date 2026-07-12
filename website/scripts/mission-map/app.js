@@ -10,12 +10,22 @@ import {
   computeSkySession,
   buildNightHours,
 } from "./services/sky-compute.js";
+import {
+  createMissionStore,
+  createMissionItemFromTarget,
+  localDateString,
+  MISSION_STORAGE_KEY,
+} from "./services/mission-store.js";
+import { promptPreviousMission } from "./ui/mission-prompt.js";
 
 class ObservatoryApp {
   constructor() {
     this.canvas = document.getElementById("mission-canvas");
     this.canvasWrap = document.querySelector(".sky-chamber");
-    this.mission = [];
+    this.missionStore = createMissionStore(CATALOG.map((t) => t.id));
+    this.missionPayload = this.missionStore.load();
+    this.mission = [...this.missionPayload.items];
+    this.missionDate = this.missionPayload.missionDate;
     this.catalog = CATALOG;
     this.lastFrame = 0;
     this.thumbnails = new ThumbnailCache(CATALOG);
@@ -30,22 +40,28 @@ class ObservatoryApp {
     this.selectedId = null;
     this.liveTime = true;
     this.syncTimer = null;
+    this.missionReady = false;
+
+    this.prehydrateMissionDeck();
   }
 
   async init() {
     try {
+      await this.resolveMissionDate();
+
       await this.thumbnails.load();
       this.sprites = buildTargetSprites(this.thumbnails, CATALOG);
       this.initLocationUI();
       this.initTimeUI();
+      this.initMissionUI();
       this.initRenderer();
       this.initUI();
 
-      // Mostra subito il cielo demo — non bloccare su GPS
       this.locationService.useDemo();
       this.refreshSky();
       this.startLiveSync();
       this.startLoop();
+      this.markMissionReady();
 
       this.locationService.requestLocation().then(() => {
         this.refreshSky();
@@ -55,11 +71,60 @@ class ObservatoryApp {
         this.renderer.resize();
         this.updateCardAnchor();
       });
+
+      window.addEventListener("storage", (event) => {
+        if (event.key !== MISSION_STORAGE_KEY) return;
+        this.applyExternalMission(event.newValue);
+      });
     } catch (err) {
       console.error("NovaSky init failed:", err);
       const verdict = document.querySelector("[data-verdict]");
       if (verdict) verdict.textContent = "Errore di caricamento — ricarica la pagina";
+      this.markMissionReady();
     }
+  }
+
+  prehydrateMissionDeck() {
+    const root = document.querySelector("[data-mission-timeline]");
+    const count = document.querySelector("[data-mission-count]");
+    const empty = document.querySelector("[data-timeline-empty]");
+    const filled = document.querySelector("[data-timeline-filled]");
+    const clearBtn = document.querySelector("[data-mission-clear]");
+    const has = this.mission.length > 0;
+
+    if (count) count.textContent = String(this.mission.length);
+    if (empty) empty.hidden = has;
+    if (filled) filled.hidden = !has;
+    if (root) root.classList.toggle("has-mission", has);
+    if (clearBtn) clearBtn.hidden = !has;
+  }
+
+  markMissionReady() {
+    this.missionReady = true;
+    const root = document.querySelector("[data-mission-timeline]");
+    if (root) root.dataset.missionReady = "true";
+  }
+
+  async resolveMissionDate() {
+    const today = localDateString();
+    if (!this.mission.length || this.missionDate === today) {
+      if (!this.mission.length) this.missionDate = today;
+      return;
+    }
+
+    const choice = await promptPreviousMission(this.missionDate);
+    if (choice === "new") {
+      this.mission = [];
+      this.missionDate = today;
+      this.missionStore.clear();
+      this.prehydrateMissionDeck();
+    }
+  }
+
+  initMissionUI() {
+    document.querySelector("[data-mission-clear]")?.addEventListener("click", () => {
+      this.clearMission();
+    });
   }
 
   initLocationUI() {
@@ -127,6 +192,8 @@ class ObservatoryApp {
         this.handleSelect(id);
       },
     });
+
+    this.syncMission();
   }
 
   refreshSky(whenArg) {
@@ -156,7 +223,6 @@ class ObservatoryApp {
     this.session = session;
     this.nightSteps = buildNightHours(when, this.session.meta.twilight);
 
-    // Ricostruisci sprite con altitudini calcolate (evita depth NaN al primo init)
     this.sprites = buildTargetSprites(this.thumbnails, this.session.targets);
     this.renderer.setSprites(this.sprites);
 
@@ -215,7 +281,7 @@ class ObservatoryApp {
   applySessionToMap() {
     const visible = this.session.visibleTargets;
     this.renderer.setTargets(visible);
-    this.timeline.setCatalog(visible);
+    this.timeline.setCatalog(this.session.targets);
     this.syncMission();
   }
 
@@ -245,31 +311,88 @@ class ObservatoryApp {
 
     const prompt = document.querySelector("[data-sky-prompt]");
     if (prompt) prompt.classList.toggle("is-hidden", Boolean(target));
-    if (target) this.targetCard.setInMission(id, this.mission.includes(id));
+    if (target) this.targetCard.setInMission(id, this.hasMissionTarget(id));
+  }
+
+  hasMissionTarget(id) {
+    return this.mission.some((item) => item.targetId === id);
+  }
+
+  getMissionTargetIds() {
+    return this.mission.map((item) => item.targetId);
   }
 
   addToMission(id) {
-    if (this.mission.includes(id)) return;
-    this.mission.push(id);
-    this.mission.sort((a, b) => {
-      const ta = this.session.targets.find((t) => t.id === a);
-      const tb = this.session.targets.find((t) => t.id === b);
-      if (!ta?.window?.startDate || !tb?.window?.startDate) return 0;
-      return ta.window.startDate - tb.window.startDate;
-    });
+    if (this.hasMissionTarget(id)) return;
+
+    const target = this.session?.targets.find((t) => t.id === id);
+    if (!target) return;
+
+    const item = createMissionItemFromTarget(target);
+    item.order = this.mission.length;
+    this.mission.push(item);
+    this.sortMissionByWindow();
+    this.persistMission();
     this.syncMission();
     this.targetCard.setInMission(id, true);
   }
 
   removeFromMission(id) {
-    this.mission = this.mission.filter((x) => x !== id);
+    this.mission = this.mission.filter((item) => item.targetId !== id);
+    this.reindexMission();
+    this.persistMission();
     this.syncMission();
     this.targetCard.setInMission(id, false);
   }
 
+  clearMission() {
+    if (!this.mission.length) return;
+    const ok = window.confirm("Svuotare la missione di stanotte? Tutti i target verranno rimossi.");
+    if (!ok) return;
+    this.mission = [];
+    this.missionDate = localDateString();
+    this.missionStore.clear();
+    this.syncMission();
+    if (this.selectedId) this.targetCard.setInMission(this.selectedId, false);
+  }
+
+  sortMissionByWindow() {
+    this.mission.sort((a, b) => {
+      const ta = this.session?.targets.find((t) => t.id === a.targetId);
+      const tb = this.session?.targets.find((t) => t.id === b.targetId);
+      if (!ta?.window?.startDate || !tb?.window?.startDate) return a.order - b.order;
+      return ta.window.startDate - tb.window.startDate;
+    });
+    this.reindexMission();
+  }
+
+  reindexMission() {
+    this.mission.forEach((item, idx) => {
+      item.order = idx;
+    });
+  }
+
+  persistMission() {
+    if (!this.missionDate) this.missionDate = localDateString();
+    this.missionPayload = this.missionStore.save(this.mission, this.missionDate);
+  }
+
+  applyExternalMission(raw) {
+    const payload = this.missionStore.parse(raw);
+    this.mission = [...payload.items];
+    this.missionDate = payload.missionDate;
+    this.prehydrateMissionDeck();
+    this.syncMission();
+    if (this.selectedId) {
+      this.targetCard.setInMission(this.selectedId, this.hasMissionTarget(this.selectedId));
+    }
+  }
+
   syncMission() {
-    this.renderer.setMission(this.mission);
+    const ids = this.getMissionTargetIds();
+    this.renderer.setMission(ids);
     this.timeline.setMission(this.mission);
+    this.prehydrateMissionDeck();
   }
 
   startLoop() {

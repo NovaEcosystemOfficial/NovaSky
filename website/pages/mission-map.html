@@ -172,13 +172,18 @@
         </aside>
       </main>
 
-      <footer class="mission-deck" data-mission-timeline aria-label="Timeline della missione">
+      <footer class="mission-deck" data-mission-timeline aria-label="Timeline della missione" data-mission-ready="false">
         <div class="mission-deck-head">
           <div>
             <h2>La missione di stanotte</h2>
             <p>Costruisci la tua notte, target dopo target</p>
           </div>
-          <span class="mission-deck-count"><strong data-mission-count>0</strong> target</span>
+          <div class="mission-deck-actions">
+            <button type="button" class="btn-mission-clear" data-mission-clear hidden>
+              Svuota missione
+            </button>
+            <span class="mission-deck-count"><strong data-mission-count>0</strong> target</span>
+          </div>
         </div>
 
         <div class="mission-deck-empty" data-timeline-empty>
@@ -192,6 +197,22 @@
           </div>
         </div>
       </footer>
+
+      <div class="mission-rollover" data-mission-rollover hidden role="dialog" aria-labelledby="mission-rollover-title" aria-modal="true">
+        <div class="mission-rollover-card">
+          <p class="mission-rollover-kicker">Missione salvata</p>
+          <h3 id="mission-rollover-title">È presente una missione del giorno precedente.</h3>
+          <p class="mission-rollover-meta">Salvata il <span data-mission-rollover-date>—</span></p>
+          <div class="mission-rollover-actions">
+            <button type="button" class="btn-mission btn-mission-primary" data-mission-rollover-continue>
+              Continua questa missione
+            </button>
+            <button type="button" class="btn-mission btn-mission-secondary" data-mission-rollover-new>
+              Crea una nuova missione
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script type="module" src="../scripts/mission-map/app.js"></script>

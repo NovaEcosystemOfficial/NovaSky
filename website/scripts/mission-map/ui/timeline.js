@@ -15,13 +15,6 @@ function windowDuration(start, end) {
   return `${h}h ${m}m`;
 }
 
-function sortTargetsByWindow(a, b) {
-  if (a.window?.startDate && b.window?.startDate) {
-    return a.window.startDate - b.window.startDate;
-  }
-  return parseTime(a.window.start) - parseTime(b.window.start);
-}
-
 export class MissionTimeline {
   constructor(root, options) {
     this.root = root;
@@ -30,6 +23,7 @@ export class MissionTimeline {
     this.onRemove = options.onRemove;
     this.onSelect = options.onSelect;
     this.missionIds = [];
+    this.missionEntries = [];
     this.selectedId = null;
 
     this.els = {
@@ -55,16 +49,27 @@ export class MissionTimeline {
     this.render();
   }
 
-  setMission(ids) {
-    this.missionIds = [...ids];
+  setMission(entries) {
+    this.missionEntries = Array.isArray(entries) ? entries.map(normalizeEntry) : [];
+    this.missionIds = this.missionEntries.map((e) => e.targetId);
     this.render();
   }
 
+  /** @param {import("../services/mission-store.js").MissionItem} entry */
+  updateMissionEntry(entry) {
+    const idx = this.missionEntries.findIndex((e) => e.targetId === entry.targetId);
+    if (idx >= 0) {
+      this.missionEntries[idx] = normalizeEntry(entry);
+      this.render();
+    }
+  }
+
   render() {
+    const orderMap = new Map(this.missionEntries.map((e) => [e.targetId, e.order]));
     const targets = this.missionIds
       .map((id) => this.allTargets.find((t) => t.id === id))
       .filter(Boolean)
-      .sort(sortTargetsByWindow);
+      .sort((a, b) => (orderMap.get(a.id) ?? 0) - (orderMap.get(b.id) ?? 0));
 
     if (this.els.count) this.els.count.textContent = String(targets.length);
 
@@ -82,7 +87,14 @@ export class MissionTimeline {
 
     targets.forEach((target, index) => {
       const cat = getCategory(target);
-      const duration = windowDuration(target.window.start, target.window.end);
+      const entry = this.missionEntries.find((e) => e.targetId === target.id);
+      const duration = entry?.durationMinutes
+        ? formatDurationMinutes(entry.durationMinutes)
+        : windowDuration(target.window.start, target.window.end);
+      const windowLabel =
+        entry?.plannedStart && target.window?.end
+          ? `${entry.plannedStart} – ${target.window.end}`
+          : `${target.window.start} – ${target.window.end}`;
       const isSelected = target.id === this.selectedId;
 
       const item = document.createElement("div");
@@ -102,7 +114,7 @@ export class MissionTimeline {
       card.dataset.id = target.id;
       card.tabIndex = 0;
       card.setAttribute("role", "button");
-      card.setAttribute("aria-label", `${target.name}, ${target.window.start} – ${target.window.end}`);
+      card.setAttribute("aria-label", `${target.name}, ${windowLabel}`);
 
       const thumbSrc =
         this.thumbnails?.getMiniUrl(target.id) ||
@@ -114,7 +126,7 @@ export class MissionTimeline {
         <div class="chain-body">
           <span class="chain-icon" aria-hidden="true">${cat.icon}</span>
           <strong class="chain-name">${target.name}</strong>
-          <span class="chain-window">${target.window.start} – ${target.window.end}</span>
+          <span class="chain-window">${windowLabel}</span>
           <span class="chain-duration">${duration}</span>
         </div>
         <button type="button" class="chain-remove" aria-label="Rimuovi ${target.name}">×</button>
@@ -144,3 +156,18 @@ export class MissionTimeline {
 }
 
 export { formatTime, windowDuration };
+
+function normalizeEntry(entry) {
+  if (typeof entry === "string") {
+    return { targetId: entry, order: 0, durationMinutes: 0, plannedStart: null, addedAt: "" };
+  }
+  return entry;
+}
+
+function formatDurationMinutes(mins) {
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  if (h === 0) return `${m} min`;
+  if (m === 0) return `${h}h`;
+  return `${h}h ${m}m`;
+}

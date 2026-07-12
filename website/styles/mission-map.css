@@ -762,6 +762,109 @@ body.mission-map-page {
   margin-bottom: 14px;
 }
 
+.mission-deck-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-mission-clear {
+  padding: 5px 10px;
+  border: 1px solid rgba(158, 183, 204, 0.22);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--quiet);
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 200ms ease, border-color 200ms ease;
+}
+
+.btn-mission-clear:hover {
+  color: var(--danger);
+  border-color: rgba(229, 111, 104, 0.35);
+}
+
+.mission-deck[data-mission-ready="false"] .mission-deck-empty,
+.mission-deck[data-mission-ready="false"] .mission-deck-filled {
+  visibility: hidden;
+}
+
+.mission-rollover[hidden] {
+  display: none !important;
+  pointer-events: none !important;
+  opacity: 0;
+}
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(5, 7, 10, 0.72);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  transition: opacity 280ms ease;
+}
+
+.mission-rollover.is-visible {
+  opacity: 1;
+}
+
+.mission-rollover-card {
+  width: min(420px, 92vw);
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(8, 12, 18, 0.96);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+}
+
+.mission-rollover-kicker {
+  margin: 0 0 8px;
+  color: var(--cyan);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mission-rollover-card h3 {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.mission-rollover-meta {
+  margin: 0 0 16px;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.mission-rollover-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.btn-mission-secondary {
+  padding: 10px 16px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 200ms ease, color 200ms ease;
+}
+
+.btn-mission-secondary:hover {
+  border-color: rgba(92, 199, 216, 0.35);
+  color: var(--text);
+}
+
 .mission-deck-head h2 {
   margin: 0;
   font-size: 0.92rem;
