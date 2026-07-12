@@ -49,6 +49,12 @@ export async function mountMissionMap(container, ctx) {
   activeApp = new ObservatoryApp();
   await activeApp.init();
 
+  requestAnimationFrame(() => {
+    activeApp.renderer?.resize();
+    activeApp.refreshSky?.();
+    window.dispatchEvent(new Event("resize"));
+  });
+
   if (ctx.panelBody) {
     ctx.panelBody.innerHTML = `
       <p><strong>Mission Map</strong> — vista osservatorio attiva.</p>

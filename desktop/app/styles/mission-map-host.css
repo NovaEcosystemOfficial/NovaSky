@@ -1,21 +1,36 @@
 /* Adatta Mission Map al workspace desktop (look osservatorio invariato) */
 
 .nova-workspace.is-mission-map {
-  display: flex;
-  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
   height: 100%;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .nova-workspace.is-mission-map .observatory {
-  flex: 1;
+  flex: 1 1 auto;
   min-height: 0;
-  height: 100%;
+  width: 100%;
+  /* Override 100dvh del sito — riempie il workspace, non tutto il monitor */
+  height: 100% !important;
+  min-height: 0 !important;
   max-height: 100%;
+}
+
+.nova-workspace.is-mission-map .observatory-main {
+  min-height: 0;
+  overflow: hidden;
 }
 
 .nova-workspace.is-mission-map .observatory-header .brand {
   text-decoration: none;
   color: inherit;
   cursor: default;
+}
+
+/* Deck missione sempre visibile in fondo */
+.nova-workspace.is-mission-map .mission-deck {
+  flex-shrink: 0;
 }
