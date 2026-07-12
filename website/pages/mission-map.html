@@ -39,7 +39,12 @@
           <span class="header-moon" data-moon>—</span>
           <span class="header-window">Crepuscolo <strong data-window>—</strong></span>
           <label class="header-time">
-            <span>Ora simulata <strong data-time-label>—</strong></span>
+            <span class="header-time-row">
+              <span><span data-time-mode>Ora reale</span> <strong data-time-label>—</strong></span>
+              <button type="button" class="btn-time-sync" data-time-sync hidden title="Sincronizza con data e ora reali">
+                Ora reale
+              </button>
+            </span>
             <input type="range" data-time-slider min="0" max="0" value="0" step="1" aria-label="Simula un'ora della notte" />
           </label>
         </div>

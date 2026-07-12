@@ -28,6 +28,8 @@ class ObservatoryApp {
     this.targetCard = null;
     this.timeline = null;
     this.selectedId = null;
+    this.liveTime = true;
+    this.syncTimer = null;
   }
 
   async init() {
@@ -42,6 +44,7 @@ class ObservatoryApp {
       // Mostra subito il cielo demo — non bloccare su GPS
       this.locationService.useDemo();
       this.refreshSky();
+      this.startLiveSync();
       this.startLoop();
 
       this.locationService.requestLocation().then(() => {
@@ -70,10 +73,29 @@ class ObservatoryApp {
   initTimeUI() {
     const slider = document.querySelector("[data-time-slider]");
     slider?.addEventListener("input", () => {
+      this.liveTime = false;
       const idx = Number(slider.value);
       const when = this.nightSteps[idx];
       if (when) this.refreshSky(when);
     });
+
+    document.querySelector("[data-time-sync]")?.addEventListener("click", () => {
+      this.liveTime = true;
+      this.refreshSky();
+    });
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible" && this.liveTime) {
+        this.refreshSky();
+      }
+    });
+  }
+
+  startLiveSync() {
+    if (this.syncTimer) clearInterval(this.syncTimer);
+    this.syncTimer = setInterval(() => {
+      if (this.liveTime) this.refreshSky();
+    }, 60_000);
   }
 
   initRenderer() {
@@ -109,11 +131,24 @@ class ObservatoryApp {
 
   refreshSky(whenArg) {
     const observer = this.locationService.getLocation();
-    let when = whenArg ?? this.session?.when ?? new Date();
+    let when;
+
+    if (whenArg) {
+      when = whenArg;
+    } else if (this.liveTime) {
+      when = new Date();
+    } else {
+      when = this.session?.when ?? new Date();
+    }
 
     let session = computeSkySession(observer, when);
 
-    if (!whenArg && session.visibleTargets.length === 0 && session.meta.twilight.evening) {
+    if (
+      !this.liveTime &&
+      !whenArg &&
+      session.visibleTargets.length === 0 &&
+      session.meta.twilight.evening
+    ) {
       when = new Date(session.meta.twilight.evening.getTime() + 90 * 60_000);
       session = computeSkySession(observer, when);
     }
@@ -135,6 +170,12 @@ class ObservatoryApp {
     const timeLabel = document.querySelector("[data-time-label]");
     if (timeLabel) timeLabel.textContent = this.session.meta.time;
 
+    const timeMode = document.querySelector("[data-time-mode]");
+    if (timeMode) timeMode.textContent = this.liveTime ? "Ora reale" : "Ora simulata";
+
+    const syncBtn = document.querySelector("[data-time-sync]");
+    if (syncBtn) syncBtn.hidden = this.liveTime;
+
     this.updateHeader(this.session.meta);
     this.renderer.resize();
     this.applySessionToMap();
@@ -153,7 +194,6 @@ class ObservatoryApp {
   updateHeader(meta) {
     const fields = {
       "[data-location]": meta.location,
-      "[data-date]": meta.date,
       "[data-verdict]": meta.verdict,
       "[data-window]": meta.window,
       "[data-moon]": meta.moon,
@@ -161,6 +201,14 @@ class ObservatoryApp {
     for (const [sel, text] of Object.entries(fields)) {
       const el = document.querySelector(sel);
       if (el) el.textContent = text;
+    }
+
+    const dateEl = document.querySelector("[data-date]");
+    if (dateEl) {
+      dateEl.textContent = meta.date;
+      if (this.session?.when) {
+        dateEl.dateTime = this.session.when.toISOString();
+      }
     }
   }
 

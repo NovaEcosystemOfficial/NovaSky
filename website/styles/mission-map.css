@@ -160,6 +160,30 @@ body.mission-map-page {
   font-size: 0.68rem;
 }
 
+.header-time-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-time-sync {
+  padding: 2px 8px;
+  border: 1px solid rgba(92, 199, 216, 0.35);
+  border-radius: 999px;
+  background: rgba(92, 199, 216, 0.08);
+  color: var(--cyan);
+  font: inherit;
+  font-size: 0.62rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 200ms ease, border-color 200ms ease;
+}
+
+.btn-time-sync:hover {
+  background: rgba(92, 199, 216, 0.16);
+  border-color: rgba(92, 199, 216, 0.55);
+}
+
 .header-time strong {
   color: var(--text);
   font-family: "JetBrains Mono", ui-monospace, monospace;
