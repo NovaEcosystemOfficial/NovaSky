@@ -217,6 +217,139 @@ async function runTests() {
 
   win2.close();
 
+  // ── Vista Missione operativa (Test A–G) ──
+  const win3 = await createWindow();
+  const wc3 = win3.webContents;
+  await loadUrl(wc3, `${APP_SCHEME}://desktop/index.html`);
+  await new Promise((r) => setTimeout(r, 1200));
+
+  await wc3.executeJavaScript(`
+    localStorage.setItem('novasky.mission.v1', JSON.stringify({
+      version: 1,
+      missionDate: new Date().toISOString().slice(0, 10),
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
+      updatedAt: new Date().toISOString(),
+      items: [
+        { targetId: 'm31', order: 0, durationMinutes: 45, plannedStart: '22:30', addedAt: new Date().toISOString() },
+        { targetId: 'm51', order: 1, durationMinutes: 30, plannedStart: '23:15', addedAt: new Date().toISOString() }
+      ]
+    }));
+    localStorage.removeItem('novasky.mission.desktop-meta.v1');
+  `);
+
+  await clickNav(wc3, "missione");
+  await new Promise((r) => setTimeout(r, 800));
+
+  const missioneView = await wc3.executeJavaScript('!!document.querySelector(".missione:not(.missione-empty)")');
+  const stepCount = await wc3.executeJavaScript('document.querySelectorAll(".missione-leg").length');
+  const hasBriefing = await wc3.executeJavaScript('!!document.querySelector(".missione-briefing")');
+  log("Test A: Missione con 2 target", missioneView && stepCount === 2 && hasBriefing, `steps=${stepCount}`);
+
+  const firstBefore = await wc3.executeJavaScript(`
+    document.querySelector('.missione-leg')?.dataset.stepId
+  `);
+  await wc3.executeJavaScript(`
+    document.querySelector('.missione-leg[data-step-id="m31"] [data-move-down]')?.click();
+  `);
+  await new Promise((r) => setTimeout(r, 400));
+  const firstAfter = await wc3.executeJavaScript(`
+    document.querySelector('.missione-leg')?.dataset.stepId
+  `);
+  log("Test B: Riordino aggiorna sequenza", firstBefore === "m31" && firstAfter === "m51", `${firstBefore}→${firstAfter}`);
+
+  await wc3.executeJavaScript(`
+    document.querySelector('.missione-leg[data-step-id="m51"] [data-dur="60"]')?.click();
+  `);
+  await new Promise((r) => setTimeout(r, 400));
+  const totalAfter = await wc3.executeJavaScript(`
+    (() => {
+      const dur = document.querySelector('.missione-leg-dur strong')?.textContent;
+      return dur || '';
+    })()
+  `);
+  log("Test C: Durata aggiorna totale", totalAfter.includes("60") || totalAfter.includes("1h"), `dur=${totalAfter}`);
+
+  const persisted = await wc3.executeJavaScript(`
+    JSON.parse(localStorage.getItem('novasky.mission.v1')).items.length
+  `);
+  log("Test D: Persistenza localStorage", persisted === 2, `items=${persisted}`);
+
+  await wc3.executeJavaScript(`
+    document.querySelector('.missione-leg[data-step-id="m31"] [data-remove]')?.click();
+  `);
+  await new Promise((r) => setTimeout(r, 400));
+  const afterRemove = await wc3.executeJavaScript('document.querySelectorAll(".missione-leg").length');
+  const storedAfterRemove = await wc3.executeJavaScript(`
+    JSON.parse(localStorage.getItem('novasky.mission.v1')).items.map(i => i.targetId).join(',')
+  `);
+  log("Test E: Rimozione target", afterRemove === 1 && !storedAfterRemove.includes('m31'), storedAfterRemove);
+
+  await wc3.executeJavaScript(`
+    (() => {
+      const orig = window.confirm;
+      window.confirm = () => true;
+      document.querySelector('[data-clear]')?.click();
+      window.confirm = orig;
+    })();
+  `);
+  await new Promise((r) => setTimeout(r, 400));
+  const emptyState = await wc3.executeJavaScript('!!document.querySelector(".missione-empty")');
+  const storedEmpty = await wc3.executeJavaScript(`
+    (() => {
+      const raw = localStorage.getItem('novasky.mission.v1');
+      if (!raw) return 0;
+      return JSON.parse(raw).items.length;
+    })()
+  `);
+  log("Test F: Svuota missione", emptyState && storedEmpty === 0);
+
+  const nanCheck = await wc3.executeJavaScript(`
+    !document.body.innerText.match(/\\bNaN\\b|undefined/)
+  `);
+  log("Test G: Nessun NaN/undefined", nanCheck === true);
+
+  await wc3.executeJavaScript(`
+    localStorage.setItem('novasky.mission.v1', JSON.stringify({
+      version: 1,
+      missionDate: new Date().toISOString().slice(0, 10),
+      timezone: 'UTC',
+      updatedAt: new Date().toISOString(),
+      items: [{ targetId: 'm31', order: 0, durationMinutes: 45, plannedStart: '22:30', addedAt: new Date().toISOString() }]
+    }));
+    localStorage.removeItem('novasky.mission.desktop-meta.v1');
+  `);
+  await clickNav(wc3, "dashboard");
+  await clickNav(wc3, "missione");
+  await new Promise((r) => setTimeout(r, 600));
+
+  const hasStartBtn = await wc3.executeJavaScript('!!document.querySelector("[data-start-mission]")');
+  if (hasStartBtn) {
+    await wc3.executeJavaScript(`document.querySelector('[data-start-mission]')?.click()`);
+  }
+  await new Promise((r) => setTimeout(r, 400));
+  const sessionActive = await wc3.executeJavaScript(`
+    (() => {
+      const raw = localStorage.getItem('novasky.mission.desktop-meta.v1');
+      return raw ? JSON.parse(raw).sessionActive : false;
+    })()
+  `);
+  log("Test H: Inizia missione", sessionActive === true);
+
+  await wc3.executeJavaScript(`
+    const cb = document.querySelector('[data-check-id="dome"]');
+    if (cb) { cb.checked = true; cb.dispatchEvent(new Event('change', { bubbles: true })); }
+  `);
+  await new Promise((r) => setTimeout(r, 200));
+  const checklistSaved = await wc3.executeJavaScript(`
+    (() => {
+      const raw = localStorage.getItem('novasky.mission.desktop-meta.v1');
+      return raw ? JSON.parse(raw).checklist?.dome === true : false;
+    })()
+  `);
+  log("Test I: Checklist persistente", checklistSaved === true);
+
+  win3.close();
+
   const critical = errors.filter(
     (e) => !/favicon|DevTools|NetworkManager|GPU|Insecure Content-Security/i.test(e)
   );

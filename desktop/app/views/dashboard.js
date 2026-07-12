@@ -5,10 +5,12 @@ import { CATALOG } from "nova://engine/scripts/mission-map/data/catalog.js";
 import { moonAltAz, moonPhase } from "nova://engine/scripts/mission-map/astro/moon.js";
 import { SKY_LIMITS } from "nova://engine/scripts/mission-map/data/config.js";
 import { getDeviceSummary } from "../shared/device-registry.js";
+import { loadMissionMeta } from "../shared/mission-plan.js";
 
 const STATUS_CLASS = {
   "Missione pronta": "dash-status-ready",
   "In preparazione": "dash-status-prep",
+  "In osservazione": "dash-status-optimal",
   "Finestra in apertura": "dash-status-opening",
   "Osservazione consigliata": "dash-status-optimal",
   "Finestra in chiusura": "dash-status-closing",
@@ -62,12 +64,14 @@ function formatWindow(window) {
 }
 
 function renderDashboard(container, ctx, data) {
-  const { status, target, session, mission, devices, moon, phase } = data;
+  const { status, target, session, mission, meta, devices, moon, phase } = data;
   const statusClass = STATUS_CLASS[status.status] || "dash-status-prep";
   const missionLabel =
     mission.items.length === 0
       ? "Nessuna missione composta"
-      : `${mission.items.length} target · salvata oggi`;
+      : meta?.sessionActive
+        ? `${mission.items.length} target · in osservazione`
+        : `${mission.items.length} target · salvata oggi`;
 
   container.innerHTML = `
     <section class="dash">
@@ -135,19 +139,26 @@ async function refresh(container, ctx) {
   const target = pickPrimaryTarget(session);
   const status = computeMissionStatus(now, target.window, target);
   const mission = missionStore.load();
+  const meta = loadMissionMeta();
   const devices = getDeviceSummary();
   const moon = moonAltAz(observer.lat, observer.lon, now);
   const phase = moonPhase(now);
+
+  let displayStatus = status;
+  if (meta.sessionActive && mission.items.length > 0) {
+    displayStatus = { status: "In osservazione" };
+  }
 
   const observerLabel =
     observer.label ||
     `${observer.lat.toFixed(2)}°, ${observer.lon.toFixed(2)}°`;
 
   renderDashboard(container, ctx, {
-    status,
+    status: displayStatus,
     target,
     session,
     mission,
+    meta,
     devices,
     moon,
     phase,
@@ -174,19 +185,25 @@ export async function mountDashboard(container, ctx) {
   const onStorage = (event) => {
     if (event.key === MISSION_STORAGE_KEY) refresh(container, ctx);
   };
+  const onMissionEvent = () => refresh(container, ctx);
+  const onSessionEvent = () => refresh(container, ctx);
   window.addEventListener("storage", onStorage);
+  window.addEventListener("novasky-mission-updated", onMissionEvent);
+  window.addEventListener("novasky-session-updated", onSessionEvent);
 
   return {
-    unmount: () => unmountDashboard(onStorage),
+    unmount: () => unmountDashboard(onStorage, onMissionEvent, onSessionEvent),
   };
 }
 
-export function unmountDashboard(onStorage) {
+export function unmountDashboard(onStorage, onMissionEvent, onSessionEvent) {
   if (refreshTimer) {
     clearInterval(refreshTimer);
     refreshTimer = null;
   }
   if (onStorage) window.removeEventListener("storage", onStorage);
+  if (onMissionEvent) window.removeEventListener("novasky-mission-updated", onMissionEvent);
+  if (onSessionEvent) window.removeEventListener("novasky-session-updated", onSessionEvent);
   locationService = null;
   missionStore = null;
 }

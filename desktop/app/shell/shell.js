@@ -1,6 +1,7 @@
 import { mountDashboard, unmountDashboard } from "../views/dashboard.js";
 import { mountMissionMap, unmountMissionMap } from "../views/mission-map.js";
 import { mountAttrezzatura } from "../views/attrezzatura.js";
+import { mountMissione, unmountMissione } from "../views/missione.js";
 import { mountPlaceholder } from "../views/placeholder.js";
 
 const ROUTES = {
@@ -22,10 +23,10 @@ const ROUTES = {
   },
   missione: {
     title: "Missione",
-    subtitle: "Timeline della serata",
-    panelTitle: "Missione",
-    mount: (el, ctx) => mountPlaceholder(el, ctx, "Missione", "La timeline completa della missione sarà disponibile qui. Per ora usa Mission Map per comporre la serata."),
-    unmount: null,
+    subtitle: "Piano osservativo della serata",
+    panelTitle: "Assistente NovaSky",
+    mount: mountMissione,
+    unmount: unmountMissione,
     missionMap: false,
   },
   catalogo: {
