@@ -142,8 +142,8 @@
     if (mutedPref) audioBtn.classList.add("is-muted");
 
     const timeline = isMobileIntro
-      ? { total: 1800, orbit: [180, 520], logo: 520, l1: 720, scan: 920, l2: 1120, l3: 1320, reveal: 1520 }
-      : { total: 3200, orbit: [350, 950], logo: 950, l1: 1350, scan: 1750, l2: 2150, l3: 2550, reveal: 2950 };
+      ? { total: 3000, orbit: [280, 780], logo: 780, l1: 1080, scan: 1380, l2: 1980, l3: 2450, reveal: 2750 }
+      : { total: 5000, orbit: [500, 1300], logo: 1300, l1: 1850, scan: 2350, l2: 3550, l3: 4200, reveal: 4700 };
 
     const rand = seededRandom(17);
     const introStars = Array.from({ length: 90 }, () => ({
