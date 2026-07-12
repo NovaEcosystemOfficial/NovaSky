@@ -189,8 +189,27 @@ async function runTests() {
   log("Missione persistente", missionCount === 1, `count=${missionCount}`);
 
   await clickNav(wc, "attrezzatura");
+  await new Promise((r) => setTimeout(r, 800));
+
+  const hubActive = await wc.executeJavaScript('!!document.querySelector(".device-hub-view")');
+  const hubSummary = await wc.executeJavaScript(`
+    document.querySelector("[data-hub-summary]")?.textContent?.trim() || ""
+  `);
+  const setupCount = await wc.executeJavaScript('document.querySelectorAll("[data-setup-id]").length');
   const gearCards = await wc.executeJavaScript("document.querySelectorAll('.gear-card').length");
-  log("Attrezzatura 8 dispositivi", gearCards === 8, `cards=${gearCards}`);
+  const simBadge = await wc.executeJavaScript('!!document.querySelector(".device-hub-badge--sim")');
+  const canon2000dUnassigned = await wc.executeJavaScript(`
+    (() => {
+      const cards = [...document.querySelectorAll(".device-hub-unassigned .gear-card")];
+      return cards.some(c => c.textContent.includes("2000D"));
+    })()
+  `);
+  log(
+    "Device Hub: 2 setup + 4 dispositivi + Device Hub attivo",
+    hubActive && hubSummary.includes("2 setup + 4 dispositivi") && setupCount === 3 && gearCards >= 10 && simBadge,
+    `summary=${hubSummary.slice(0, 60)} setups=${setupCount} cards=${gearCards}`
+  );
+  log("Canon EOS 2000D non assegnata", canon2000dUnassigned === true);
 
   const fontsLocal = await wc.executeJavaScript(`
     [...document.styleSheets].some(s => s.href && s.href.includes('fonts.css'))
@@ -349,6 +368,105 @@ async function runTests() {
   log("Test I: Checklist persistente", checklistSaved === true);
 
   win3.close();
+
+  // ── Device Hub (Test A–I) ──
+  const win4 = await createWindow();
+  const wc4 = win4.webContents;
+  await loadUrl(wc4, `${APP_SCHEME}://desktop/index.html`);
+  await new Promise((r) => setTimeout(r, 1200));
+  await clickNav(wc4, "attrezzatura");
+  await new Promise((r) => setTimeout(r, 900));
+
+  const dhA = await wc4.executeJavaScript(`
+    (() => {
+      const obs = localStorage.getItem('novasky.device-hub.v1');
+      if (!obs) return false;
+      try {
+        const hub = JSON.parse(obs);
+        return hub.observatory?.name === 'Osservatorio Roma' && hub.setups?.length === 3 && hub.devices?.length === 10;
+      } catch { return false; }
+    })()
+  `);
+  log("Test A: Seed osservatorio e setup", dhA === true);
+
+  const dhB = await wc4.executeJavaScript(`
+    (() => {
+      try {
+        const hub = JSON.parse(localStorage.getItem('novasky.device-hub.v1'));
+        const deep = hub.setups.find(s => s.id === 'setup-deep-sky');
+        const required = ['dev-mount-eq6','dev-eagle-core','dev-guide-camera','dev-focuser','dev-filter-wheel'];
+        return required.every(id => deep?.deviceIds?.includes(id));
+      } catch { return false; }
+    })()
+  `);
+  log("Test B: DEEP SKY con placeholder", dhB === true);
+
+  const dhC = await wc4.executeJavaScript(`
+    (() => {
+      try {
+        const hub = JSON.parse(localStorage.getItem('novasky.device-hub.v1'));
+        return !hub.setups.some(s => s.deviceIds.includes('dev-canon-2000d'));
+      } catch { return false; }
+    })()
+  `);
+  log("Test C: Canon 2000D libera nel Hub", dhC === true);
+
+  const dhD = await wc4.executeJavaScript(`
+    document.querySelectorAll('.device-hub-setup [data-device-id]').length >= 7
+  `);
+  log("Test D: Card dispositivi nei setup", dhD === true);
+
+  await wc4.executeJavaScript(`
+    document.querySelector('[data-device-detail="dev-seestar-s50"]')?.click();
+  `);
+  await new Promise((r) => setTimeout(r, 300));
+  const dhE = await wc4.executeJavaScript(`
+    document.querySelector('[data-panel-body]')?.textContent?.includes('Seestar S50')
+  `);
+  log("Test E: Pannello dettaglio dispositivo", dhE === true);
+
+  await wc4.executeJavaScript(`
+    document.querySelector('[data-connect="dev-seestar-s50"]')?.click();
+  `);
+  await new Promise((r) => setTimeout(r, 700));
+  const dhF = await wc4.executeJavaScript(`
+    (() => {
+      try {
+        const hub = JSON.parse(localStorage.getItem('novasky.device-hub.v1'));
+        const dev = hub.devices.find(d => d.id === 'dev-seestar-s50');
+        return dev?.connectionState === 'connected';
+      } catch { return false; }
+    })()
+  `);
+  log("Test F: Simulazione connette dispositivo", dhF === true);
+
+  await wc4.executeJavaScript(`
+    document.querySelector('[data-obs-name]').value = 'Osservatorio Test';
+    document.querySelector('[data-obs-name]').dispatchEvent(new Event('change', { bubbles: true }));
+  `);
+  await new Promise((r) => setTimeout(r, 200));
+  const dhG = await wc4.executeJavaScript(`
+    (() => {
+      try {
+        return JSON.parse(localStorage.getItem('novasky.device-hub.v1')).observatory.name === 'Osservatorio Test';
+      } catch { return false; }
+    })()
+  `);
+  log("Test G: Profilo osservatorio persistente", dhG === true);
+
+  await clickNav(wc4, "dashboard");
+  await new Promise((r) => setTimeout(r, 600));
+  const dhH = await wc4.executeJavaScript(`
+    document.body.innerText.includes('2 setup + 4 dispositivi')
+  `);
+  log("Test H: Dashboard legge Device Hub", dhH === true);
+
+  const dhI = await wc4.executeJavaScript(`
+    [...document.querySelectorAll('.gear-card img')].every(img => img.src.includes('.svg'))
+  `);
+  log("Test I: Placeholder SVG sostituibili", dhI === true);
+
+  win4.close();
 
   const critical = errors.filter(
     (e) => !/favicon|DevTools|NetworkManager|GPU|Insecure Content-Security/i.test(e)

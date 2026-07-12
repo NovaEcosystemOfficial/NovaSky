@@ -109,7 +109,7 @@ function renderDashboard(container, ctx, data) {
         <article class="dash-card">
           <span class="dash-card-label">Attrezzatura</span>
           <h3>${devices.connected}/${devices.total}</h3>
-          <p>Dispositivi collegati</p>
+          <p>${devices.label || "Dispositivi collegati"}</p>
           <button type="button" class="dash-link" data-goto="attrezzatura">Gestisci</button>
         </article>
       </div>
@@ -187,16 +187,18 @@ export async function mountDashboard(container, ctx) {
   };
   const onMissionEvent = () => refresh(container, ctx);
   const onSessionEvent = () => refresh(container, ctx);
+  const onHubEvent = () => refresh(container, ctx);
   window.addEventListener("storage", onStorage);
   window.addEventListener("novasky-mission-updated", onMissionEvent);
   window.addEventListener("novasky-session-updated", onSessionEvent);
+  window.addEventListener("novasky-device-hub-updated", onHubEvent);
 
   return {
-    unmount: () => unmountDashboard(onStorage, onMissionEvent, onSessionEvent),
+    unmount: () => unmountDashboard(onStorage, onMissionEvent, onSessionEvent, onHubEvent),
   };
 }
 
-export function unmountDashboard(onStorage, onMissionEvent, onSessionEvent) {
+export function unmountDashboard(onStorage, onMissionEvent, onSessionEvent, onHubEvent) {
   if (refreshTimer) {
     clearInterval(refreshTimer);
     refreshTimer = null;
@@ -204,6 +206,7 @@ export function unmountDashboard(onStorage, onMissionEvent, onSessionEvent) {
   if (onStorage) window.removeEventListener("storage", onStorage);
   if (onMissionEvent) window.removeEventListener("novasky-mission-updated", onMissionEvent);
   if (onSessionEvent) window.removeEventListener("novasky-session-updated", onSessionEvent);
+  if (onHubEvent) window.removeEventListener("novasky-device-hub-updated", onHubEvent);
   locationService = null;
   missionStore = null;
 }

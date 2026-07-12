@@ -1,19 +1,38 @@
-/** Registro dispositivi — architettura futura, nessuna connessione Sprint 1. */
+/** Device Hub — re-export per compatibilità con moduli esistenti. */
 
-export const DEVICE_REGISTRY = [
-  { id: "seestar", name: "Seestar", icon: "🔭", category: "telescope" },
-  { id: "mount", name: "Montatura", icon: "⛰", category: "mount" },
-  { id: "camera-main", name: "Camera principale", icon: "📷", category: "camera" },
-  { id: "camera-guide", name: "Camera guida", icon: "◎", category: "camera" },
-  { id: "filter-wheel", name: "Ruota portafiltri", icon: "◉", category: "accessory" },
-  { id: "focuser", name: "Focheggiatore", icon: "↕", category: "accessory" },
-  { id: "eagle", name: "EAGLE", icon: "🦅", category: "controller" },
-  { id: "observatory", name: "Osservatorio", icon: "🏠", category: "site" },
-];
+export {
+  getDevices,
+  getSetups,
+  getObservatory,
+  getUnassignedDevices,
+  getDevicesForSetup,
+  isSimulationMode,
+  toggleSimulationMode,
+  connectDevice,
+  disconnectDevice,
+  setObservatory,
+  registerDevice,
+  editDevice,
+  HUB_EVENT,
+  DEVICE_CATEGORIES,
+  deviceStatusLabel,
+  deviceDisplayName,
+  resolveDeviceImage,
+  getDeviceHub,
+} from "./device-hub/index.js";
+
+import { getDeviceSummary as hubGetSummary } from "./device-hub/index.js";
 
 export function getDeviceSummary() {
+  const summary = hubGetSummary();
   return {
-    total: DEVICE_REGISTRY.length,
-    connected: 0,
+    total: summary.deviceCount,
+    connected: summary.connected,
+    label: summary.label,
+    setupCount: summary.setupCount,
+    hardwareCount: summary.hardwareCount,
+    unassigned: summary.unassigned,
+    simulationMode: summary.simulationMode,
+    observatoryName: summary.observatoryName,
   };
 }
