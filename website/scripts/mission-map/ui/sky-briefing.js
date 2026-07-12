@@ -1,16 +1,17 @@
 /**
- * Sky Briefing UI — sezione espandibile nella scheda target.
- * "Perché stasera" deriva dai dati già calcolati dal motore (senza modificarlo).
+ * Sky Briefing UI — briefing astronomico NovaSky nella scheda target.
+ * PERCHÉ STANOTTE deriva dal motore (nessuna modifica al motore).
  */
 
 import { getSkyBriefing } from "../data/sky-briefings.js";
+import { resolveBriefingProfile } from "../data/sky-briefing-schema.js";
 import { SKY_LIMITS } from "../data/config.js";
 
-const LEVEL_LABELS = [
+const RATING_LABELS = [
   { key: "ease", label: "Facilità" },
   { key: "visualImpact", label: "Impatto visivo" },
   { key: "photogenic", label: "Fotogenia" },
-  { key: "beginnerFriendly", label: "Consigliato ai principianti" },
+  { key: "beginnerFriendly", label: "Ideale per principianti" },
 ];
 
 const PLACEHOLDER = "Briefing in preparazione — i dati di base restano disponibili sopra.";
@@ -31,15 +32,15 @@ function windowDurationMinutes(target) {
 }
 
 /**
- * Testo naturale per PERCHÉ STASERA — usa alt, Luna, finestra e NovaScore.
- * @param {object} target - target calcolato dal motore
+ * PERCHÉ STANOTTE — linguaggio naturale da alt, Luna, finestra, NovaScore.
+ * @param {object} target
  * @returns {string}
  */
 export function buildTonightBriefing(target) {
   if (!target) return PLACEHOLDER;
 
   if (!target.aboveHorizon) {
-    return "Il target è sotto l'orizzonte in questo momento. Avanza l'orario simulato per trovare la finestra in cui sorge e culmina.";
+    return "Stanotte il target è ancora sotto l'orizzonte. Avanza l'orario simulato per individuare la finestra in cui sorge e culmina.";
   }
 
   const sentences = [];
@@ -49,28 +50,28 @@ export function buildTonightBriefing(target) {
 
   if (alt >= OPTIMAL_ALT) {
     sentences.push(
-      `In questo istante è alto ${alt}°: una quota comoda, lontana dalla turbolenza del bordo orizzonte.`,
+      `Stanotte raggiunge un'ottima altezza (${alt}°): lontano dalla turbolenza del bordo orizzonte, in condizione favorevole per il Seestar.`,
     );
   } else if (alt >= MIN_ALT) {
     sentences.push(
-      `Sta a ${alt}° — osservabile, con margine di miglioramento verso la culminazione a ${culmAlt}°.`,
+      `In questo momento è a ${alt}° — osservabile, con margine di miglioramento verso la culminazione prevista a ${culmAlt}°.`,
     );
   } else {
     sentences.push(
-      `È basso sull'orizzonte (${alt}°): conviene attendere che salga prima di puntare il Seestar.`,
+      `Per ora resta basso sull'orizzonte (${alt}°): conviene attendere che salga prima di inquadrarlo.`,
     );
   }
 
   const moonSep = target.moonSeparation ?? 0;
   if (moonSep >= 70) {
-    sentences.push("La Luna resta lontana dal campo: il contrasto del cielo profondo resta favorevole.");
+    sentences.push("La Luna disturba poco il contrasto: resta lontana dal campo.");
   } else if (moonSep >= 45) {
     sentences.push(
-      `La Luna è a ${moonSep}° dal target: interferenza moderata, gestibile con filtri o attendendo un'ora più buia.`,
+      `La Luna è a ${moonSep}° dal target — interferenza moderata, gestibile con filtri o attendendo un'ora più buia.`,
     );
   } else if (moonSep > 0) {
     sentences.push(
-      `La Luna è vicina (${moonSep}°): il chiarore riduce il contrasto — preferisci filtri o un momento senza Luna nel campo.`,
+      `La Luna è vicina (${moonSep}°) e il chiarore riduce il contrasto: preferisci filtri o un momento senza Luna nel campo.`,
     );
   }
 
@@ -78,46 +79,56 @@ export function buildTonightBriefing(target) {
   if (dur != null) {
     if (dur >= 120) {
       sentences.push(
-        `Hai una finestra ampia (${target.window.start} – ${target.window.end}): oltre ${Math.round(dur / 60)} ore sopra ${MIN_ALT}°.`,
+        `La finestra utile va dalle ${target.window.start} alle ${target.window.end}: oltre ${Math.round(dur / 60)} ore sopra ${MIN_ALT}°.`,
       );
     } else if (dur >= 45) {
       sentences.push(
-        `Finestra utile dalle ${target.window.start} alle ${target.window.end} — circa ${dur} minuti sopra l'orizzonte utile.`,
+        `Hai circa ${dur} minuti utili tra ${target.window.start} e ${target.window.end} per osservarlo comodamente.`,
       );
     } else if (dur > 0) {
       sentences.push(
-        `Finestra stretta (${target.window.start} – ${target.window.end}): pianifica l'inquadratura con precisione.`,
+        `Finestra stretta (${target.window.start} – ${target.window.end}): serve pianificazione precisa.`,
       );
     }
   }
 
   const score = target.novaScore ?? 50;
   if (score >= 72) {
-    sentences.push("Il NovaScore indica condizioni solide per stanotte: tra le migliori disponibili adesso.");
+    sentences.push("Nel complesso, le condizioni calcolate per stanotte sono tra le più favorevoli disponibili adesso.");
   } else if (score >= 50) {
-    sentences.push("Condizioni accettabili: il cielo permette un tentativo, con qualche compromesso su contrasto o altezza.");
+    sentences.push("Le condizioni permettono un tentativo credibile, con qualche compromesso su contrasto o quota.");
   } else {
-    sentences.push("Condizioni impegnative stasera: valuta un altro orario o un target alternativo nel deck.");
+    sentences.push("Stanotte è impegnativo: valuta un altro orario o un target alternativo nel deck.");
   }
 
   return sentences.join(" ");
 }
 
-function buildQuickData(target) {
-  const meta = target.skyMeta ?? {};
+/** @param {import("../data/sky-briefing-schema.js").SkyBriefingProfile} profile */
+function buildIdentityRows(profile) {
   return [
-    { label: "Tipo", value: target.category ?? "—" },
-    { label: "Costellazione", value: meta.constellation ?? "—" },
-    { label: "Distanza", value: meta.distance ?? "—" },
-    { label: "Dimensione", value: formatArcmin(target.sizeArcmin) },
-    { label: "Magnitudine", value: target.magnitude != null ? String(target.magnitude) : "—" },
-    { label: "Migliore periodo osservativo", value: meta.bestSeason ?? "—", wide: true },
+    { label: "Tipo", value: profile.type ?? "—" },
+    { label: "Costellazione", value: profile.constellation ?? "—" },
+    { label: "Distanza", value: profile.distance ?? "—" },
+    { label: "Magnitudine", value: profile.magnitude != null ? String(profile.magnitude) : "—" },
+    { label: "Dimensione apparente", value: formatArcmin(profile.sizeArcmin) },
+    { label: "Periodo migliore", value: profile.bestSeason ?? "—", wide: true },
   ];
 }
 
-function renderLevelBars(container, levels) {
+function renderIdentity(container, profile) {
   container.replaceChildren();
-  if (!levels) {
+  for (const item of buildIdentityRows(profile)) {
+    const div = document.createElement("div");
+    if (item.wide) div.className = "briefing-quick-wide";
+    div.innerHTML = `<dt>${item.label}</dt><dd>${item.value}</dd>`;
+    container.appendChild(div);
+  }
+}
+
+function renderRatings(container, ratings) {
+  container.replaceChildren();
+  if (!ratings) {
     const p = document.createElement("p");
     p.className = "briefing-placeholder";
     p.textContent = PLACEHOLDER;
@@ -125,8 +136,8 @@ function renderLevelBars(container, levels) {
     return;
   }
 
-  for (const { key, label } of LEVEL_LABELS) {
-    const value = Math.max(0, Math.min(100, Math.round(levels[key] ?? 0)));
+  for (const { key, label } of RATING_LABELS) {
+    const value = Math.max(0, Math.min(100, Math.round(ratings[key] ?? 0)));
     const row = document.createElement("div");
     row.className = "briefing-level";
     row.innerHTML = `
@@ -142,40 +153,30 @@ function renderLevelBars(container, levels) {
   }
 }
 
-function renderQuickData(container, target) {
-  container.replaceChildren();
-  for (const item of buildQuickData(target)) {
-    const div = document.createElement("div");
-    if (item.wide) div.className = "briefing-quick-wide";
-    div.innerHTML = `<dt>${item.label}</dt><dd>${item.value}</dd>`;
-    container.appendChild(div);
-  }
-}
-
 function setText(el, text, fallback = PLACEHOLDER) {
   if (!el) return;
   el.textContent = text?.trim() ? text : fallback;
 }
 
 /**
- * Popola la sezione Sky Briefing nella scheda target.
- * @param {HTMLElement} root - elemento [data-sky-briefing]
- * @param {object} target - target calcolato
+ * @param {HTMLElement} root
+ * @param {object} target — target calcolato + campi catalogo
  */
 export function populateSkyBriefing(root, target) {
   if (!root || !target) return;
 
-  const briefing = getSkyBriefing(target.id);
+  const editorial = getSkyBriefing(target.id);
+  const profile = resolveBriefingProfile(target, editorial);
 
-  setText(root.querySelector("[data-briefing-observing]"), briefing.observing);
+  setText(root.querySelector("[data-briefing-observing]"), profile.description);
   setText(root.querySelector("[data-briefing-tonight]"), buildTonightBriefing(target));
-  setText(root.querySelector("[data-briefing-seestar]"), briefing.seestar);
-  setText(root.querySelector("[data-briefing-curiosity]"), briefing.curiosity);
+  setText(root.querySelector("[data-briefing-seestar]"), profile.seestarView);
+  setText(root.querySelector("[data-briefing-curiosity]"), profile.curiosity);
 
-  renderQuickData(root.querySelector("[data-briefing-quick]"), target);
-  renderLevelBars(root.querySelector("[data-briefing-levels]"), briefing.levels);
+  renderIdentity(root.querySelector("[data-briefing-identity]"), profile);
+  renderRatings(root.querySelector("[data-briefing-levels]"), profile.ratings);
 
-  root.dataset.briefingComplete = briefing.complete ? "true" : "false";
+  root.dataset.briefingComplete = profile.complete ? "true" : "false";
 }
 
-export { formatArcmin, buildQuickData };
+export { formatArcmin, buildIdentityRows };

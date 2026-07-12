@@ -17,6 +17,9 @@ import {
   MISSION_STORAGE_KEY,
   windowDurationMinutes,
 } from "../services/mission-store.js";
+import { CATALOG } from "../data/catalog.js";
+import { SKY_BRIEFINGS } from "../data/sky-briefings.js";
+import { getBriefingCatalogReport, resolveBriefingProfile } from "../data/sky-briefing-schema.js";
 
 let passed = 0;
 let failed = 0;
@@ -136,6 +139,21 @@ test("mission store: save and load roundtrip", () => {
 
 test("windowDurationMinutes handles overnight window", () => {
   assert.equal(windowDurationMinutes("22:10", "01:35"), 205);
+});
+
+test("sky briefing: all catalog targets have complete editorial profile", () => {
+  const report = getBriefingCatalogReport(CATALOG, SKY_BRIEFINGS);
+  assert.equal(report.total, CATALOG.length);
+  assert.equal(report.complete.length, CATALOG.length, `incomplete: ${report.incomplete.join(", ")}`);
+});
+
+test("sky briefing: resolveBriefingProfile merges catalog and editorial", () => {
+  const entry = CATALOG.find((t) => t.id === "m31");
+  const profile = resolveBriefingProfile(entry, SKY_BRIEFINGS.m31);
+  assert.ok(profile.description?.includes("Andromeda"));
+  assert.equal(profile.constellation, "Andromeda");
+  assert.equal(profile.magnitude, 3.4);
+  assert.ok(profile.ratings?.visualImpact >= 80);
 });
 
 function createMemoryStorage() {

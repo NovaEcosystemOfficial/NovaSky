@@ -1,13 +1,16 @@
 /**
  * Sky Briefing — contenuti editoriali NovaSky per ogni target del catalogo.
- * Tono: briefing osservatorio, non enciclopedia.
+ * Tono: briefing d'osservatorio, non enciclopedia.
+ *
+ * Dati scientifici (tipo, magnitudine, dimensione, note Seestar): catalog.js
+ * Resolver unificato: sky-briefing-schema.js
  *
  * @typedef {object} SkyBriefingEntry
- * @property {string|null} observing - COSA STAI GUARDANDO (4–6 righe)
- * @property {string|null} seestar - COSA ASPETTARTI CON IL SEESTAR
- * @property {string|null} curiosity - CURIOSITÀ verificata
- * @property {{ ease: number, visualImpact: number, photogenic: number, beginnerFriendly: number }|null} levels
- * @property {boolean} complete - true se tutti i campi editoriali sono compilati
+ * @property {string|null} observing — alias description · COSA STAI OSSERVANDO
+ * @property {string|null} seestar — alias seestarView · COSA VEDRAI CON IL SEESTAR
+ * @property {string|null} curiosity — CURIOSITÀ
+ * @property {{ ease: number, visualImpact: number, photogenic: number, beginnerFriendly: number }|null} levels — alias ratings
+ * @property {boolean} complete
  */
 
 /** @type {Record<string, SkyBriefingEntry>} */

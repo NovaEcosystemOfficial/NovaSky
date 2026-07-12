@@ -2,10 +2,22 @@
  * Curated deep-sky catalog — equatorial coordinates (J2000).
  * No alt/az or visibility: computed by the astronomy engine.
  *
- * skyMeta — metadati editoriali per Sky Briefing (opzionali, non usati dal motore).
- * @property {string} [skyMeta.constellation]
- * @property {string} [skyMeta.distance]
- * @property {string} [skyMeta.bestSeason]
+ * ## Sky Briefing — dati scientifici (Sprint 10)
+ * Campi usati dal briefing, senza duplicare il motore astronomico:
+ * - `category`, `magnitude`, `sizeArcmin` — identità osservativa
+ * - `seestar` — note Seestar S50 / S30 Pro
+ * - `skyMeta` o `briefing.scientific` — costellazione, distanza, periodo migliore
+ *
+ * Contenuti editoriali (descrizione, curiosità, valutazioni, testo Seestar):
+ * `data/sky-briefings.js` — una voce per `id`, estendibile a centinaia di target.
+ *
+ * @typedef {object} SkyBriefingScientificBlock
+ * @property {string} [constellation]
+ * @property {string} [distance]
+ * @property {string} [bestSeason]
+ *
+ * @typedef {object} CatalogBriefingBlock
+ * @property {SkyBriefingScientificBlock} [scientific]
  */
 
 export const CATALOG = [
