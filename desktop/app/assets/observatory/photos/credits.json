@@ -1,0 +1,124 @@
+{
+  "version": 1,
+  "updatedAt": "2026-07-13",
+  "note": "Foto rappresentative da Wikimedia Commons — sostituibili con scatti dell'osservatorio reale.",
+  "assets": {
+    "seestar-s50": {
+      "id": "seestar-s50",
+      "file": "Seestar S50 smart telescope.jpg",
+      "source": "Wikimedia Commons",
+      "artist": "El Mexicano",
+      "credit": "Own work",
+      "license": "CC BY-SA 4.0",
+      "localPath": "photos/seestar-s50.jpg"
+    },
+    "seestar-s30": {
+      "id": "seestar-s30",
+      "file": "Seestar S50 smart telescope.jpg",
+      "source": "Wikimedia Commons",
+      "artist": "El Mexicano",
+      "credit": "Own work",
+      "license": "CC BY-SA 4.0",
+      "localPath": "photos/seestar-s30.jpg"
+    },
+    "canon-80d": {
+      "id": "canon-80d",
+      "file": "Canon EOS 80D 1.JPG",
+      "source": "Wikimedia Commons",
+      "artist": "MKFI",
+      "credit": "Own work",
+      "license": "Public domain",
+      "localPath": "photos/canon-80d.jpg"
+    },
+    "canon-2000d": {
+      "id": "canon-2000d",
+      "file": "Left side view of Canon EOS Rebel T7 or 2000D Body.jpg",
+      "source": "Wikimedia Commons",
+      "artist": "Greyfiveys",
+      "credit": "Own work",
+      "license": "CC BY-SA 4.0",
+      "localPath": "photos/canon-2000d.jpg"
+    },
+    "eq6": {
+      "id": "eq6",
+      "file": "90mm Apochromatic Refractor on NEQ6 Pro German Equatorial mount.jpg",
+      "source": "Wikimedia Commons",
+      "artist": "Gustaaf Prins from Haarlem, The Netherlands",
+      "credit": "Telescope setup",
+      "license": "CC BY 2.0",
+      "localPath": "photos/eq6.jpg"
+    },
+    "eagle-core": {
+      "id": "eagle-core",
+      "file": "Intel NUC.png",
+      "source": "Wikimedia Commons",
+      "artist": "Batocera Team",
+      "credit": "https://batocera.org/download",
+      "license": "CC0",
+      "localPath": "photos/eagle-core.jpg"
+    },
+    "guide-camera": {
+      "id": "guide-camera",
+      "file": "Webcam astrophotography 2007 09 15.jpg",
+      "source": "Wikimedia Commons",
+      "artist": "Marie-Lan Nguyen",
+      "credit": "Own work",
+      "license": "CC BY 2.5",
+      "localPath": "photos/guide-camera.jpg"
+    },
+    "focuser": {
+      "id": "focuser",
+      "file": "First Light for a new scope - Equinox 120ED (17798969953).jpg",
+      "source": "Wikimedia Commons",
+      "artist": "john.purvis",
+      "credit": "First Light for a new scope - Equinox 120ED",
+      "license": "CC BY 2.0",
+      "localPath": "photos/focuser.jpg"
+    },
+    "filter-wheel": {
+      "id": "filter-wheel",
+      "file": "Ritchey–Chrétien at Kickapoo Valley Reserve 2-b.jpg",
+      "source": "Wikimedia Commons",
+      "artist": "Photo Brainandforce , edited from raw by Cart",
+      "credit": "Raw file sent to me ( Cart ) by the author per this diff",
+      "license": "CC BY 4.0",
+      "localPath": "photos/filter-wheel.jpg"
+    },
+    "ota-deep-sky": {
+      "id": "ota-deep-sky",
+      "file": "ED120.jpg",
+      "source": "Wikimedia Commons",
+      "artist": "Bradeos Graphon at English Wikipedia",
+      "credit": "Transferred from en.wikipedia to Commons.",
+      "license": "Public domain",
+      "localPath": "photos/ota-deep-sky.jpg"
+    },
+    "setup-deep-sky": {
+      "id": "setup-deep-sky",
+      "file": "90mm Apochromatic Refractor on NEQ6 Pro German Equatorial mount.jpg",
+      "source": "Wikimedia Commons",
+      "artist": "Gustaaf Prins from Haarlem, The Netherlands",
+      "credit": "Telescope setup",
+      "license": "CC BY 2.0",
+      "localPath": "photos/setup-deep-sky.jpg"
+    },
+    "panorama": {
+      "id": "panorama",
+      "file": "Imaging IC 10 at Kickapoo Valley Reserve.jpg",
+      "source": "Wikimedia Commons",
+      "artist": "Brainandforce",
+      "credit": "Own work",
+      "license": "CC BY 4.0",
+      "localPath": "photos/panorama.jpg"
+    },
+    "default": {
+      "id": "default",
+      "file": "ApoRef.png",
+      "source": "Wikimedia Commons",
+      "artist": "Tamasflex",
+      "credit": "Own work",
+      "license": "CC BY-SA 3.0",
+      "localPath": "photos/default.jpg"
+    }
+  }
+}
