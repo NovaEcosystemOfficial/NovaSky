@@ -1,12 +1,22 @@
 import { ObservatoryApp } from "nova://engine/scripts/mission-map/app.js";
 import { installDesktopSkyEnhancement } from "./mission-map/sky-immersive.js";
 import { installPanelBridge } from "./mission-map/panel-bridge.js";
+import { installMissionMapRedesignBridge } from "./mission-map/mission-map-redesign.js";
+import {
+  isMissionMapRedesignEnabled,
+  UI_PREFS_EVENT,
+} from "../shared/ui-preferences.js";
 
 let activeApp = null;
 let teardownSky = null;
 let teardownPanel = null;
+let teardownRedesign = null;
 let missionMapCssLoaded = false;
+let redesignCssLoaded = false;
 let engineBaseEl = null;
+let hostContainer = null;
+let hostCtx = null;
+let onUiPref = null;
 
 function ensureEngineBase() {
   if (engineBaseEl) return;
@@ -23,28 +33,42 @@ function removeEngineBase() {
   }
 }
 
+function loadStylesheet(href, marker) {
+  if (document.querySelector(`link[${marker}]`)) return;
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = href;
+  link.setAttribute(marker, "1");
+  document.head.appendChild(link);
+}
+
 function ensureStyles() {
   if (missionMapCssLoaded) return;
   missionMapCssLoaded = true;
+  loadStylesheet("nova://engine/styles/mission-map.css", "data-mm-engine-css");
+  loadStylesheet("nova://desktop/styles/mission-map-host.css", "data-mm-host-css");
+}
 
-  const links = [
-    "nova://engine/styles/mission-map.css",
-    "nova://desktop/styles/mission-map-host.css",
-  ];
-
-  for (const href of links) {
-    if (document.querySelector(`link[href="${href}"]`)) continue;
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = href;
-    document.head.appendChild(link);
+function ensureRedesignStyles(enabled) {
+  if (enabled) {
+    if (!redesignCssLoaded) {
+      redesignCssLoaded = true;
+      loadStylesheet("nova://desktop/styles/mission-map-redesign.css", "data-mm-redesign-css");
+    }
   }
 }
 
-export async function mountMissionMap(container, ctx) {
+function applyRedesignClass(enabled) {
+  document.body.classList.toggle("is-mission-map-redesign", enabled);
+  hostContainer?.closest("[data-workspace]")?.classList.toggle("is-mission-map-redesign", enabled);
+}
+
+async function mountCore(container, ctx) {
   ensureStyles();
+  ensureRedesignStyles(isMissionMapRedesignEnabled());
   ensureEngineBase();
   document.body.classList.add("mission-map-page");
+  applyRedesignClass(isMissionMapRedesignEnabled());
 
   const res = await fetch("nova://desktop/views/mission-map/observatory.html");
   const html = await res.text();
@@ -57,13 +81,40 @@ export async function mountMissionMap(container, ctx) {
   teardownPanel = installPanelBridge(activeApp, {
     panelBody: ctx.panelBody,
     appEl: container,
+    redesign: isMissionMapRedesignEnabled(),
   });
+
+  if (isMissionMapRedesignEnabled()) {
+    teardownRedesign = installMissionMapRedesignBridge(container, {
+      onLayoutToggle: () => remountMissionMap(),
+    });
+  }
 
   requestAnimationFrame(() => {
     activeApp.renderer?.resize();
     activeApp.refreshSky?.();
     window.dispatchEvent(new Event("resize"));
   });
+}
+
+async function remountMissionMap() {
+  if (!hostContainer || !hostCtx) return;
+  await unmountMissionMap();
+  await mountCore(hostContainer, hostCtx);
+}
+
+export async function mountMissionMap(container, ctx) {
+  hostContainer = container;
+  hostCtx = ctx;
+
+  if (!onUiPref) {
+    onUiPref = () => {
+      if (hostContainer) remountMissionMap();
+    };
+    window.addEventListener(UI_PREFS_EVENT, onUiPref);
+  }
+
+  await mountCore(container, ctx);
 
   return {
     unmount: unmountMissionMap,
@@ -71,6 +122,10 @@ export async function mountMissionMap(container, ctx) {
 }
 
 export async function unmountMissionMap() {
+  if (teardownRedesign) {
+    teardownRedesign();
+    teardownRedesign = null;
+  }
   if (teardownPanel) {
     teardownPanel();
     teardownPanel = null;
@@ -84,5 +139,6 @@ export async function unmountMissionMap() {
     activeApp = null;
   }
   removeEngineBase();
-  document.body.classList.remove("mission-map-page");
+  document.body.classList.remove("mission-map-page", "is-mission-map-redesign");
+  hostContainer?.closest("[data-workspace]")?.classList.remove("is-mission-map-redesign");
 }

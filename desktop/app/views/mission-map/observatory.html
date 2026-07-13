@@ -1,12 +1,15 @@
 <!-- Markup observatory — desktop-owned, compatibile con ObservatoryApp -->
-<div class="observatory desktop-observatory" data-observatory>
+<div class="observatory desktop-observatory" data-observatory data-mission-map-root>
   <header class="observatory-header desktop-obs-header">
     <div class="brand" aria-label="NovaSky Osservatorio">
       <span class="brand-mark" aria-hidden="true"><span></span></span>
       <span class="brand-word">Osservatorio</span>
     </div>
     <div class="header-verdict">
-      <p data-verdict>Calcolo del cielo in corso…</p>
+      <p class="header-verdict-line">
+        <span data-verdict>Calcolo del cielo in corso…</span>
+        <span class="mm-demo-pill" data-mm-demo-pill hidden aria-label="Modalità demo">DEMO</span>
+      </p>
       <span class="header-location-row">
         <span data-location>—</span>
         <button type="button" class="btn-location" data-location-request title="Usa la posizione del browser">
@@ -28,6 +31,9 @@
         <input type="range" data-time-slider min="0" max="0" value="0" step="1" aria-label="Simula un'ora della notte" />
       </label>
     </div>
+    <button type="button" class="mm-layout-toggle" data-mm-layout-toggle hidden title="Cambia layout Mission Map">
+      Layout compatto (beta)
+    </button>
   </header>
 
   <main class="observatory-main">
@@ -56,6 +62,7 @@
               <span aria-hidden="true"> · </span>
               <span data-target-state>—</span>
             </p>
+            <p class="mm-inline-metrics" data-mm-inline-metrics aria-label="Metriche target"></p>
           </header>
 
           <div class="premium-sky-stats desktop-card-stats">
@@ -141,6 +148,12 @@
         <button type="button" class="btn-mission-clear" data-mission-clear hidden>Svuota</button>
         <span class="mission-deck-count"><strong data-mission-count>0</strong> target</span>
       </div>
+    </div>
+    <div class="mm-mission-ghosts" data-mission-ghosts aria-hidden="true">
+      <div class="mm-ghost-slot"><span>+</span></div>
+      <div class="mm-ghost-slot"><span>+</span></div>
+      <div class="mm-ghost-slot"><span>+</span></div>
+      <p class="mm-ghost-hint">Nessun target · seleziona nel cielo</p>
     </div>
     <div class="mission-deck-empty" data-timeline-empty>
       <p>Scegli un'opportunità nel cielo e componi la serata.</p>

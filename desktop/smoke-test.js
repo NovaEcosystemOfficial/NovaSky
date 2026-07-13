@@ -190,7 +190,7 @@ async function runTests() {
 
   await clickNav(wc, "attrezzatura");
   await wc.executeJavaScript(`
-    localStorage.setItem('novasky.desktop.ui.v1', JSON.stringify({ digitalObservatoryRedesign: false }));
+    localStorage.setItem('novasky.desktop.ui.v1', JSON.stringify({ digitalObservatoryRedesign: false, missionMapRedesign: false }));
     location.reload();
   `);
   await new Promise((r) => setTimeout(r, 900));
@@ -383,7 +383,7 @@ async function runTests() {
   await wc4.executeJavaScript(`
     (() => {
       try {
-        localStorage.setItem('novasky.desktop.ui.v1', JSON.stringify({ digitalObservatoryRedesign: false }));
+        localStorage.setItem('novasky.desktop.ui.v1', JSON.stringify({ digitalObservatoryRedesign: false, missionMapRedesign: false }));
         const raw = localStorage.getItem('novasky.device-hub.v1');
         if (!raw) return;
         const hub = JSON.parse(raw);

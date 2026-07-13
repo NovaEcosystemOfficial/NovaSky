@@ -3,20 +3,27 @@
 export const UI_PREFS_KEY = "novasky.desktop.ui.v1";
 export const UI_PREFS_EVENT = "novasky-ui-prefs-updated";
 
+const DEFAULTS = {
+  digitalObservatoryRedesign: false,
+  missionMapRedesign: false,
+};
+
 function read() {
   try {
     const raw = localStorage.getItem(UI_PREFS_KEY);
-    if (!raw) return { digitalObservatoryRedesign: false };
+    if (!raw) return { ...DEFAULTS };
     const parsed = JSON.parse(raw);
     return {
       digitalObservatoryRedesign: parsed.digitalObservatoryRedesign === true,
+      missionMapRedesign: parsed.missionMapRedesign === true,
     };
   } catch {
-    return { digitalObservatoryRedesign: false };
+    return { ...DEFAULTS };
   }
 }
 
-function write(prefs) {
+function write(partial) {
+  const prefs = { ...read(), ...partial };
   localStorage.setItem(
     UI_PREFS_KEY,
     JSON.stringify({ ...prefs, updatedAt: new Date().toISOString() })
@@ -39,5 +46,19 @@ export function setPhotoRedesignEnabled(enabled) {
 export function togglePhotoRedesign() {
   const next = !isPhotoRedesignEnabled();
   setPhotoRedesignEnabled(next);
+  return next;
+}
+
+export function isMissionMapRedesignEnabled() {
+  return read().missionMapRedesign === true;
+}
+
+export function setMissionMapRedesignEnabled(enabled) {
+  write({ missionMapRedesign: Boolean(enabled) });
+}
+
+export function toggleMissionMapRedesign() {
+  const next = !isMissionMapRedesignEnabled();
+  setMissionMapRedesignEnabled(next);
   return next;
 }
