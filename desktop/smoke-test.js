@@ -134,8 +134,8 @@ async function runTests() {
   const dashTitle = await wc.executeJavaScript('document.querySelector("[data-view-title]")?.textContent');
   log("Dashboard predefinita", dashTitle === "Dashboard", dashTitle);
 
-  const dashStatus = await wc.executeJavaScript('!!document.querySelector(".dash-status")');
-  log("Dashboard con dati cielo", dashStatus);
+  const dashOk = await wc.executeJavaScript('!!document.querySelector(".dash-v2")');
+  log("Dashboard v2 attiva", dashOk);
 
   await clickNav(wc, "mission-map");
 

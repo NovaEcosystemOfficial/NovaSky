@@ -1,7 +1,7 @@
 {
   "name": "novasky-desktop",
   "productName": "NovaSky",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "NovaSky — osservatorio personale per Seestar (desktop demo)",
   "author": "Nova Ecosystem",
   "private": true,
