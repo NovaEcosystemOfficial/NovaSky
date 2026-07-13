@@ -380,3 +380,31 @@
   right: 16px;
   max-width: min(var(--card-w), calc(100% - 32px));
 }
+
+/* Elementi redesign — nascosti in layout classico */
+.nova-workspace.is-mission-map:not(.is-mission-map-redesign) .mm-mission-ghosts,
+.nova-workspace.is-mission-map:not(.is-mission-map-redesign) .mm-inline-metrics,
+.nova-workspace.is-mission-map:not(.is-mission-map-redesign) .mm-demo-pill,
+.nova-workspace.is-mission-map:not(.is-mission-map-redesign) .mm-ghost-hint {
+  display: none !important;
+}
+
+.nova-workspace.is-mission-map .mm-layout-toggle {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(158, 183, 204, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--muted, #aeb9c5);
+  font-size: 0.625rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.nova-workspace.is-mission-map .mm-layout-toggle:hover {
+  border-color: rgba(92, 199, 216, 0.35);
+  color: var(--text, #eef4f8);
+}

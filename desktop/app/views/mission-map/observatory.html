@@ -31,7 +31,7 @@
         <input type="range" data-time-slider min="0" max="0" value="0" step="1" aria-label="Simula un'ora della notte" />
       </label>
     </div>
-    <button type="button" class="mm-layout-toggle" data-mm-layout-toggle hidden title="Cambia layout Mission Map">
+    <button type="button" class="mm-layout-toggle" data-mm-layout-toggle title="Cambia layout Mission Map">
       Layout compatto (beta)
     </button>
   </header>
@@ -149,14 +149,14 @@
         <span class="mission-deck-count"><strong data-mission-count>0</strong> target</span>
       </div>
     </div>
-    <div class="mm-mission-ghosts" data-mission-ghosts aria-hidden="true">
-      <div class="mm-ghost-slot"><span>+</span></div>
-      <div class="mm-ghost-slot"><span>+</span></div>
-      <div class="mm-ghost-slot"><span>+</span></div>
-      <p class="mm-ghost-hint">Nessun target · seleziona nel cielo</p>
-    </div>
     <div class="mission-deck-empty" data-timeline-empty>
-      <p>Scegli un'opportunità nel cielo e componi la serata.</p>
+      <div class="mm-mission-ghosts" data-mission-ghosts aria-hidden="true">
+        <div class="mm-ghost-slot"><span>+</span></div>
+        <div class="mm-ghost-slot"><span>+</span></div>
+        <div class="mm-ghost-slot"><span>+</span></div>
+        <p class="mm-ghost-hint">Nessun target · seleziona nel cielo</p>
+      </div>
+      <p class="mm-empty-classic">Scegli un'opportunità nel cielo e componi la serata.</p>
     </div>
     <div class="mission-deck-filled" data-timeline-filled hidden>
       <div class="night-markers" data-timeline-markers></div>

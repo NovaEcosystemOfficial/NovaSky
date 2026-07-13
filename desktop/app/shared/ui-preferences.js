@@ -5,13 +5,13 @@ export const UI_PREFS_EVENT = "novasky-ui-prefs-updated";
 
 const DEFAULTS = {
   digitalObservatoryRedesign: false,
-  missionMapRedesign: false,
+  missionMapRedesign: true,
 };
 
 function read() {
   try {
     const raw = localStorage.getItem(UI_PREFS_KEY);
-    if (!raw) return { ...DEFAULTS };
+    if (!raw) return { digitalObservatoryRedesign: false, missionMapRedesign: true };
     const parsed = JSON.parse(raw);
     return {
       digitalObservatoryRedesign: parsed.digitalObservatoryRedesign === true,

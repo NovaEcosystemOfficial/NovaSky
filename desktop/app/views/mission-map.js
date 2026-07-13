@@ -12,7 +12,6 @@ let teardownSky = null;
 let teardownPanel = null;
 let teardownRedesign = null;
 let missionMapCssLoaded = false;
-let redesignCssLoaded = false;
 let engineBaseEl = null;
 let hostContainer = null;
 let hostCtx = null;
@@ -47,15 +46,7 @@ function ensureStyles() {
   missionMapCssLoaded = true;
   loadStylesheet("nova://engine/styles/mission-map.css", "data-mm-engine-css");
   loadStylesheet("nova://desktop/styles/mission-map-host.css", "data-mm-host-css");
-}
-
-function ensureRedesignStyles(enabled) {
-  if (enabled) {
-    if (!redesignCssLoaded) {
-      redesignCssLoaded = true;
-      loadStylesheet("nova://desktop/styles/mission-map-redesign.css", "data-mm-redesign-css");
-    }
-  }
+  loadStylesheet("nova://desktop/styles/mission-map-redesign.css", "data-mm-redesign-css");
 }
 
 function applyRedesignClass(enabled) {
@@ -65,7 +56,6 @@ function applyRedesignClass(enabled) {
 
 async function mountCore(container, ctx) {
   ensureStyles();
-  ensureRedesignStyles(isMissionMapRedesignEnabled());
   ensureEngineBase();
   document.body.classList.add("mission-map-page");
   applyRedesignClass(isMissionMapRedesignEnabled());
@@ -84,11 +74,9 @@ async function mountCore(container, ctx) {
     redesign: isMissionMapRedesignEnabled(),
   });
 
-  if (isMissionMapRedesignEnabled()) {
-    teardownRedesign = installMissionMapRedesignBridge(container, {
-      onLayoutToggle: () => remountMissionMap(),
-    });
-  }
+  teardownRedesign = installMissionMapRedesignBridge(container, {
+    onLayoutToggle: () => remountMissionMap(),
+  });
 
   requestAnimationFrame(() => {
     activeApp.renderer?.resize();

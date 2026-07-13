@@ -2,7 +2,11 @@
 
 .nova-workspace.is-mission-map.is-mission-map-redesign {
   --mm-card-w: min(420px, calc(100% - 48px));
-  --deck: 88px;
+  --deck: 92px;
+}
+
+.nova-workspace.is-mission-map.is-mission-map-redesign .desktop-observatory:has([data-mission-timeline].has-mission) {
+  --deck: clamp(108px, 15vh, 140px);
 }
 
 /* ── Header mission control ── */
@@ -77,26 +81,6 @@
   margin-left: 4px;
   padding-left: 12px;
   border-left: 1px solid rgba(158, 183, 204, 0.08);
-}
-
-.nova-workspace.is-mission-map.is-mission-map-redesign .mm-layout-toggle {
-  display: inline-flex;
-  align-items: center;
-  padding: 6px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(158, 183, 204, 0.12);
-  background: rgba(255, 255, 255, 0.03);
-  color: var(--muted, #aeb9c5);
-  font-size: 0.625rem;
-  font-weight: 600;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: border-color 0.15s, color 0.15s;
-}
-
-.nova-workspace.is-mission-map.is-mission-map-redesign .mm-layout-toggle:hover {
-  border-color: rgba(92, 199, 216, 0.35);
-  color: var(--text, #eef4f8);
 }
 
 /* ── Sky: nascondi prompt con target selezionato ── */
@@ -307,15 +291,29 @@
   display: none;
 }
 
-.nova-workspace.is-mission-map.is-mission-map-redesign .mm-mission-ghosts {
+.nova-workspace.is-mission-map.is-mission-map-redesign .mission-deck-empty {
   display: flex;
   align-items: center;
   gap: 10px;
   min-height: 44px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
 }
 
-.nova-workspace.is-mission-map.is-mission-map-redesign .mm-mission-ghosts[hidden] {
+.nova-workspace.is-mission-map.is-mission-map-redesign .mission-deck-empty[hidden] {
   display: none !important;
+}
+
+.nova-workspace.is-mission-map.is-mission-map-redesign .mm-empty-classic {
+  display: none;
+}
+
+.nova-workspace.is-mission-map.is-mission-map-redesign .mm-mission-ghosts {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .nova-workspace.is-mission-map.is-mission-map-redesign .mm-ghost-slot {
@@ -337,8 +335,12 @@
   color: var(--quiet, #74808d);
 }
 
-.nova-workspace.is-mission-map.is-mission-map-redesign .mission-deck-empty {
-  display: none;
+.nova-workspace.is-mission-map.is-mission-map-redesign .mission-deck-filled {
+  min-height: 52px;
+}
+
+.nova-workspace.is-mission-map.is-mission-map-redesign .mission-deck-filled[hidden] {
+  display: none !important;
 }
 
 .nova-workspace.is-mission-map.is-mission-map-redesign .mission-deck-filled .night-chain-wrap {
@@ -352,10 +354,9 @@
 }
 
 /* Classic mode: hide redesign-only chrome */
-.nova-workspace.is-mission-map:not(.is-mission-map-redesign) .mm-demo-pill,
-.nova-workspace.is-mission-map:not(.is-mission-map-redesign) .mm-layout-toggle,
 .nova-workspace.is-mission-map:not(.is-mission-map-redesign) .mm-inline-metrics,
-.nova-workspace.is-mission-map:not(.is-mission-map-redesign) .mm-mission-ghosts {
+.nova-workspace.is-mission-map:not(.is-mission-map-redesign) .mm-mission-ghosts,
+.nova-workspace.is-mission-map:not(.is-mission-map-redesign) .mm-demo-pill {
   display: none !important;
 }
 

@@ -30,21 +30,9 @@ function syncDemoPill(root) {
 function syncLayoutToggle(root) {
   const btn = root.querySelector("[data-mm-layout-toggle]");
   if (!btn) return;
-  btn.hidden = false;
   btn.textContent = isMissionMapRedesignEnabled()
     ? "Layout classico"
     : "Layout compatto (beta)";
-}
-
-function syncMissionGhosts(root) {
-  const ghosts = root.querySelector("[data-mission-ghosts]");
-  const filled = root.querySelector("[data-timeline-filled]");
-  const empty = root.querySelector("[data-timeline-empty]");
-  if (!ghosts) return;
-
-  const hasMission = filled && !filled.hidden;
-  ghosts.hidden = hasMission;
-  if (empty) empty.hidden = !hasMission && isMissionMapRedesignEnabled();
 }
 
 /**
@@ -57,7 +45,6 @@ export function installMissionMapRedesignBridge(appEl, options = {}) {
   const cardRoot = appEl.querySelector("[data-target-card]");
   syncDemoPill(appEl);
   syncLayoutToggle(appEl);
-  syncMissionGhosts(appEl);
   if (cardRoot?.classList.contains("is-open")) syncInlineMetrics(cardRoot);
 
   const layoutBtn = appEl.querySelector("[data-mm-layout-toggle]");
@@ -88,18 +75,6 @@ export function installMissionMapRedesignBridge(appEl, options = {}) {
     () => {
       if (cardRoot?.classList.contains("is-open")) syncInlineMetrics(cardRoot);
     }
-  );
-
-  observe(
-    appEl.querySelector("[data-timeline-filled]"),
-    { attributes: true, attributeFilter: ["hidden"] },
-    () => syncMissionGhosts(appEl)
-  );
-
-  observe(
-    appEl.querySelector("[data-mission-count]"),
-    { childList: true, characterData: true, subtree: true },
-    () => syncMissionGhosts(appEl)
   );
 
   return () => {
