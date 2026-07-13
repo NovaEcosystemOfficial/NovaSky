@@ -1,19 +1,19 @@
-/** Catalogo fotografico dispositivi — sostituibile con imageUrl per foto reali. */
+/** Catalogo fotografico dispositivi — JPG da Wikimedia Commons (vedi photos/credits.json). */
 
 const BASE = "nova://desktop/assets/observatory/photos/";
 
 export const DEVICE_PHOTO_CATALOG = {
-  seestar_s50: `${BASE}seestar-s50.svg`,
-  seestar_s30: `${BASE}seestar-s30.svg`,
-  canon_80d: `${BASE}canon-80d.svg`,
-  canon_2000d: `${BASE}canon-2000d.svg`,
-  eq6: `${BASE}eq6.svg`,
-  eagle_core: `${BASE}eagle-core.svg`,
-  guide_camera: `${BASE}guide-camera.svg`,
-  focuser: `${BASE}focuser.svg`,
-  filter_wheel: `${BASE}filter-wheel.svg`,
-  ota_deep_sky: `${BASE}ota-deep-sky.svg`,
-  default: `${BASE}default.svg`,
+  seestar_s50: `${BASE}seestar-s50.jpg`,
+  seestar_s30: `${BASE}seestar-s30.jpg`,
+  canon_80d: `${BASE}canon-80d.jpg`,
+  canon_2000d: `${BASE}canon-2000d.jpg`,
+  eq6: `${BASE}eq6.jpg`,
+  eagle_core: `${BASE}eagle-core.jpg`,
+  guide_camera: `${BASE}guide-camera.jpg`,
+  focuser: `${BASE}focuser.jpg`,
+  filter_wheel: `${BASE}filter-wheel.jpg`,
+  ota_deep_sky: `${BASE}ota-deep-sky.jpg`,
+  default: `${BASE}default.jpg`,
 };
 
 export function resolveDeviceImage(device) {

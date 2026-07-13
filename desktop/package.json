@@ -1,7 +1,7 @@
 {
   "name": "novasky-desktop",
   "productName": "NovaSky",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "NovaSky — osservatorio personale per Seestar (desktop demo)",
   "author": "Nova Ecosystem",
   "private": true,
@@ -9,6 +9,7 @@
   "scripts": {
     "start": "electron .",
     "test:smoke": "electron smoke-test.js",
+    "fetch:equipment-photos": "python3 scripts/fetch-equipment-photos.py",
     "build:win": "electron-builder --win --x64",
     "build:dir": "electron-builder --win --x64 --dir",
     "postinstall": "electron-builder install-app-deps"

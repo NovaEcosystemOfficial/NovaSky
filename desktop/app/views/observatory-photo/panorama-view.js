@@ -40,7 +40,7 @@ export function renderPanoramaView(hotspotsVisible = true) {
         </div>
       </div>
 
-      <p class="oph-panorama-note">Layout placeholder — sostituibile con fotografia panoramica reale senza modificare il codice.</p>
+      <p class="oph-panorama-note">Foto da Wikimedia Commons — sostituibile con panoramica reale dell'osservatorio.</p>
 
       <div data-setup-registry style="display:none" aria-hidden="true">
         <span data-setup-id="setup-deep-sky"></span>

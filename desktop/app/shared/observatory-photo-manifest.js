@@ -1,30 +1,32 @@
 /**
  * Manifest asset fotografici — sostituibile con file reali senza modificare le viste.
- * Priorità: imageUrl dispositivo → manifest → fallback hub SVG.
+ * Priorità: imageUrl dispositivo → manifest → catalogo hub.
  */
 
 import { resolveDeviceImage } from "./device-registry.js";
 
-const BASE = "nova://desktop/assets/observatory/";
+const BASE = "nova://desktop/assets/observatory/photos/";
 
 export const PRIMARY_SETUP_ID = "setup-deep-sky";
 
 export const PHOTO_ASSETS = {
-  panorama: `${BASE}panoramiche/observatory-wide.svg`,
+  panorama: `${BASE}panorama.jpg`,
   setups: {
-    [PRIMARY_SETUP_ID]: `${BASE}setup/deep-sky.svg`,
+    [PRIMARY_SETUP_ID]: `${BASE}setup-deep-sky.jpg`,
+    "setup-seestar-s50": `${BASE}seestar-s50.jpg`,
+    "setup-seestar-s30": `${BASE}seestar-s30.jpg`,
   },
   devices: {
-    "dev-mount-eq6": `${BASE}montature/mount.svg`,
-    "dev-telescope-ota": `${BASE}telescopi/ota.svg`,
-    "dev-canon-80d": `${BASE}camere/camera.svg`,
-    "dev-canon-2000d": `${BASE}camere/camera-alt.svg`,
-    "dev-guide-camera": `${BASE}camere/guide-camera.svg`,
-    "dev-focuser": `${BASE}accessori/focuser.svg`,
-    "dev-filter-wheel": `${BASE}accessori/filter-wheel.svg`,
-    "dev-eagle-core": `${BASE}controller/eagle.svg`,
-    "dev-seestar-s50": `${BASE}camere/seestar.svg`,
-    "dev-seestar-s30-pro": `${BASE}camere/seestar-compact.svg`,
+    "dev-mount-eq6": `${BASE}eq6.jpg`,
+    "dev-telescope-ota": `${BASE}ota-deep-sky.jpg`,
+    "dev-canon-80d": `${BASE}canon-80d.jpg`,
+    "dev-canon-2000d": `${BASE}canon-2000d.jpg`,
+    "dev-guide-camera": `${BASE}guide-camera.jpg`,
+    "dev-focuser": `${BASE}focuser.jpg`,
+    "dev-filter-wheel": `${BASE}filter-wheel.jpg`,
+    "dev-eagle-core": `${BASE}eagle-core.jpg`,
+    "dev-seestar-s50": `${BASE}seestar-s50.jpg`,
+    "dev-seestar-s30-pro": `${BASE}seestar-s30.jpg`,
   },
 };
 
@@ -59,7 +61,7 @@ export const PANORAMA_HOTSPOTS = [
 ];
 
 export function resolveSetupPhoto(setupId) {
-  return PHOTO_ASSETS.setups[setupId] || `${BASE}setup/deep-sky.svg`;
+  return PHOTO_ASSETS.setups[setupId] || `${BASE}setup-deep-sky.jpg`;
 }
 
 export function resolveDevicePhoto(device) {
