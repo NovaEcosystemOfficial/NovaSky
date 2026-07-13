@@ -1,0 +1,408 @@
+.nova-app {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  height: 100vh;
+  min-height: 100%;
+}
+
+/* ── Sidebar ── */
+
+.nova-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px 10px 14px;
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+}
+
+.nova-sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 6px 4px;
+}
+
+.nova-mark {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff 0 2px, transparent 3px), var(--bg-optical);
+  border: 1.5px solid var(--cyan);
+  box-shadow: 0 0 10px rgba(92, 199, 216, 0.28);
+  flex-shrink: 0;
+}
+
+.nova-word {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.nova-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.nova-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+}
+
+.nova-nav-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  opacity: 0.72;
+}
+
+.nova-nav-item:hover {
+  background: rgba(92, 199, 216, 0.06);
+  color: var(--text);
+}
+
+.nova-nav-item:hover .nova-nav-icon {
+  opacity: 1;
+}
+
+.nova-nav-item.is-active {
+  background: rgba(92, 199, 216, 0.1);
+  color: var(--cyan);
+  box-shadow: inset 2px 0 0 var(--cyan);
+}
+
+.nova-nav-item.is-active .nova-nav-icon {
+  opacity: 1;
+}
+
+.nova-sidebar-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+  padding: 10px 8px;
+  border-top: 1px solid var(--line);
+}
+
+.nova-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px rgba(103, 201, 141, 0.45);
+  flex-shrink: 0;
+}
+
+.nova-status-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.nova-status-copy strong {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--quiet);
+}
+
+.nova-status-copy span {
+  font-size: 0.75rem;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Main column ── */
+
+.nova-main {
+  display: grid;
+  grid-template-rows: var(--header-h) 1fr;
+  min-width: 0;
+  min-height: 0;
+}
+
+.nova-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(5, 7, 10, 0.92);
+  backdrop-filter: blur(8px);
+}
+
+.nova-header-title h1 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.nova-header-title p {
+  margin: 2px 0 0;
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
+.nova-header-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.nova-header-meta time {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--cyan);
+}
+
+.nova-header-meta span {
+  font-size: 0.75rem;
+  color: var(--quiet);
+}
+
+.nova-body {
+  display: grid;
+  grid-template-columns: 1fr var(--panel-w);
+  min-height: 0;
+  min-width: 0;
+}
+
+.nova-app.is-panel-collapsed .nova-body {
+  grid-template-columns: 1fr 0;
+}
+
+.nova-app.is-panel-collapsed .nova-panel {
+  border-left: none;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.nova-workspace {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  padding: 24px;
+}
+
+.nova-workspace.is-mission-map {
+  padding: 0;
+  overflow: hidden;
+}
+
+/* ── Context panel ── */
+
+.nova-panel {
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--line);
+  background: var(--surface);
+  min-height: 0;
+  min-width: var(--panel-w);
+  transition: min-width 0.22s ease, opacity 0.22s ease;
+}
+
+.nova-app.is-panel-collapsed .nova-panel {
+  min-width: 0;
+  opacity: 0;
+}
+
+.nova-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 14px 10px;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+
+.nova-panel-head h2 {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--quiet);
+}
+
+.nova-panel-toggle {
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface-raised);
+  color: var(--muted);
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.nova-app.is-panel-collapsed .nova-panel-toggle span {
+  display: inline-block;
+  transform: rotate(180deg);
+}
+
+.nova-panel-body {
+  padding: 14px;
+  overflow: auto;
+  flex: 1;
+  font-size: 0.8125rem;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.nova-panel-empty {
+  margin: 0;
+}
+
+.nova-app.is-mission-map-view .nova-header {
+  display: none;
+}
+
+.nova-app.is-mission-map-view .nova-main {
+  grid-template-rows: 1fr;
+}
+
+.nova-app.is-mission-map-view .nova-body {
+  grid-template-columns: 1fr var(--panel-w);
+  min-height: 0;
+}
+
+.nova-app.is-mission-map-view.is-panel-collapsed .nova-body {
+  grid-template-columns: 1fr 0;
+}
+
+.nova-app.is-mission-map-view .nova-workspace {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Panel blocks (Mission Map bridge) ── */
+
+.nova-panel-section {
+  margin-bottom: 16px;
+}
+
+.nova-panel-section:last-child {
+  margin-bottom: 0;
+}
+
+.nova-panel-section h3 {
+  margin: 0 0 8px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--quiet);
+}
+
+.nova-panel-kv {
+  display: grid;
+  gap: 6px;
+}
+
+.nova-panel-kv div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.8125rem;
+}
+
+.nova-panel-kv span {
+  color: var(--quiet);
+}
+
+.nova-panel-kv strong {
+  color: var(--text);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.nova-panel-sync {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(92, 199, 216, 0.06);
+  border: 1px solid rgba(92, 199, 216, 0.12);
+  font-size: 0.75rem;
+  color: var(--cyan);
+}
+
+.nova-panel-sync-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 6px rgba(92, 199, 216, 0.5);
+}
+
+.nova-panel-briefing {
+  font-size: 0.8125rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.nova-panel-briefing p {
+  margin: 0 0 10px;
+}
+
+.nova-panel-briefing p:last-child {
+  margin-bottom: 0;
+}
+
+/* ── Shared view blocks ── */
+
+.view-placeholder {
+  max-width: 640px;
+}
+
+.view-placeholder h2 {
+  margin: 0 0 8px;
+  font-size: 1.375rem;
+  font-weight: 700;
+}
+
+.view-placeholder p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+@media (max-width: 1366px) {
+  :root {
+    --sidebar-w: 172px;
+    --panel-w: 248px;
+  }
+
+  .nova-nav-item span {
+    font-size: 0.75rem;
+  }
+}
+
+@media (min-width: 1920px) {
+  :root {
+    --panel-w: 288px;
+  }
+}

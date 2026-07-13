@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="120" y2="120">
+      <stop offset="0%" stop-color="#0e1218"/>
+      <stop offset="100%" stop-color="#060810"/>
+    </linearGradient>
+  </defs>
+  <rect width="120" height="120" rx="16" fill="url(#bg)"/>
+  <rect x="36" y="42" width="48" height="36" rx="6" fill="#141a22" stroke="rgba(92,199,216,0.25)" stroke-width="1"/>
+  <circle cx="60" cy="60" r="12" stroke="#5cc7d8" stroke-width="1.5" opacity="0.6"/>
+  <circle cx="60" cy="60" r="4" fill="#5cc7d8" opacity="0.5"/>
+  <circle cx="48" cy="52" r="2" fill="#67c98d"/>
+  <circle cx="72" cy="52" r="2" fill="#67c98d"/>
+  <text x="60" y="96" text-anchor="middle" fill="#6b7785" font-family="Inter, sans-serif" font-size="7" letter-spacing="0.05em">GUIDE CAM</text>
+</svg>
