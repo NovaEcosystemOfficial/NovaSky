@@ -81,7 +81,23 @@
 }
 
 .nova-workspace.is-mission-map .desktop-sky-chamber {
-  background: #04060a;
+  background: #03050a;
+  position: relative;
+}
+
+/* Atmosfera immersiva calma — overlay CSS, non atlante */
+.nova-workspace.is-mission-map .desktop-sky-chamber::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background:
+    radial-gradient(ellipse 70% 45% at 55% 28%, rgba(55, 70, 110, 0.12), transparent 70%),
+    radial-gradient(ellipse 50% 35% at 20% 70%, rgba(40, 28, 20, 0.08), transparent 65%);
+  mix-blend-mode: screen;
+  opacity: 0.85;
+  animation: mm-sky-breathe 18s ease-in-out infinite;
 }
 
 .nova-workspace.is-mission-map .desktop-sky-chamber::after {
@@ -89,17 +105,35 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
+  z-index: 1;
   background:
-    radial-gradient(ellipse 90% 70% at 50% 40%, transparent 40%, rgba(4, 6, 10, 0.35) 100%),
-    linear-gradient(180deg, transparent 70%, rgba(4, 6, 9, 0.5) 100%);
+    radial-gradient(ellipse 95% 75% at 50% 42%, transparent 38%, rgba(3, 5, 10, 0.42) 100%),
+    linear-gradient(180deg, rgba(3, 5, 10, 0.12) 0%, transparent 18%, transparent 62%, rgba(3, 5, 9, 0.55) 100%);
+}
+
+@keyframes mm-sky-breathe {
+  0%, 100% { opacity: 0.75; }
+  50% { opacity: 0.95; }
+}
+
+.nova-workspace.is-mission-map #mission-canvas {
+  position: relative;
+  z-index: 0;
 }
 
 .nova-workspace.is-mission-map .sky-prompt {
   font-size: 0.8125rem;
-  opacity: 0.75;
+  opacity: 0.55;
+  z-index: 2;
+  letter-spacing: 0.01em;
+}
+
+.nova-workspace.is-mission-map .sky-prompt p {
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.65);
 }
 
 .nova-workspace.is-mission-map .desktop-target-card {
+  z-index: 3;
   top: auto;
   right: 12px;
   bottom: calc(var(--deck) + 10px);
@@ -283,6 +317,7 @@
 }
 
 .nova-workspace.is-mission-map .desktop-mission-deck {
+  z-index: 4;
   padding: 10px 16px 12px;
   background: rgba(4, 6, 9, 0.94);
   border-top-color: rgba(158, 183, 204, 0.06);

@@ -1,20 +1,24 @@
 /* NovaSky Desktop — Mission Map redesign (feature flag: missionMapRedesign) */
 
 .nova-workspace.is-mission-map.is-mission-map-redesign {
-  --mm-card-w: min(420px, calc(100% - 48px));
-  --deck: 92px;
+  --mm-card-w: min(400px, calc(100% - 48px));
+  --deck: 84px;
+  --header: 46px;
 }
 
 .nova-workspace.is-mission-map.is-mission-map-redesign .desktop-observatory:has([data-mission-timeline].has-mission) {
-  --deck: clamp(108px, 15vh, 140px);
+  --deck: clamp(100px, 14vh, 132px);
 }
 
-/* ── Header mission control ── */
+/* ── Header sottile — il cielo resta protagonista ── */
 .nova-workspace.is-mission-map.is-mission-map-redesign .desktop-obs-header {
   padding: 0 14px 0 12px;
   gap: 10px 16px;
   grid-template-columns: auto 1fr auto auto;
   align-items: center;
+  background: rgba(4, 6, 10, 0.48);
+  backdrop-filter: blur(14px);
+  border-bottom-color: rgba(158, 183, 204, 0.04);
 }
 
 .nova-workspace.is-mission-map.is-mission-map-redesign .desktop-obs-header .brand {
@@ -101,11 +105,12 @@
   max-width: var(--mm-card-w);
   transform: translateX(-50%);
   border-radius: 16px;
-  border-color: rgba(158, 183, 204, 0.12);
-  background: rgba(8, 10, 14, 0.88);
+  border-color: rgba(158, 183, 204, 0.1);
+  background: rgba(6, 8, 12, 0.72);
+  backdrop-filter: blur(22px) saturate(1.05);
   box-shadow:
-    0 20px 56px rgba(0, 0, 0, 0.5),
-    0 0 0 1px rgba(92, 199, 216, 0.06) inset;
+    0 20px 56px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(92, 199, 216, 0.05) inset;
 }
 
 .nova-workspace.is-mission-map.is-mission-map-redesign .desktop-target-card.is-open {
@@ -274,7 +279,9 @@
 /* ── Mission tray compatto ── */
 .nova-workspace.is-mission-map.is-mission-map-redesign .desktop-mission-deck {
   padding: 8px 16px 10px;
-  background: rgba(4, 6, 9, 0.92);
+  background: rgba(4, 6, 9, 0.72);
+  backdrop-filter: blur(16px);
+  border-top-color: rgba(158, 183, 204, 0.05);
 }
 
 .nova-workspace.is-mission-map.is-mission-map-redesign .desktop-mission-deck .mission-deck-head {

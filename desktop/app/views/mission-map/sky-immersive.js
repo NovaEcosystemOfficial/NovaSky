@@ -1,5 +1,6 @@
 /**
- * Desktop-only: sprite cielo con PNG sfumati — nessuna modifica al motore website/.
+ * Desktop-only: cielo immersivo calmo — PNG sfumati + focus notte.
+ * Nessuna modifica al motore website/. Reversibile al teardown.
  */
 
 function smoothstep(edge0, edge1, x) {
@@ -63,10 +64,11 @@ export function buildFeatheredSkyCanvas(source) {
 function drawFeatheredSkyImage(ctx, canvas, w, h, state) {
   if (!canvas || state.presence < 0.02) return;
 
-  const alpha = state.presence * (state.isSelected ? 0.92 : state.isHovered ? 0.62 : 0.38);
-  const bright = state.isSelected ? 1.08 + state.emerge * 0.18 : state.isHovered ? 0.95 : 0.78;
-  const contrast = state.isSelected ? 1.02 + state.emerge * 0.08 : 0.9;
-  const saturate = state.isSelected ? 1.05 + state.emerge * 0.12 : 0.82;
+  /* Immersivo: non-selezionati più quieti, selezionato più presente */
+  const alpha = state.presence * (state.isSelected ? 0.95 : state.isHovered ? 0.55 : 0.26);
+  const bright = state.isSelected ? 1.1 + state.emerge * 0.2 : state.isHovered ? 0.92 : 0.72;
+  const contrast = state.isSelected ? 1.04 + state.emerge * 0.08 : 0.88;
+  const saturate = state.isSelected ? 1.08 + state.emerge * 0.1 : 0.78;
 
   ctx.save();
   ctx.globalCompositeOperation = "screen";
@@ -91,6 +93,83 @@ function enhanceSprite(sprite, thumbnails, id) {
 }
 
 /**
+ * Focus notte più deciso: il cielo intorno al target si quieta.
+ */
+function patchSkyDim(renderer, origSkyDim) {
+  renderer.drawSkyDim = function immersiveSkyDim() {
+    const dim = this.anim.skyDim;
+    if (dim < 0.01) {
+      origSkyDim.call(this);
+      return;
+    }
+
+    const { ctx, width, height } = this;
+    ctx.save();
+
+    if (this.selectedId) {
+      const target = this.targets.find((t) => t.id === this.selectedId);
+      if (target) {
+        const pos = this.worldToScreen(target.alt, target.az, 2, this.targetParallaxAz(target));
+        if (Number.isFinite(pos.x) && Number.isFinite(pos.y)) {
+          const r = Math.max(width, height) * 0.82;
+          const g = ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, r);
+          g.addColorStop(0, `rgba(2, 4, 8, ${0.02 * dim})`);
+          g.addColorStop(0.28, `rgba(2, 4, 8, ${0.18 * dim})`);
+          g.addColorStop(0.62, `rgba(2, 4, 8, ${0.36 * dim})`);
+          g.addColorStop(1, `rgba(2, 4, 8, ${0.52 * dim})`);
+          ctx.fillStyle = g;
+          ctx.fillRect(0, 0, width, height);
+          ctx.restore();
+          return;
+        }
+      }
+    }
+
+    ctx.restore();
+    origSkyDim.call(this);
+  };
+}
+
+/**
+ * Orizzonte leggermente più caldo — atmosfera, non atlante.
+ */
+function patchHorizon(renderer, origHorizon) {
+  renderer.drawHorizon = function immersiveHorizon() {
+    origHorizon.call(this);
+    const { ctx, width, height } = this;
+    const y = height * 0.88;
+    ctx.save();
+    const warm = ctx.createLinearGradient(0, y, 0, height);
+    warm.addColorStop(0, "transparent");
+    warm.addColorStop(0.55, "rgba(28, 22, 18, 0.06)");
+    warm.addColorStop(1, "rgba(8, 6, 5, 0.18)");
+    ctx.fillStyle = warm;
+    ctx.fillRect(0, y, width, height - y);
+
+    const glow = ctx.createRadialGradient(width * 0.5, height * 0.98, 0, width * 0.5, height, width * 0.55);
+    glow.addColorStop(0, "rgba(70, 90, 120, 0.07)");
+    glow.addColorStop(1, "transparent");
+    ctx.globalCompositeOperation = "screen";
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, height * 0.7, width, height * 0.3);
+    ctx.restore();
+  };
+}
+
+/**
+ * Costellazioni quasi invisibili — non stile Stellarium.
+ */
+function patchConstellations(renderer, origConstellations) {
+  renderer.drawConstellations = function immersiveConstellations() {
+    const { ctx } = this;
+    ctx.save();
+    ctx.globalAlpha = 0.35;
+    origConstellations.call(this);
+    ctx.restore();
+  };
+}
+
+/**
  * @param {import('nova://engine/scripts/mission-map/app.js').ObservatoryApp} app
  */
 export function installDesktopSkyEnhancement(app) {
@@ -101,6 +180,9 @@ export function installDesktopSkyEnhancement(app) {
   const origGlow = renderer.drawSkyObjectGlow.bind(renderer);
   const origDraw = renderer.drawSuspendedTarget.bind(renderer);
   const origSetSprites = renderer.setSprites.bind(renderer);
+  const origSkyDim = renderer.drawSkyDim.bind(renderer);
+  const origHorizon = renderer.drawHorizon.bind(renderer);
+  const origConstellations = renderer.drawConstellations.bind(renderer);
 
   function enhanceAll(sprites) {
     if (!sprites) return sprites;
@@ -114,12 +196,17 @@ export function installDesktopSkyEnhancement(app) {
     origSetSprites(enhanceAll(sprites));
   };
 
+  patchSkyDim(renderer, origSkyDim);
+  patchHorizon(renderer, origHorizon);
+  patchConstellations(renderer, origConstellations);
+
   renderer.drawSuspendedTarget = function drawWithSkyImage(target) {
     const sprite = this.sprites.get(target.id);
     const feathered = sprite?.featheredCanvas;
 
     this.drawSkyObjectGlow = function patchedGlow(ctx, w, h, gr, gg, gb, ar, ag, ab, state, glowBase, glowMul) {
-      origGlow.call(renderer, ctx, w, h, gr, gg, gb, ar, ag, ab, state, glowBase, glowMul);
+      const quietMul = state.isSelected ? 1.05 : state.isHovered ? 0.85 : 0.55;
+      origGlow.call(renderer, ctx, w, h, gr, gg, gb, ar, ag, ab, state, glowBase, glowMul * quietMul);
       if (feathered) {
         drawFeatheredSkyImage(ctx, feathered, w, h, state);
       }
@@ -143,6 +230,9 @@ export function installDesktopSkyEnhancement(app) {
     renderer.setSprites = origSetSprites;
     renderer.drawSuspendedTarget = origDraw;
     renderer.drawSkyObjectGlow = origGlow;
+    renderer.drawSkyDim = origSkyDim;
+    renderer.drawHorizon = origHorizon;
+    renderer.drawConstellations = origConstellations;
     app.refreshSky = origRefresh;
   };
 }
