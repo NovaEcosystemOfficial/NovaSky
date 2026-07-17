@@ -15,6 +15,9 @@ export {
   editDevice,
   HUB_EVENT,
   getDeviceHub,
+  startSeestarLive,
+  stopSeestarLive,
+  isSeestarLivePolling,
 } from "./device-hub/index.js";
 
 export {
@@ -23,6 +26,7 @@ export {
   devicePowerLabel,
   deviceConnectionLabel,
   deviceDisplayName,
+  deviceModeBadge,
 } from "./device-hub/schemas.js";
 
 export { resolveDeviceImage, DEVICE_PHOTO_CATALOG } from "./device-hub/images.js";

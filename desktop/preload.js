@@ -1,14 +1,20 @@
 /**
  * NovaSky Desktop — preload sicuro.
- * Espone solo metadati runtime; nessuna API Node diretta alla UI.
+ * Espone metadati runtime + bridge Alpaca READ-ONLY (GET + discovery).
  */
 
-const { contextBridge } = require("electron");
+const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("novaSkyDesktop", {
   isDesktop: true,
   platform: process.platform,
-  version: "0.1.0",
+  version: "0.1.6",
+  alpaca: {
+    /** UDP discovery only */
+    discover: (opts) => ipcRenderer.invoke("alpaca:discover", opts || {}),
+    /** HTTP GET only — main process enforces allowlist */
+    httpGet: (opts) => ipcRenderer.invoke("alpaca:httpGet", opts || {}),
+  },
 });
 
 document.addEventListener("DOMContentLoaded", () => {

@@ -88,6 +88,14 @@ export function moonPhaseIcon(phaseName = "") {
   return "◔";
 }
 
+export function findPrimarySeestar() {
+  return (
+    getDevices().find((d) => d.id === "dev-seestar-s30-pro") ||
+    getDevices().find((d) => d.id === "dev-seestar-s50") ||
+    getDevices().find((d) => d.category === "seestar")
+  );
+}
+
 export function findConnectedSeestar() {
   return getDevices().find(
     (d) =>
@@ -96,11 +104,27 @@ export function findConnectedSeestar() {
   );
 }
 
-export function findPrimarySeestar() {
-  return (
-    getDevices().find((d) => d.id === "dev-seestar-s50") ||
-    getDevices().find((d) => d.category === "seestar")
-  );
+export async function quickConnectSeestar() {
+  if (isSimulationMode()) {
+    const simTarget =
+      getDevices().find((d) => d.id === "dev-seestar-s50") || findPrimarySeestar();
+    if (!simTarget) return { ok: false, reason: "no_device" };
+    await connectDevice(simTarget.id);
+    return { ok: true, mode: "SIM", deviceId: simTarget.id };
+  }
+
+  const liveTarget =
+    getDevices().find((d) => d.id === "dev-seestar-s30-pro") || findPrimarySeestar();
+  if (!liveTarget) return { ok: false, reason: "no_device" };
+  await connectDevice(liveTarget.id);
+  const updated = getDevices().find((d) => d.id === liveTarget.id);
+  const liveOk = updated?.telemetry?.mount?.liveState === "LIVE";
+  return {
+    ok: liveOk,
+    mode: "LIVE",
+    deviceId: liveTarget.id,
+    error: liveOk ? null : updated?.errors?.[0] || "Seestar non rilevato — verifica hotspot Wi-Fi",
+  };
 }
 
 export function resolveCaptureTargetId({ mission, plan, meta, session, captureState }) {
@@ -120,17 +144,23 @@ export function targetFromCatalog(targetId) {
 export function activeSetupLabel() {
   const setups = getSetups();
   const deep = setups.find((s) => s.id === "setup-deep-sky");
-  const seestar = setups.find((s) => s.slug === "smart-telescope");
+  const seestar = setups.find((s) => s.slug === "smart-telescope" || s.slug === "smart-telescope-portable");
   if (findConnectedSeestar()) return seestar?.name || "Seestar";
   return deep?.name || setups[0]?.name || "—";
 }
 
-export async function quickConnectSeestar() {
-  const device = findPrimarySeestar();
-  if (!device) return { ok: false, reason: "no_device" };
-  if (!isSimulationMode()) return { ok: false, reason: "need_simulation" };
-  await connectDevice(device.id);
-  return { ok: true, deviceId: device.id };
+export function formatMountRa(hours) {
+  if (hours == null || Number.isNaN(Number(hours))) return "—";
+  const h = Number(hours);
+  const hh = Math.floor(h);
+  const mm = Math.floor((h - hh) * 60);
+  const ss = Math.round((((h - hh) * 60) - mm) * 60);
+  return `${hh}h ${String(mm).padStart(2, "0")}m ${String(ss).padStart(2, "0")}s`;
+}
+
+export function formatMountDeg(deg, digits = 2) {
+  if (deg == null || Number.isNaN(Number(deg))) return "—";
+  return `${Number(deg).toFixed(digits)}°`;
 }
 
 export function addTargetToMission(targetId, missionStore) {

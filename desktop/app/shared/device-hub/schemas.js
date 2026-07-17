@@ -75,6 +75,8 @@ const CATEGORY_CAPABILITIES = {
 };
 
 function defaultTelemetry(raw = {}) {
+  const mount = raw.telemetry?.mount && typeof raw.telemetry.mount === "object" ? raw.telemetry.mount : null;
+  const cameras = Array.isArray(raw.telemetry?.cameras) ? raw.telemetry.cameras : null;
   return {
     power: {
       state: raw.telemetry?.power?.state || raw.powerState || "standby",
@@ -89,6 +91,39 @@ function defaultTelemetry(raw = {}) {
       version: raw.telemetry?.firmware?.version || raw.firmware || "—",
       channel: raw.telemetry?.firmware?.channel || "stable",
     },
+    // LIVE Alpaca mount snapshot (null when offline / SIM) — never invent values
+    mount: mount
+      ? {
+          liveState: mount.liveState || "OFFLINE",
+          protocol: mount.protocol || null,
+          alpacaPort: mount.alpacaPort ?? null,
+          host: mount.host ?? null,
+          telescopeNumber: mount.telescopeNumber ?? null,
+          connected: mount.connected ?? null,
+          ra: mount.ra ?? null,
+          dec: mount.dec ?? null,
+          altitude: mount.altitude ?? null,
+          azimuth: mount.azimuth ?? null,
+          siderealTime: mount.siderealTime ?? null,
+          tracking: mount.tracking ?? null,
+          slewing: mount.slewing ?? null,
+          atPark: mount.atPark ?? null,
+          atHome: mount.atHome ?? null,
+          utcDate: mount.utcDate ?? null,
+          siteLatitude: mount.siteLatitude ?? null,
+          siteLongitude: mount.siteLongitude ?? null,
+          name: mount.name ?? null,
+          description: mount.description ?? null,
+          driverInfo: mount.driverInfo ?? null,
+          driverVersion: mount.driverVersion ?? null,
+          interfaceVersion: mount.interfaceVersion ?? null,
+          capabilities: mount.capabilities && typeof mount.capabilities === "object" ? mount.capabilities : null,
+          lastPollAt: mount.lastPollAt ?? null,
+          lastError: mount.lastError ?? null,
+          source: mount.source === "live" ? "live" : mount.source || "none",
+        }
+      : null,
+    cameras,
   };
 }
 
@@ -305,13 +340,38 @@ export function createSetup(input = {}) {
 
 export function deviceStatusLabel(device) {
   if (!device) return "—";
-  if (device.connectionState === "connected" || device.connectionState === "operational") {
-    return device.dataSource === "live" ? "Online" : "Online · Simulazione";
+  const liveState = device.telemetry?.mount?.liveState || device.metadata?.liveState;
+  if (device.dataSource === "live") {
+    if (liveState === "LIVE" && ["connected", "operational"].includes(device.connectionState)) return "LIVE";
+    if (liveState === "CONNECTING" || device.connectionState === "connecting") return "CONNECTING";
+    if (liveState === "ERROR" || device.connectionState === "error") return "ERROR";
+    if (liveState === "OFFLINE" || device.connectionState === "disconnected") return "OFFLINE";
   }
-  if (device.connectionState === "connecting") return "Connessione in corso";
+  if (device.connectionState === "connected" || device.connectionState === "operational") {
+    return device.dataSource === "live" ? "LIVE" : "Online · SIM";
+  }
+  if (device.connectionState === "connecting") return "CONNECTING";
   if (device.connectionState === "attention") return "Richiede attenzione";
-  if (device.connectionState === "error") return "Errore";
+  if (device.connectionState === "error") return "ERROR";
   return "Standby";
+}
+
+/** Explicit mode badge: LIVE | SIM | OFFLINE | CONNECTING | ERROR */
+export function deviceModeBadge(device) {
+  if (!device) return "OFFLINE";
+  if (device.dataSource === "simulated" && ["connected", "operational"].includes(device.connectionState)) {
+    return "SIM";
+  }
+  if (device.dataSource === "live") {
+    const liveState = device.telemetry?.mount?.liveState || device.metadata?.liveState;
+    if (liveState === "LIVE" && ["connected", "operational"].includes(device.connectionState)) return "LIVE";
+    if (liveState === "CONNECTING" || device.connectionState === "connecting") return "CONNECTING";
+    if (liveState === "ERROR" || device.connectionState === "error" || device.connectionState === "attention") {
+      return "ERROR";
+    }
+    return "OFFLINE";
+  }
+  return "OFFLINE";
 }
 
 export function devicePowerLabel(device) {

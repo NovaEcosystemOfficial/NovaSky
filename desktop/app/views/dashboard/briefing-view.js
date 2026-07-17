@@ -5,7 +5,10 @@ import {
   miniImageUrl,
   addTargetToMission,
   quickConnectSeestar,
+  formatMountRa,
+  formatMountDeg,
 } from "./helpers.js";
+import { deviceModeBadge } from "../../shared/device-hub/schemas.js";
 
 function renderChips(chips, ctx) {
   if (!chips.length) return "";
@@ -114,8 +117,30 @@ export function renderBriefingView(container, ctx, data, missionStore) {
             </article>
             <article class="dash-mini-card">
               <span class="dash-card-label">Seestar</span>
-              <h4>${seestar ? "Online" : "Offline"}</h4>
-              <p>${seestar ? esc(seestar.customName) : simulationMode ? "Pronto al collegamento" : "Simulazione disattiva"}</p>
+              <h4>${
+                seestar
+                  ? esc(deviceModeBadge(seestar))
+                  : simulationMode
+                    ? "OFFLINE"
+                    : "OFFLINE"
+              }</h4>
+              <p>${
+                seestar
+                  ? seestar.dataSource === "live" && seestar.telemetry?.mount?.liveState === "LIVE"
+                    ? `LIVE · ${esc(seestar.telemetry.mount.name || seestar.customName)}`
+                    : seestar.dataSource === "simulated"
+                      ? `SIM · ${esc(seestar.customName)}`
+                      : esc(seestar.customName)
+                  : simulationMode
+                    ? "SIM pronta — collega in Device Hub"
+                    : "LIVE — collega S30 Pro (hotspot)"
+              }</p>
+              ${
+                seestar?.dataSource === "live" && seestar.telemetry?.mount?.liveState === "LIVE"
+                  ? `<p class="dash-live-metrics">RA ${esc(formatMountRa(seestar.telemetry.mount.ra))} · Dec ${esc(formatMountDeg(seestar.telemetry.mount.dec))} · Alt ${esc(formatMountDeg(seestar.telemetry.mount.altitude))} · Az ${esc(formatMountDeg(seestar.telemetry.mount.azimuth))}</p>
+                     <p class="dash-live-metrics">track ${seestar.telemetry.mount.tracking ? "on" : "off"} · slew ${seestar.telemetry.mount.slewing ? "on" : "off"} · park ${seestar.telemetry.mount.atPark ? "yes" : "no"}</p>`
+                  : ""
+              }
             </article>
           </div>
         </div>
@@ -158,9 +183,16 @@ function bindBriefingEvents(container, ctx, missionStore) {
   });
 
   container.querySelector("[data-connect-seestar]")?.addEventListener("click", async () => {
+    const btn = container.querySelector("[data-connect-seestar]");
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "Connessione…";
+    }
     const result = await quickConnectSeestar();
-    if (result.reason === "need_simulation") {
-      ctx.navigate("attrezzatura");
+    if (btn) btn.disabled = false;
+    if (!result.ok && result.error) {
+      if (btn) btn.textContent = "Riprova LIVE";
+      window.alert(result.error);
     }
   });
 }

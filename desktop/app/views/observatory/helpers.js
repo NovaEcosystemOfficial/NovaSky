@@ -24,6 +24,13 @@ export {
 };
 
 export function statusTone(device) {
+  const live = device?.telemetry?.mount?.liveState || device?.metadata?.liveState;
+  if (device?.dataSource === "live") {
+    if (live === "LIVE" && ["connected", "operational"].includes(device.connectionState)) return "online";
+    if (live === "CONNECTING" || device.connectionState === "connecting") return "cyan";
+    if (live === "ERROR" || device.connectionState === "error" || device.connectionState === "attention") return "warn";
+    return "idle";
+  }
   const s = device?.connectionState;
   if (s === "connected" || s === "operational") return "online";
   if (s === "attention" || s === "error") return "warn";

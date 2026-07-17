@@ -9,6 +9,7 @@
   "scripts": {
     "start": "electron .",
     "test:smoke": "electron smoke-test.js",
+    "test:seestar": "node test-seestar-adapter.js",
     "fetch:equipment-photos": "python3 scripts/fetch-equipment-photos.py",
     "build:win": "electron-builder --win --x64",
     "build:dir": "electron-builder --win --x64 --dir",
@@ -24,6 +25,7 @@
     },
     "files": [
       "main.js",
+      "main-alpaca.js",
       "preload.js",
       "package.json",
       "app/**/*"

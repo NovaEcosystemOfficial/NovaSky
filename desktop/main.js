@@ -3,8 +3,9 @@
  * nova://desktop/ → UI software | nova://engine/ → motore condiviso (website/)
  */
 
-const { app, BrowserWindow, Menu, shell, protocol } = require("electron");
+const { app, BrowserWindow, Menu, shell, protocol, ipcMain } = require("electron");
 const path = require("path");
+const { registerAlpacaIpc } = require("./main-alpaca");
 
 const APP_SCHEME = "nova";
 const WINDOW_DEFAULT = { width: 1440, height: 900, minWidth: 1024, minHeight: 700 };
@@ -134,6 +135,7 @@ function createMainWindow() {
 
 app.whenReady().then(() => {
   Menu.setApplicationMenu(null);
+  registerAlpacaIpc(ipcMain);
   registerNovaProtocol();
   createMainWindow();
 

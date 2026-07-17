@@ -31,6 +31,7 @@ export const ADAPTER_PROTOCOLS = [
 /** @type {Map<string, object>} */
 const registry = new Map([
   ["simulation", { id: "simulation", label: "Simulazione NovaSky", protocol: "simulation", vendor: "NovaSky" }],
+  ["seestar-alpaca", { id: "seestar-alpaca", label: "Seestar Alpaca (read-only)", protocol: "ascom-alpaca", vendor: "ZWO/ASCOM", status: "live-readonly-v0" }],
   ["zwo-seestar", { id: "zwo-seestar", label: "ZWO Seestar", protocol: "zwo-seestar", vendor: "ZWO", status: "planned" }],
   ["zwo-asiair", { id: "zwo-asiair", label: "ZWO ASIAIR", protocol: "zwo-asiair", vendor: "ZWO", status: "planned" }],
   ["eagle", { id: "eagle", label: "PrimaLuceLab Eagle", protocol: "eagle", vendor: "PrimaLuceLab", status: "planned" }],
@@ -39,7 +40,7 @@ const registry = new Map([
   ["eqmod", { id: "eqmod", label: "EQMOD", protocol: "eqmod", vendor: "EQMOD", status: "planned" }],
   ["indi", { id: "indi", label: "INDI", protocol: "indi", vendor: "INDI", status: "planned" }],
   ["ascom", { id: "ascom", label: "ASCOM", protocol: "ascom", vendor: "ASCOM", status: "planned" }],
-  ["ascom-alpaca", { id: "ascom-alpaca", label: "ASCOM Alpaca", protocol: "ascom-alpaca", vendor: "ASCOM", status: "planned" }],
+  ["ascom-alpaca", { id: "ascom-alpaca", label: "ASCOM Alpaca", protocol: "ascom-alpaca", vendor: "ASCOM", status: "live-readonly-v0" }],
   ["canon-edsdk", { id: "canon-edsdk", label: "Canon EDSDK", protocol: "canon-edsdk", vendor: "Canon", status: "planned" }],
   ["nikon-ptp", { id: "nikon-ptp", label: "Nikon PTP", protocol: "nikon-ptp", vendor: "Nikon", status: "planned" }],
   ["zwo-asi", { id: "zwo-asi", label: "ZWO ASI SDK", protocol: "zwo-asi", vendor: "ZWO", status: "planned" }],

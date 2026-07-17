@@ -50,15 +50,26 @@ export function createSeedHub() {
       category: "seestar",
       imageKey: "seestar_s30",
       serial: "ZWO-S30P-2025-0112",
-      connection: { type: "Wi-Fi", adapterId: "zwo-seestar", driver: "Seestar" },
+      connection: {
+        type: "ASCOM Alpaca",
+        adapterId: "seestar-alpaca",
+        driver: "Seestar.Alpaca / Telescope V3",
+        port: "32323",
+      },
+      capabilities: ["connect", "disconnect", "readBattery"],
       telemetry: {
         power: { state: "standby", batteryPct: 100 },
-        firmware: { version: "1.6.2", channel: "stable" },
+        firmware: { version: "1.2.0-3", channel: "alpaca" },
+        mount: null,
+        cameras: null,
       },
-      ports: ["Wi-Fi", "USB-C"],
-      compatibility: ["Seestar App", "NovaSky Seestar Adapter"],
+      ports: ["Wi-Fi hotspot", "Alpaca :32323"],
+      compatibility: ["ASCOM Alpaca", "Seestar App", "NovaSky SeestarAdapter v0 read-only"],
       layout: { zone: "mobile", x: 22, y: 68, scale: 0.9 },
-      notes: "Setup portatile — armadio strumenti.",
+      notes:
+        "LIVE Alpaca read-only (GET). Disattiva simulazione e Connetti sull'hotspot Seestar. Nessun GOTO/park/capture in v0.",
+      dataSource: "live",
+      integrationStatus: "live",
     }),
     profile({
       id: "dev-canon-80d",
@@ -245,8 +256,39 @@ export function createSeedHub() {
 }
 
 export function ensureSeededHub(loadFn, saveFn) {
-  const current = loadFn();
-  if (current.version >= 2 && current.seeded && current.devices.length >= 10) return current;
-  const seeded = createSeedHub();
-  return saveFn(seeded);
+  let current = loadFn();
+  if (!(current.version >= 2 && current.seeded && current.devices.length >= 10)) {
+    const seeded = createSeedHub();
+    return saveFn(seeded);
+  }
+
+  // Migrate S30 Pro profile to Seestar Alpaca read-only adapter (idempotent)
+  const s30 = current.devices.find((d) => d.id === "dev-seestar-s30-pro");
+  if (s30 && s30.connection?.adapterId !== "seestar-alpaca") {
+    current = {
+      ...current,
+      devices: current.devices.map((d) =>
+        d.id === "dev-seestar-s30-pro"
+          ? {
+              ...d,
+              connection: {
+                ...d.connection,
+                type: "ASCOM Alpaca",
+                adapterId: "seestar-alpaca",
+                driver: "Seestar.Alpaca / Telescope V3",
+                port: d.connection?.port || "32323",
+              },
+              capabilities: ["connect", "disconnect", "readBattery"],
+              compatibility: ["ASCOM Alpaca", "Seestar App", "NovaSky SeestarAdapter v0 read-only"],
+              notes:
+                d.notes ||
+                "LIVE Alpaca read-only (GET). Disattiva simulazione e Connetti sull'hotspot Seestar.",
+              dataSource: d.dataSource === "simulated" && d.connectionState === "connected" ? "simulated" : "live",
+            }
+          : d
+      ),
+    };
+    return saveFn(current);
+  }
+  return current;
 }
