@@ -1,5 +1,3 @@
-/** Device Hub — re-export per compatibilità con moduli esistenti. */
-
 export {
   getDevices,
   getSetups,
@@ -18,16 +16,18 @@ export {
   startSeestarLive,
   stopSeestarLive,
   isSeestarLivePolling,
-} from "./device-hub/index.js";
-
-export {
-  DEVICE_CATEGORIES,
+  startEq6Live,
+  stopEq6Live,
+  isEq6LivePolling,
   deviceStatusLabel,
   devicePowerLabel,
   deviceConnectionLabel,
   deviceDisplayName,
   deviceModeBadge,
-} from "./device-hub/schemas.js";
+  DEVICE_CATEGORIES,
+  eq6ManualMoveAxis,
+  eq6ManualStopAxes,
+} from "./device-hub/index.js";
 
 export { resolveDeviceImage, DEVICE_PHOTO_CATALOG } from "./device-hub/images.js";
 

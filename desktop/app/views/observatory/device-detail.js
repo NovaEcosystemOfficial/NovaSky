@@ -1,4 +1,4 @@
-import { getDeviceHub, isSimulationMode } from "../../shared/device-registry.js";
+import { getDeviceHub, isSimulationMode, deviceModeBadge } from "../../shared/device-registry.js";
 import {
   esc,
   deviceDisplayName,
@@ -10,7 +10,7 @@ import {
   formatDate,
   statusTone,
 } from "./helpers.js";
-import { deviceModeBadge } from "../../shared/device-hub/schemas.js";
+import { renderEq6ManualControls } from "./eq6-manual-controls.js";
 
 function fmtRa(hours) {
   if (hours == null || Number.isNaN(Number(hours))) return "—";
@@ -29,18 +29,24 @@ function fmtDeg(v) {
 function renderMountPanel(device) {
   const mount = device.telemetry?.mount;
   const mode = deviceModeBadge(device);
+  const isEq6 = device.category === "mount" || device.id === "dev-mount-eq6" || mount?.protocol === "ASCOM_EQMOD";
+
   if (device.dataSource !== "live" && mode === "SIM") {
     return `
       <section class="glass-panel obs-detail-panel obs-detail-panel--wide">
         <h3>Montatura · <span class="obs-tag">SIM</span></h3>
-        <p class="obs-muted">Dati simulati — nessun hardware. Disattiva simulazione per LIVE Alpaca.</p>
+        <p class="obs-muted">Dati simulati — nessun hardware. Disattiva simulazione per LIVE${isEq6 ? " ASCOM/EQMOD" : " Alpaca"}.</p>
       </section>`;
   }
+
   if (!mount || mount.liveState === "OFFLINE" || mount.source !== "live") {
+    const hint = isEq6
+      ? "Nessuna telemetria LIVE. Apri EQMOD, collega EQ6 su COM3 e premi Connetti. Nessun dato inventato."
+      : "Nessuna telemetria LIVE. Collega il Seestar sull'hotspot (Alpaca :32323). Nessun dato inventato.";
     return `
       <section class="glass-panel obs-detail-panel obs-detail-panel--wide">
         <h3>Montatura · <span class="obs-tag">${esc(mode)}</span></h3>
-        <p class="obs-muted">Nessuna telemetria LIVE. Collega il Seestar sull'hotspot (Alpaca :32323). Nessun dato inventato.</p>
+        <p class="obs-muted">${hint}</p>
         ${mount?.lastError ? `<p class="obs-muted">Ultimo errore: ${esc(mount.lastError)}</p>` : ""}
       </section>`;
   }
@@ -50,14 +56,22 @@ function renderMountPanel(device) {
     .map(([k, v]) => `<span class="obs-tag ${v ? "obs-tag--cyan" : ""}">${esc(k)}=${v ? "yes" : "no"}</span>`)
     .join("");
 
+  const title = isEq6 ? "Montatura EQ6 · EQMOD" : "Montatura Alpaca";
+  const linkRow = isEq6
+    ? `<div><dt>Driver / porta</dt><dd>${esc(mount.driverInfo || "EQMOD HEQ5/6")} · ${esc(mount.comPort || "COM3")} @ ${esc(String(mount.baud || 9600))}</dd></div>
+       <div><dt>ProgID</dt><dd>${esc(mount.progId || "EQMOD.Telescope")}</dd></div>`
+    : `<div><dt>Host</dt><dd>${esc(mount.host || "—")}:${esc(String(mount.alpacaPort || 32323))}</dd></div>`;
+
   return `
     <section class="glass-panel obs-detail-panel obs-detail-panel--wide">
-      <h3>Montatura Alpaca · <span class="obs-tag obs-tag--cyan">LIVE</span></h3>
+      <h3>${title} · <span class="obs-tag obs-tag--cyan">LIVE</span></h3>
+      ${isEq6 ? `<p class="obs-muted">LIVE EQMOD — controlli manuali MoveAxis (hold). Nessun GOTO / park / sync / home.</p>` : ""}
+      ${mount.siteWarning ? `<p class="obs-muted" role="status">⚠ ${esc(mount.siteWarningMessage || "Coordinate sito EQMOD da verificare")}</p>` : ""}
       <dl class="obs-spec-grid">
         <div><dt>Identità</dt><dd>${esc(mount.name || "—")}</dd></div>
         <div><dt>Driver</dt><dd>${esc(mount.driverInfo || "—")} ${esc(mount.driverVersion || "")}</dd></div>
-        <div><dt>Host</dt><dd>${esc(mount.host || "—")}:${esc(String(mount.alpacaPort || 32323))}</dd></div>
-        <div><dt>Connected (Alpaca)</dt><dd>${mount.connected == null ? "—" : mount.connected ? "true" : "false"}</dd></div>
+        ${linkRow}
+        <div><dt>Connected</dt><dd>${mount.connected == null ? "—" : mount.connected ? "true" : "false"}</dd></div>
         <div><dt>RA</dt><dd>${esc(fmtRa(mount.ra))}</dd></div>
         <div><dt>Dec</dt><dd>${esc(fmtDeg(mount.dec))}</dd></div>
         <div><dt>Alt</dt><dd>${esc(fmtDeg(mount.altitude))}</dd></div>
@@ -65,13 +79,15 @@ function renderMountPanel(device) {
         <div><dt>Sidereal</dt><dd>${mount.siderealTime == null ? "—" : Number(mount.siderealTime).toFixed(4)}</dd></div>
         <div><dt>Tracking</dt><dd>${mount.tracking == null ? "—" : mount.tracking ? "on" : "off"}</dd></div>
         <div><dt>Slewing</dt><dd>${mount.slewing == null ? "—" : mount.slewing ? "on" : "off"}</dd></div>
+        <div><dt>Movimento manuale</dt><dd>${mount.manualMoving ? `sì${mount.manualDirection ? ` · ${esc(mount.manualDirection)}` : ""}` : "no"}</dd></div>
         <div><dt>AtPark</dt><dd>${mount.atPark == null ? "—" : mount.atPark ? "yes" : "no"}</dd></div>
         <div><dt>AtHome</dt><dd>${mount.atHome == null ? "—" : mount.atHome ? "yes" : "no"}</dd></div>
+        <div><dt>SideOfPier</dt><dd>${esc(mount.sideOfPier == null ? "—" : String(mount.sideOfPier))}</dd></div>
         <div><dt>UTC</dt><dd>${esc(mount.utcDate || "—")}</dd></div>
-        <div><dt>Sito</dt><dd>${mount.siteLatitude != null ? `${mount.siteLatitude}, ${mount.siteLongitude}` : "—"}</dd></div>
+        <div><dt>Sito</dt><dd>${mount.siteLatitude != null ? `${mount.siteLatitude}, ${mount.siteLongitude}${mount.siteElevation != null ? ` · ${mount.siteElevation} m` : ""}` : "—"}</dd></div>
         <div><dt>Ultimo poll</dt><dd>${esc(mount.lastPollAt || "—")}</dd></div>
       </dl>
-      <h4>Capability (sola lettura — non comandi)</h4>
+      <h4>Capability ASCOM</h4>
       <div class="obs-tags">${capTags || "<span class='obs-muted'>—</span>"}</div>
     </section>`;
 }
@@ -108,11 +124,30 @@ export function renderDeviceDetail(deviceId) {
   const adapter = resolveAdapterForDevice(device);
   const tone = statusTone(device);
   const sim = isSimulationMode();
-  const connected = ["connected", "operational"].includes(device.connectionState);
+  const liveState = device.telemetry?.mount?.liveState || device.metadata?.liveState;
+  const connecting =
+    device.connectionState === "connecting" || liveState === "CONNECTING";
+  const connected = ["connected", "operational"].includes(device.connectionState) && !connecting;
   const isLiveSeestar = device.category === "seestar" && !sim;
+  const isLiveEq6 = (device.category === "mount" || device.id === "dev-mount-eq6") && !sim;
   const specs = device.specs || {};
   const specRows = Object.entries(specs).map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("");
   const mode = deviceModeBadge(device);
+  const lastError = device.errors?.[0] || device.telemetry?.mount?.lastError || null;
+
+  const connectLabel = isLiveEq6
+    ? "Connetti LIVE (EQMOD)"
+    : isLiveSeestar
+      ? "Connetti LIVE (Alpaca GET)"
+      : sim
+        ? "Connetti (SIM)"
+        : "Connetti";
+
+  const actionButtons = connected
+    ? `<button type="button" class="obs-btn" data-disconnect="${device.id}">Disconnetti</button>`
+    : connecting
+      ? `<button type="button" class="obs-btn" disabled aria-busy="true">Connessione…</button>`
+      : `<button type="button" class="obs-btn obs-btn--primary" data-connect="${device.id}">${connectLabel}</button>`;
 
   return `
     <div class="obs-detail" data-obs-detail data-device-id="${device.id}">
@@ -128,23 +163,28 @@ export function renderDeviceDetail(deviceId) {
           <p class="obs-detail-model">${esc(device.model)}</p>
           <span class="obs-card-status obs-card-status--${tone}">${esc(deviceStatusLabel(device))} · ${esc(mode)}</span>
           <div class="obs-detail-actions">
-            ${
-              connected
-                ? `<button type="button" class="obs-btn" data-disconnect="${device.id}">Disconnetti</button>`
-                : `<button type="button" class="obs-btn obs-btn--primary" data-connect="${device.id}">${
-                    isLiveSeestar ? "Connetti LIVE (Alpaca GET)" : sim ? "Connetti (SIM)" : "Connetti"
-                  }</button>`
-            }
+            ${actionButtons}
           </div>
+          ${
+            lastError && (mode === "ERROR" || device.connectionState === "error" || device.connectionState === "attention")
+              ? `<p class="obs-muted" role="alert">Errore: ${esc(lastError)}</p>`
+              : ""
+          }
           ${
             isLiveSeestar
               ? `<p class="obs-muted">v0 read-only: solo GET Alpaca :32323. Nessun GOTO/park/sync/capture.</p>`
+              : ""
+          }
+          ${
+            isLiveEq6
+              ? `<p class="obs-muted">v0 read-only: ASCOM EQMOD (COM3). Nessun GOTO/slew/park/sync/tracking. Nessun controllo movimento in UI.</p>`
               : ""
           }
         </div>
       </div>
 
       ${renderMountPanel(device)}
+      ${device.category === "mount" || device.id === "dev-mount-eq6" ? renderEq6ManualControls(device) : ""}
       ${renderCameraInventory(device)}
 
       <div class="obs-detail-grid">

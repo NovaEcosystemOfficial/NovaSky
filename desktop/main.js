@@ -6,6 +6,7 @@
 const { app, BrowserWindow, Menu, shell, protocol, ipcMain } = require("electron");
 const path = require("path");
 const { registerAlpacaIpc } = require("./main-alpaca");
+const { registerEq6AscomIpc } = require("./main-eq6-ascom");
 
 const APP_SCHEME = "nova";
 const WINDOW_DEFAULT = { width: 1440, height: 900, minWidth: 1024, minHeight: 700 };
@@ -136,6 +137,7 @@ function createMainWindow() {
 app.whenReady().then(() => {
   Menu.setApplicationMenu(null);
   registerAlpacaIpc(ipcMain);
+  registerEq6AscomIpc(ipcMain);
   registerNovaProtocol();
   createMainWindow();
 

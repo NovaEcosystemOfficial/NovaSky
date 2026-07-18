@@ -10,6 +10,8 @@
     "start": "electron .",
     "test:smoke": "electron smoke-test.js",
     "test:seestar": "node test-seestar-adapter.js",
+    "test:eq6": "node test-eq6-adapter.js",
+    "test:eq6-manual": "node test-eq6-manual-controls.js",
     "fetch:equipment-photos": "python3 scripts/fetch-equipment-photos.py",
     "build:win": "electron-builder --win --x64",
     "build:dir": "electron-builder --win --x64 --dir",
@@ -26,7 +28,9 @@
     "files": [
       "main.js",
       "main-alpaca.js",
+      "main-eq6-ascom.js",
       "preload.js",
+      "bridges/**/*",
       "package.json",
       "app/**/*"
     ],

@@ -190,7 +190,18 @@ async function runTests() {
 
   await clickNav(wc, "attrezzatura");
   await wc.executeJavaScript(`
-    localStorage.setItem('novasky.desktop.ui.v1', JSON.stringify({ digitalObservatoryRedesign: false, missionMapRedesign: false }));
+    (() => {
+      try {
+        localStorage.setItem('novasky.desktop.ui.v1', JSON.stringify({ digitalObservatoryRedesign: false, missionMapRedesign: false }));
+        const raw = localStorage.getItem('novasky.device-hub.v1');
+        if (raw) {
+          const hub = JSON.parse(raw);
+          hub.preferences = { ...(hub.preferences || {}), simulationMode: true };
+          hub.observatory = { ...(hub.observatory || {}), simulationMode: true };
+          localStorage.setItem('novasky.device-hub.v1', JSON.stringify(hub));
+        }
+      } catch {}
+    })();
     location.reload();
   `);
   await new Promise((r) => setTimeout(r, 900));
@@ -388,10 +399,21 @@ async function runTests() {
         if (!raw) return;
         const hub = JSON.parse(raw);
         hub.observatory.name = 'Osservatorio Roma';
+        hub.preferences = { ...(hub.preferences || {}), simulationMode: true };
+        hub.observatory = { ...(hub.observatory || {}), name: 'Osservatorio Roma', simulationMode: true };
+        // Evita connessioni LIVE residue da sessioni di test hardware
+        hub.devices = (hub.devices || []).map((d) => ({
+          ...d,
+          connectionState: ['connected', 'operational', 'connecting'].includes(d.connectionState)
+            ? 'disconnected'
+            : d.connectionState,
+        }));
         localStorage.setItem('novasky.device-hub.v1', JSON.stringify(hub));
       } catch {}
     })();
   `);
+  await wc4.reload();
+  await new Promise((r) => setTimeout(r, 1200));
   await clickNav(wc4, "attrezzatura");
   await new Promise((r) => setTimeout(r, 900));
 

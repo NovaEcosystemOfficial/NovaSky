@@ -114,17 +114,27 @@ export function createSeedHub() {
       category: "mount",
       imageKey: "eq6",
       serial: "SW-EQ6R-2019-4421",
-      connection: { type: "USB", adapterId: "skywatcher", driver: "SynScan / EQMOD" },
-      capabilities: ["connect", "disconnect", "goto", "sync", "park", "unpark"],
+      connection: {
+        type: "ASCOM",
+        adapterId: "eq6-ascom",
+        driver: "EQMOD HEQ5/6",
+        port: "COM3",
+      },
+      capabilities: ["connect", "disconnect", "moveAxis", "stopAxes"],
       telemetry: {
         power: { state: "standby", drawWatts: 12 },
-        firmware: { version: "4.39.12", channel: "SynScan" },
+        firmware: { version: "EQASCOM 2.00w", channel: "eqmod" },
+        mount: null,
       },
-      ports: ["USB-B", "ST-4", "Snap port"],
-      usb: ["Eagle Core USB3 #1"],
-      compatibility: ["EQMOD", "ASCOM", "SynScan", "NINA"],
-      upcomingUpdates: ["ASCOM Alpaca bridge"],
+      ports: ["COM3 @ 9600", "SynScan PC Direct", "ASCOM EQMOD"],
+      usb: ["Prolific USB-Serial"],
+      compatibility: ["EQASCOM / EQMOD", "ASCOM Platform 7", "NovaSky Eq6AscomAdapter MoveAxis"],
+      upcomingUpdates: [],
       layout: { zone: "pier", x: 50, y: 52, scale: 1.2 },
+      notes:
+        "LIVE ASCOM via EQMOD. Controlli manuali N/S/E/O (MoveAxis hold). Nessun GOTO/park/sync. Coordinate sito EQMOD da verificare.",
+      dataSource: "live",
+      integrationStatus: "live",
     }),
     profile({
       id: "dev-eagle-core",
@@ -283,6 +293,35 @@ export function ensureSeededHub(loadFn, saveFn) {
               notes:
                 d.notes ||
                 "LIVE Alpaca read-only (GET). Disattiva simulazione e Connetti sull'hotspot Seestar.",
+              dataSource: d.dataSource === "simulated" && d.connectionState === "connected" ? "simulated" : "live",
+            }
+          : d
+      ),
+    };
+    return saveFn(current);
+  }
+
+  // Migrate EQ6 to ASCOM EQMOD read-only adapter (idempotent)
+  const eq6 = current.devices.find((d) => d.id === "dev-mount-eq6");
+  if (eq6 && eq6.connection?.adapterId !== "eq6-ascom") {
+    current = {
+      ...current,
+      devices: current.devices.map((d) =>
+        d.id === "dev-mount-eq6"
+          ? {
+              ...d,
+              connection: {
+                ...d.connection,
+                type: "ASCOM",
+                adapterId: "eq6-ascom",
+                driver: "EQMOD HEQ5/6",
+                port: d.connection?.port || "COM3",
+              },
+              capabilities: ["connect", "disconnect", "moveAxis", "stopAxes"],
+              compatibility: ["EQASCOM / EQMOD", "ASCOM Platform 7", "NovaSky Eq6AscomAdapter MoveAxis"],
+              notes:
+                d.notes ||
+                "LIVE ASCOM via EQMOD. Controlli manuali N/S/E/O (MoveAxis hold). Nessun GOTO/park/sync.",
               dataSource: d.dataSource === "simulated" && d.connectionState === "connected" ? "simulated" : "live",
             }
           : d

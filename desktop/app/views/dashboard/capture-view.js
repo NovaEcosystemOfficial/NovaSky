@@ -3,6 +3,8 @@ import {
   formatWindow,
   heroImageUrl,
   targetFromCatalog,
+  formatMountRa,
+  formatMountDeg,
 } from "./helpers.js";
 import {
   getCaptureState,
@@ -14,13 +16,15 @@ import {
 } from "../../shared/seestar-capture.js";
 
 export function renderCaptureView(container, ctx, data, captureState) {
-  const { seestar, mission, meta, plan, simulationMode, activeTarget } = data;
+  const { seestar, mission, meta, plan, simulationMode, activeTarget, eq6 } = data;
   const targetId = captureState.targetId;
   const catalogTarget = targetFromCatalog(targetId);
   const target = activeTarget || catalogTarget;
   const targetName = target?.name || targetId || "—";
   const targetSubtitle = target?.subtitle || "";
   const battery = seestar?.telemetry?.power?.batteryPct ?? "—";
+  const eq6Mount = eq6?.telemetry?.mount;
+  const eq6Live = eq6?.dataSource === "live" && eq6Mount?.liveState === "LIVE";
   const progress =
     captureState.phase === "capturing"
       ? Math.round((captureState.frameCount / captureState.totalFrames) * 100)
@@ -129,6 +133,26 @@ export function renderCaptureView(container, ctx, data, captureState) {
               : ""
           }
           <p class="dash-side-note">${esc(data.deviceHubLabel || "")}</p>
+          ${
+            eq6
+              ? `<div class="nova-panel-section">
+                  <h3>Montatura EQ6 ${eq6Live ? "· LIVE" : ""}</h3>
+                  <p style="margin:0 0 6px;font-size:0.8125rem;color:var(--quiet)">${
+                    eq6Live
+                      ? `EQMOD · ${esc(eq6Mount.comPort || "COM3")} · read-only`
+                      : esc(eq6.customName || "EQ6")
+                  }</p>
+                  ${
+                    eq6Live
+                      ? `<p class="dash-live-metrics">AR ${esc(formatMountRa(eq6Mount.ra))} · DEC ${esc(formatMountDeg(eq6Mount.dec))}</p>
+                         <p class="dash-live-metrics">ALT ${esc(formatMountDeg(eq6Mount.altitude))} · AZ ${esc(formatMountDeg(eq6Mount.azimuth))}</p>
+                         <p class="dash-live-metrics">track ${eq6Mount.tracking ? "sì" : "no"} · slew ${eq6Mount.slewing ? "sì" : "no"} · park ${eq6Mount.atPark ? "sì" : "no"}</p>
+                         ${eq6Mount.siteWarning ? `<p class="dash-live-metrics">⚠ Coordinate sito EQMOD da verificare</p>` : ""}`
+                      : ""
+                  }
+                </div>`
+              : ""
+          }
         </aside>
       </div>
     </section>

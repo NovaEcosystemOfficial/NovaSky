@@ -8,7 +8,7 @@ import {
   formatMountRa,
   formatMountDeg,
 } from "./helpers.js";
-import { deviceModeBadge } from "../../shared/device-hub/schemas.js";
+import { deviceModeBadge } from "../../shared/device-registry.js";
 
 function renderChips(chips, ctx) {
   if (!chips.length) return "";
@@ -48,6 +48,7 @@ export function renderBriefingView(container, ctx, data, missionStore) {
     deviceHubLabel,
     simulationMode,
     seestar,
+    eq6,
   } = data;
 
   const missionLabel =
@@ -61,6 +62,13 @@ export function renderBriefingView(container, ctx, data, missionStore) {
     mission.items.length > 0
       ? plan.steps[0]?.target?.name || mission.items[0].targetId
       : null;
+
+  const eq6Mount = eq6?.telemetry?.mount;
+  const eq6Live = eq6?.dataSource === "live" && eq6Mount?.liveState === "LIVE";
+  const eq6Sim =
+    simulationMode &&
+    eq6?.dataSource === "simulated" &&
+    ["connected", "operational"].includes(eq6?.connectionState);
 
   container.innerHTML = `
     <section class="dash dash-v2 dash-briefing" data-dash-mode="briefing">
@@ -139,6 +147,30 @@ export function renderBriefingView(container, ctx, data, missionStore) {
                 seestar?.dataSource === "live" && seestar.telemetry?.mount?.liveState === "LIVE"
                   ? `<p class="dash-live-metrics">RA ${esc(formatMountRa(seestar.telemetry.mount.ra))} · Dec ${esc(formatMountDeg(seestar.telemetry.mount.dec))} · Alt ${esc(formatMountDeg(seestar.telemetry.mount.altitude))} · Az ${esc(formatMountDeg(seestar.telemetry.mount.azimuth))}</p>
                      <p class="dash-live-metrics">track ${seestar.telemetry.mount.tracking ? "on" : "off"} · slew ${seestar.telemetry.mount.slewing ? "on" : "off"} · park ${seestar.telemetry.mount.atPark ? "yes" : "no"}</p>`
+                  : ""
+              }
+            </article>
+            <article class="dash-mini-card">
+              <span class="dash-card-label">Montatura EQ6</span>
+              <h4>${eq6 ? esc(deviceModeBadge(eq6)) : "OFFLINE"}</h4>
+              <p>${
+                eq6Live
+                  ? `LIVE · EQMOD · ${esc(eq6Mount.comPort || "COM3")}`
+                  : eq6Sim
+                    ? `SIM · ${esc(eq6.customName || "EQ6")}`
+                    : eq6
+                      ? esc(eq6.customName || "EQ6-R Pro")
+                      : simulationMode
+                        ? "SIM — collega in Device Hub"
+                        : "LIVE — EQMOD su COM3"
+              }</p>
+              ${
+                eq6Live
+                  ? `<p class="dash-live-metrics">AR ${esc(formatMountRa(eq6Mount.ra))} · DEC ${esc(formatMountDeg(eq6Mount.dec))}</p>
+                     <p class="dash-live-metrics">ALT ${esc(formatMountDeg(eq6Mount.altitude))} · AZ ${esc(formatMountDeg(eq6Mount.azimuth))}</p>
+                     <p class="dash-live-metrics">track ${eq6Mount.tracking ? "sì" : "no"} · slew ${eq6Mount.slewing ? "sì" : "no"} · park ${eq6Mount.atPark ? "sì" : "no"} · pier ${esc(eq6Mount.sideOfPier == null ? "—" : String(eq6Mount.sideOfPier))}</p>
+                     <p class="dash-live-metrics">agg. ${esc(eq6Mount.lastPollAt ? new Date(eq6Mount.lastPollAt).toLocaleTimeString() : "—")}</p>
+                     ${eq6Mount.siteWarning ? `<p class="dash-live-metrics">⚠ Coordinate sito EQMOD da verificare</p>` : ""}`
                   : ""
               }
             </article>

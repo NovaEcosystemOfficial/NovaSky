@@ -49,12 +49,13 @@ export const INTEGRATION_STATUS = {
 
 export const CAPABILITIES = [
   "connect", "disconnect", "goto", "sync", "park", "unpark",
+  "moveAxis", "stopAxes",
   "capture", "liveView", "autofocus", "setTemperature",
   "readBattery", "readWeather", "openRoof", "closeRoof", "emergencyStop",
 ];
 
 const CATEGORY_CAPABILITIES = {
-  mount: ["connect", "disconnect", "goto", "sync", "park", "unpark"],
+  mount: ["connect", "disconnect", "moveAxis", "stopAxes"],
   telescope: ["connect", "disconnect"],
   ota: ["connect", "disconnect"],
   guide_scope: ["connect", "disconnect"],
@@ -96,6 +97,9 @@ function defaultTelemetry(raw = {}) {
       ? {
           liveState: mount.liveState || "OFFLINE",
           protocol: mount.protocol || null,
+          progId: mount.progId || null,
+          comPort: mount.comPort || null,
+          baud: mount.baud ?? null,
           alpacaPort: mount.alpacaPort ?? null,
           host: mount.host ?? null,
           telescopeNumber: mount.telescopeNumber ?? null,
@@ -109,18 +113,27 @@ function defaultTelemetry(raw = {}) {
           slewing: mount.slewing ?? null,
           atPark: mount.atPark ?? null,
           atHome: mount.atHome ?? null,
+          sideOfPier: mount.sideOfPier ?? null,
           utcDate: mount.utcDate ?? null,
           siteLatitude: mount.siteLatitude ?? null,
           siteLongitude: mount.siteLongitude ?? null,
+          siteElevation: mount.siteElevation ?? null,
+          siteWarning: Boolean(mount.siteWarning),
+          siteWarningMessage: mount.siteWarningMessage || null,
           name: mount.name ?? null,
           description: mount.description ?? null,
           driverInfo: mount.driverInfo ?? null,
           driverVersion: mount.driverVersion ?? null,
           interfaceVersion: mount.interfaceVersion ?? null,
           capabilities: mount.capabilities && typeof mount.capabilities === "object" ? mount.capabilities : null,
+          axisRates0: Array.isArray(mount.axisRates0) ? mount.axisRates0 : null,
+          axisRates1: Array.isArray(mount.axisRates1) ? mount.axisRates1 : null,
+          manualMoving: Boolean(mount.manualMoving),
+          manualDirection: mount.manualDirection || null,
           lastPollAt: mount.lastPollAt ?? null,
           lastError: mount.lastError ?? null,
           source: mount.source === "live" ? "live" : mount.source || "none",
+          readOnly: Boolean(mount.readOnly),
         }
       : null,
     cameras,
@@ -338,30 +351,48 @@ export function createSetup(input = {}) {
   );
 }
 
-export function deviceStatusLabel(device) {
+export function deviceStatusLabel(device, opts = {}) {
   if (!device) return "—";
+  const simulationMode = opts.simulationMode !== false;
   const liveState = device.telemetry?.mount?.liveState || device.metadata?.liveState;
+
+  // LIVE path — only real telemetry
   if (device.dataSource === "live") {
     if (liveState === "LIVE" && ["connected", "operational"].includes(device.connectionState)) return "LIVE";
     if (liveState === "CONNECTING" || device.connectionState === "connecting") return "CONNECTING";
     if (liveState === "ERROR" || device.connectionState === "error") return "ERROR";
     if (liveState === "OFFLINE" || device.connectionState === "disconnected") return "OFFLINE";
   }
-  if (device.connectionState === "connected" || device.connectionState === "operational") {
-    return device.dataSource === "live" ? "LIVE" : "Online · SIM";
+
+  // SIM label only when global simulation is ON and this session is simulated
+  if (
+    simulationMode &&
+    device.dataSource === "simulated" &&
+    (device.connectionState === "connected" || device.connectionState === "operational")
+  ) {
+    return "Online · SIM";
   }
+
   if (device.connectionState === "connecting") return "CONNECTING";
   if (device.connectionState === "attention") return "Richiede attenzione";
   if (device.connectionState === "error") return "ERROR";
+  // sim OFF + leftover simulated "connected" must never read as SIM
   return "Standby";
 }
 
 /** Explicit mode badge: LIVE | SIM | OFFLINE | CONNECTING | ERROR */
-export function deviceModeBadge(device) {
+export function deviceModeBadge(device, opts = {}) {
   if (!device) return "OFFLINE";
-  if (device.dataSource === "simulated" && ["connected", "operational"].includes(device.connectionState)) {
+  const simulationMode = opts.simulationMode !== false;
+
+  if (
+    simulationMode &&
+    device.dataSource === "simulated" &&
+    ["connected", "operational"].includes(device.connectionState)
+  ) {
     return "SIM";
   }
+
   if (device.dataSource === "live") {
     const liveState = device.telemetry?.mount?.liveState || device.metadata?.liveState;
     if (liveState === "LIVE" && ["connected", "operational"].includes(device.connectionState)) return "LIVE";
@@ -371,6 +402,7 @@ export function deviceModeBadge(device) {
     }
     return "OFFLINE";
   }
+
   return "OFFLINE";
 }
 

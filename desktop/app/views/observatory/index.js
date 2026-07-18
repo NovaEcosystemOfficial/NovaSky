@@ -6,12 +6,14 @@ import {
   connectDevice,
   disconnectDevice,
   getUnassignedDevices,
+  getDevices,
 } from "../../shared/device-registry.js";
 import { setPhotoRedesignEnabled } from "../../shared/ui-preferences.js";
 import { renderDashboard } from "./dashboard.js";
 import { renderFloorPlan } from "./floor-plan.js";
 import { renderDeviceDetail } from "./device-detail.js";
 import { renderPhotoCard } from "./helpers.js";
+import { bindEq6ManualControls, forceEq6ManualStop, refreshEq6ManualTelemetry } from "./eq6-manual-controls.js";
 
 let view = "dashboard";
 let detailId = null;
@@ -52,6 +54,11 @@ function render() {
   `;
 
   bindEvents(containerRef);
+  if (view === "detail") {
+    bindEq6ManualControls(containerRef);
+    const eq6 = getDevices().find((d) => d.id === "dev-mount-eq6");
+    if (eq6) refreshEq6ManualTelemetry(eq6);
+  }
   updatePanel();
 }
 
@@ -115,13 +122,24 @@ function bindEvents(root) {
 
   root.querySelectorAll("[data-connect]").forEach((btn) => {
     btn.addEventListener("click", async () => {
-      await connectDevice(btn.dataset.connect);
+      btn.disabled = true;
+      try {
+        await connectDevice(btn.dataset.connect);
+      } finally {
+        render();
+      }
     });
   });
 
   root.querySelectorAll("[data-disconnect]").forEach((btn) => {
     btn.addEventListener("click", async () => {
-      await disconnectDevice(btn.dataset.disconnect);
+      btn.disabled = true;
+      try {
+        await forceEq6ManualStop();
+        await disconnectDevice(btn.dataset.disconnect);
+      } finally {
+        render();
+      }
     });
   });
 

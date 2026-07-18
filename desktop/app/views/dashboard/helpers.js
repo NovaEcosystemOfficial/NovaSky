@@ -97,10 +97,28 @@ export function findPrimarySeestar() {
 }
 
 export function findConnectedSeestar() {
+  return getDevices().find((d) => {
+    if (d.category !== "seestar") return false;
+    if (!["connected", "operational"].includes(d.connectionState)) return false;
+    // Non spacchettare un Seestar SIM “collegato” come LIVE quando la simulazione è off
+    if (isSimulationMode()) return d.dataSource === "simulated" || !d.dataSource;
+    return d.dataSource === "live" && d.telemetry?.mount?.liveState === "LIVE";
+  });
+}
+
+export function findPrimaryEq6() {
+  return (
+    getDevices().find((d) => d.id === "dev-mount-eq6") ||
+    getDevices().find((d) => d.category === "mount" && (d.model || "").toLowerCase().includes("eq6"))
+  );
+}
+
+export function findConnectedEq6() {
   return getDevices().find(
     (d) =>
-      d.category === "seestar" &&
-      ["connected", "operational"].includes(d.connectionState)
+      (d.id === "dev-mount-eq6" || d.category === "mount") &&
+      ["connected", "operational"].includes(d.connectionState) &&
+      (d.connection?.adapterId === "eq6-ascom" || d.telemetry?.mount?.protocol === "ASCOM_EQMOD" || d.id === "dev-mount-eq6")
   );
 }
 
@@ -209,6 +227,7 @@ export async function loadDashboardData(locationService, missionStore) {
   const moon = moonAltAz(observer.lat, observer.lon, now);
   const phase = moonPhase(now);
   const seestar = findConnectedSeestar();
+  const eq6 = findPrimaryEq6();
   const devices = getDevices();
   const connectedCount = devices.filter((d) =>
     ["connected", "operational"].includes(d.connectionState)
@@ -239,6 +258,7 @@ export async function loadDashboardData(locationService, missionStore) {
     moon,
     phase,
     seestar,
+    eq6,
     devices,
     connectedCount,
     deviceTotal: devices.length,
