@@ -1,0 +1,445 @@
+/* NovaSky Desktop — Mission Map host theme (override engine CSS, zero website edits) */
+
+.nova-workspace.is-mission-map {
+  padding: 0;
+  overflow: hidden;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.nova-workspace.is-mission-map .desktop-observatory {
+  --header: 52px;
+  --deck: clamp(112px, 16vh, 148px);
+  --card-w: 320px;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: 100%;
+}
+
+@media (min-width: 1600px) {
+  .nova-workspace.is-mission-map .desktop-observatory {
+    --card-w: 340px;
+  }
+}
+
+@media (max-height: 768px) {
+  .nova-workspace.is-mission-map .desktop-observatory {
+    --header: 48px;
+    --deck: 108px;
+    --card-w: 300px;
+  }
+}
+
+.nova-workspace.is-mission-map .desktop-obs-header {
+  padding: 0 16px;
+  gap: 12px;
+  background: rgba(5, 7, 10, 0.72);
+  backdrop-filter: blur(12px);
+  border-bottom-color: rgba(158, 183, 204, 0.06);
+}
+
+.nova-workspace.is-mission-map .desktop-obs-header .brand-word {
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.nova-workspace.is-mission-map .desktop-obs-header .brand-mark {
+  width: 22px;
+  height: 22px;
+}
+
+.nova-workspace.is-mission-map .header-verdict p {
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.nova-workspace.is-mission-map .header-verdict span,
+.nova-workspace.is-mission-map .header-meta time,
+.nova-workspace.is-mission-map .header-moon,
+.nova-workspace.is-mission-map .header-window {
+  font-size: 0.6875rem;
+}
+
+.nova-workspace.is-mission-map .header-time {
+  width: min(180px, 34vw);
+}
+
+.nova-workspace.is-mission-map .btn-location,
+.nova-workspace.is-mission-map .btn-time-sync {
+  font-size: 0.625rem;
+  padding: 3px 8px;
+}
+
+.nova-workspace.is-mission-map .observatory-main {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.nova-workspace.is-mission-map .desktop-sky-chamber {
+  background: #03050a;
+  position: relative;
+}
+
+/* Atmosfera immersiva calma — overlay CSS, non atlante */
+.nova-workspace.is-mission-map .desktop-sky-chamber::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background:
+    radial-gradient(ellipse 70% 45% at 55% 28%, rgba(55, 70, 110, 0.12), transparent 70%),
+    radial-gradient(ellipse 50% 35% at 20% 70%, rgba(40, 28, 20, 0.08), transparent 65%);
+  mix-blend-mode: screen;
+  opacity: 0.85;
+  animation: mm-sky-breathe 18s ease-in-out infinite;
+}
+
+.nova-workspace.is-mission-map .desktop-sky-chamber::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background:
+    radial-gradient(ellipse 95% 75% at 50% 42%, transparent 38%, rgba(3, 5, 10, 0.42) 100%),
+    linear-gradient(180deg, rgba(3, 5, 10, 0.12) 0%, transparent 18%, transparent 62%, rgba(3, 5, 9, 0.55) 100%);
+}
+
+@keyframes mm-sky-breathe {
+  0%, 100% { opacity: 0.75; }
+  50% { opacity: 0.95; }
+}
+
+.nova-workspace.is-mission-map #mission-canvas {
+  position: relative;
+  z-index: 0;
+}
+
+.nova-workspace.is-mission-map .sky-prompt {
+  font-size: 0.8125rem;
+  opacity: 0.55;
+  z-index: 2;
+  letter-spacing: 0.01em;
+}
+
+.nova-workspace.is-mission-map .sky-prompt p {
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.65);
+}
+
+.nova-workspace.is-mission-map .desktop-target-card {
+  z-index: 3;
+  top: auto;
+  right: 12px;
+  bottom: calc(var(--deck) + 10px);
+  left: auto;
+  width: var(--card-w);
+  max-width: calc(100% - 24px);
+  height: auto;
+  max-height: calc(100% - var(--deck) - var(--header) - 28px);
+  border-radius: 14px;
+  border-color: rgba(158, 183, 204, 0.1);
+  background: rgba(6, 8, 12, 0.82);
+  backdrop-filter: blur(20px);
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(92, 199, 216, 0.04) inset;
+}
+
+.nova-workspace.is-mission-map .desktop-target-card.is-open {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.nova-workspace.is-mission-map .desktop-target-card .premium-card-inner {
+  height: auto;
+  max-height: inherit;
+  overflow: visible;
+}
+
+.nova-workspace.is-mission-map .desktop-card-hero {
+  aspect-ratio: 16 / 9;
+  max-height: 140px;
+  background: transparent;
+  overflow: visible;
+}
+
+.nova-workspace.is-mission-map .desktop-card-hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 14px 14px 0 0;
+  filter: brightness(0.92) saturate(0.88);
+  animation: none;
+  -webkit-mask-image: radial-gradient(ellipse 88% 82% at 50% 48%, #000 42%, transparent 78%);
+  mask-image: radial-gradient(ellipse 88% 82% at 50% 48%, #000 42%, transparent 78%);
+  mix-blend-mode: screen;
+}
+
+.nova-workspace.is-mission-map .desktop-hero-mask {
+  background:
+    radial-gradient(ellipse 95% 90% at 50% 45%, transparent 35%, rgba(5, 7, 10, 0.55) 72%, rgba(6, 8, 12, 0.98) 100%);
+  inset: -2px;
+}
+
+.nova-workspace.is-mission-map .desktop-target-card .premium-badge {
+  top: 10px;
+  left: 10px;
+  padding: 4px 10px;
+  font-size: 0.625rem;
+  box-shadow: none;
+}
+
+.nova-workspace.is-mission-map .desktop-card-body {
+  padding: 12px 14px 14px;
+}
+
+.nova-workspace.is-mission-map .desktop-card-head {
+  margin-bottom: 10px;
+}
+
+.nova-workspace.is-mission-map .desktop-card-code {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cyan, #5cc7d8);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+}
+
+.nova-workspace.is-mission-map .desktop-card-name {
+  margin: 4px 0 0;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.nova-workspace.is-mission-map .desktop-card-meta {
+  margin: 4px 0 0;
+  font-size: 0.6875rem;
+  color: var(--quiet, #74808d);
+}
+
+.nova-workspace.is-mission-map .desktop-card-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 10px;
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(158, 183, 204, 0.06);
+}
+
+.nova-workspace.is-mission-map .desktop-card-stats div {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.nova-workspace.is-mission-map .desktop-card-stats span {
+  font-size: 0.625rem;
+  color: var(--quiet, #74808d);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.nova-workspace.is-mission-map .desktop-card-stats strong {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text, #eef4f8);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+}
+
+.nova-workspace.is-mission-map .desktop-card-reason {
+  margin-bottom: 12px;
+}
+
+.nova-workspace.is-mission-map .desktop-card-reason h3 {
+  margin: 0 0 4px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--quiet, #74808d);
+}
+
+.nova-workspace.is-mission-map .desktop-card-reason p {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--muted, #aeb9c5);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.nova-workspace.is-mission-map .desktop-card-actions {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 8px;
+}
+
+.nova-workspace.is-mission-map .btn-desktop-details {
+  padding: 9px 12px;
+  border: 1px solid rgba(158, 183, 204, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--muted, #aeb9c5);
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.nova-workspace.is-mission-map .btn-desktop-details:hover {
+  border-color: rgba(92, 199, 216, 0.35);
+  color: var(--text, #eef4f8);
+}
+
+.nova-workspace.is-mission-map .desktop-target-card .btn-mission-primary {
+  padding: 9px 12px;
+  font-size: 0.75rem;
+  margin: 0;
+}
+
+.nova-workspace.is-mission-map .desktop-hidden,
+.nova-workspace.is-mission-map .desktop-engine-fields {
+  display: none !important;
+}
+
+.nova-workspace.is-mission-map .desktop-mission-deck {
+  z-index: 4;
+  padding: 10px 16px 12px;
+  background: rgba(4, 6, 9, 0.94);
+  border-top-color: rgba(158, 183, 204, 0.06);
+}
+
+.nova-workspace.is-mission-map .desktop-mission-deck .mission-deck-head {
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.nova-workspace.is-mission-map .desktop-mission-deck .mission-deck-head h2 {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.nova-workspace.is-mission-map .desktop-mission-deck .mission-deck-head p {
+  font-size: 0.6875rem;
+}
+
+.nova-workspace.is-mission-map .desktop-mission-deck .mission-deck-count {
+  font-size: 0.6875rem;
+}
+
+.nova-workspace.is-mission-map .desktop-mission-deck .mission-deck-empty {
+  min-height: 48px;
+  border-radius: 10px;
+  border-style: solid;
+  border-color: rgba(158, 183, 204, 0.06);
+}
+
+.nova-workspace.is-mission-map .desktop-mission-deck .mission-deck-empty p {
+  font-size: 0.75rem;
+}
+
+.nova-workspace.is-mission-map .night-markers {
+  margin-bottom: 6px;
+  font-size: 0.625rem;
+}
+
+.nova-workspace.is-mission-map .night-chain-wrap {
+  padding: 2px 0 4px;
+}
+
+.nova-workspace.is-mission-map .chain-card {
+  min-width: 168px;
+  max-width: 200px;
+  padding: 8px 10px 8px 8px;
+  border-radius: 12px;
+  gap: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28);
+}
+
+.nova-workspace.is-mission-map .chain-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.32);
+}
+
+.nova-workspace.is-mission-map .chain-thumb {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: transparent;
+}
+
+.nova-workspace.is-mission-map .chain-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 55%, transparent 88%);
+  mask-image: radial-gradient(circle at 50% 50%, #000 55%, transparent 88%);
+  mix-blend-mode: screen;
+  filter: brightness(0.95);
+}
+
+.nova-workspace.is-mission-map .chain-body h4 {
+  font-size: 0.75rem;
+}
+
+.nova-workspace.is-mission-map .chain-body p {
+  font-size: 0.625rem;
+}
+
+.nova-workspace.is-mission-map .chain-meta {
+  font-size: 0.625rem;
+}
+
+.nova-workspace.is-mission-map .chain-connector {
+  width: 24px;
+}
+
+.nova-app.is-mission-map-view.is-panel-collapsed .desktop-target-card {
+  right: 16px;
+  max-width: min(var(--card-w), calc(100% - 32px));
+}
+
+/* Elementi redesign — nascosti in layout classico */
+.nova-workspace.is-mission-map:not(.is-mission-map-redesign) .mm-mission-ghosts,
+.nova-workspace.is-mission-map:not(.is-mission-map-redesign) .mm-inline-metrics,
+.nova-workspace.is-mission-map:not(.is-mission-map-redesign) .mm-demo-pill,
+.nova-workspace.is-mission-map:not(.is-mission-map-redesign) .mm-ghost-hint {
+  display: none !important;
+}
+
+.nova-workspace.is-mission-map .mm-layout-toggle {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(158, 183, 204, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--muted, #aeb9c5);
+  font-size: 0.625rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.nova-workspace.is-mission-map .mm-layout-toggle:hover {
+  border-color: rgba(92, 199, 216, 0.35);
+  color: var(--text, #eef4f8);
+}

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="120" y2="120">
+      <stop offset="0%" stop-color="#101820"/>
+      <stop offset="100%" stop-color="#060a10"/>
+    </linearGradient>
+    <linearGradient id="tube" x1="20" y1="50" x2="100" y2="70">
+      <stop offset="0%" stop-color="#2a3540"/>
+      <stop offset="100%" stop-color="#141a22"/>
+    </linearGradient>
+  </defs>
+  <rect width="120" height="120" rx="16" fill="url(#bg)"/>
+  <rect x="18" y="52" width="84" height="16" rx="8" fill="url(#tube)" stroke="rgba(92,199,216,0.2)" stroke-width="1"/>
+  <circle cx="24" cy="60" r="14" fill="#0a0e14" stroke="url(#tube)" stroke-width="2"/>
+  <circle cx="24" cy="60" r="8" stroke="#5cc7d8" stroke-width="1" opacity="0.5"/>
+  <path d="M38 44 L48 52 L38 60" stroke="rgba(92,199,216,0.3)" stroke-width="1" fill="none"/>
+  <path d="M38 76 L48 68 L38 60" stroke="rgba(92,199,216,0.3)" stroke-width="1" fill="none"/>
+  <text x="60" y="96" text-anchor="middle" fill="#6b7785" font-family="Inter, sans-serif" font-size="7" letter-spacing="0.05em">TELESCOPE</text>
+</svg>

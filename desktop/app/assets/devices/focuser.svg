@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="120" y2="120">
+      <stop offset="0%" stop-color="#0e1218"/>
+      <stop offset="100%" stop-color="#060810"/>
+    </linearGradient>
+  </defs>
+  <rect width="120" height="120" rx="16" fill="url(#bg)"/>
+  <rect x="52" y="28" width="16" height="64" rx="4" fill="#1a222c" stroke="rgba(92,199,216,0.25)" stroke-width="1"/>
+  <rect x="44" y="36" width="32" height="12" rx="3" fill="#242c38"/>
+  <line x1="60" y1="48" x2="60" y2="84" stroke="#5cc7d8" stroke-width="1.5" opacity="0.5"/>
+  <path d="M54 52 L60 44 L66 52" stroke="#5cc7d8" stroke-width="1.2" fill="none" opacity="0.7"/>
+  <path d="M54 80 L60 88 L66 80" stroke="#5cc7d8" stroke-width="1.2" fill="none" opacity="0.7"/>
+  <text x="60" y="106" text-anchor="middle" fill="#6b7785" font-family="Inter, sans-serif" font-size="7" letter-spacing="0.05em">FOCUSER</text>
+</svg>

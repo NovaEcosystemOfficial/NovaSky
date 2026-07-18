@@ -1,0 +1,74 @@
+{
+  "name": "novasky-desktop",
+  "productName": "NovaSky",
+  "version": "0.1.6",
+  "description": "NovaSky — osservatorio personale per Seestar (desktop demo)",
+  "author": "Nova Ecosystem",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test:smoke": "electron smoke-test.js",
+    "test:seestar": "node test-seestar-adapter.js",
+    "test:eq6": "node test-eq6-adapter.js",
+    "test:eq6-manual": "node test-eq6-manual-controls.js",
+    "fetch:equipment-photos": "python3 scripts/fetch-equipment-photos.py",
+    "build:win": "electron-builder --win --x64",
+    "build:dir": "electron-builder --win --x64 --dir",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "build": {
+    "appId": "com.novaecosystem.novasky",
+    "productName": "NovaSky",
+    "copyright": "Copyright © Nova Ecosystem",
+    "directories": {
+      "output": "dist",
+      "buildResources": "resources"
+    },
+    "files": [
+      "main.js",
+      "main-alpaca.js",
+      "main-eq6-ascom.js",
+      "preload.js",
+      "bridges/**/*",
+      "package.json",
+      "app/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "../website",
+        "to": "website",
+        "filter": [
+          "**/*",
+          "!**/.DS_Store"
+        ]
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "resources/icon.ico",
+      "publisherName": "Nova Ecosystem",
+      "artifactName": "NovaSky-Setup-${version}.${ext}",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "NovaSky",
+      "installerIcon": "resources/icon.ico",
+      "uninstallerIcon": "resources/icon.ico",
+      "installerHeaderIcon": "resources/icon.ico"
+    }
+  },
+  "devDependencies": {
+    "electron": "^34.2.0",
+    "electron-builder": "^25.1.8"
+  }
+}

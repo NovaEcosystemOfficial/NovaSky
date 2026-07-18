@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="120" y2="120">
+      <stop offset="0%" stop-color="#101820"/>
+      <stop offset="100%" stop-color="#060a10"/>
+    </linearGradient>
+    <linearGradient id="tube" x1="30" y1="40" x2="90" y2="80">
+      <stop offset="0%" stop-color="#2a3540"/>
+      <stop offset="100%" stop-color="#141a22"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#5cc7d8"/>
+      <stop offset="100%" stop-color="#2d7a8a"/>
+    </linearGradient>
+  </defs>
+  <rect width="120" height="120" rx="16" fill="url(#bg)"/>
+  <ellipse cx="60" cy="58" rx="34" ry="22" stroke="url(#glow)" stroke-width="1.5" opacity="0.4"/>
+  <rect x="28" y="48" width="64" height="20" rx="10" fill="url(#tube)" stroke="rgba(92,199,216,0.25)" stroke-width="1"/>
+  <circle cx="92" cy="58" r="10" fill="#0a0e14" stroke="url(#glow)" stroke-width="1.5"/>
+  <circle cx="92" cy="58" r="4" fill="url(#glow)" opacity="0.6"/>
+  <rect x="52" y="72" width="16" height="14" rx="3" fill="#1a222c"/>
+  <text x="60" y="102" text-anchor="middle" fill="#6b7785" font-family="Inter, sans-serif" font-size="7.5" letter-spacing="0.06em">SEESTAR</text>
+</svg>

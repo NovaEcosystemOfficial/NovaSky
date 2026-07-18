@@ -1,0 +1,48 @@
+export {
+  getDevices,
+  getSetups,
+  getObservatory,
+  getUnassignedDevices,
+  getDevicesForSetup,
+  isSimulationMode,
+  toggleSimulationMode,
+  connectDevice,
+  disconnectDevice,
+  setObservatory,
+  registerDevice,
+  editDevice,
+  HUB_EVENT,
+  getDeviceHub,
+  startSeestarLive,
+  stopSeestarLive,
+  isSeestarLivePolling,
+  startEq6Live,
+  stopEq6Live,
+  isEq6LivePolling,
+  deviceStatusLabel,
+  devicePowerLabel,
+  deviceConnectionLabel,
+  deviceDisplayName,
+  deviceModeBadge,
+  DEVICE_CATEGORIES,
+  eq6ManualMoveAxis,
+  eq6ManualStopAxes,
+} from "./device-hub/index.js";
+
+export { resolveDeviceImage, DEVICE_PHOTO_CATALOG } from "./device-hub/images.js";
+
+import { getDeviceSummary as hubGetSummary } from "./device-hub/index.js";
+
+export function getDeviceSummary() {
+  const summary = hubGetSummary();
+  return {
+    total: summary.deviceCount,
+    connected: summary.connected,
+    label: summary.label,
+    setupCount: summary.setupCount,
+    hardwareCount: summary.hardwareCount,
+    unassigned: summary.unassigned,
+    simulationMode: summary.simulationMode,
+    observatoryName: summary.observatoryName,
+  };
+}
