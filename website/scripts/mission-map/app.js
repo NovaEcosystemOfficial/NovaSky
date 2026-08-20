@@ -18,7 +18,7 @@ import {
 } from "./services/mission-store.js";
 import { promptPreviousMission } from "./ui/mission-prompt.js";
 
-class ObservatoryApp {
+export class ObservatoryApp {
   constructor() {
     this.canvas = document.getElementById("mission-canvas");
     this.canvasWrap = document.querySelector(".sky-chamber");
@@ -41,6 +41,7 @@ class ObservatoryApp {
     this.liveTime = true;
     this.syncTimer = null;
     this.missionReady = false;
+    this._rafId = null;
 
     this.prehydrateMissionDeck();
   }
@@ -396,6 +397,7 @@ class ObservatoryApp {
   }
 
   startLoop() {
+    if (this._rafId) cancelAnimationFrame(this._rafId);
     const frame = (now) => {
       const dt = now - this.lastFrame;
       this.lastFrame = now;
@@ -403,13 +405,32 @@ class ObservatoryApp {
       this.renderer.tick(dt);
       this.controller.applyInertia();
       this.renderer.render();
-      requestAnimationFrame(frame);
+      this._rafId = requestAnimationFrame(frame);
     };
     this.lastFrame = performance.now();
-    requestAnimationFrame(frame);
+    this._rafId = requestAnimationFrame(frame);
+  }
+
+  /** Rilascia timer e loop (shell desktop). */
+  destroy() {
+    if (this.syncTimer) {
+      clearInterval(this.syncTimer);
+      this.syncTimer = null;
+    }
+    if (this._rafId) {
+      cancelAnimationFrame(this._rafId);
+      this._rafId = null;
+    }
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  new ObservatoryApp().init();
-});
+function shouldAutoInitMissionMap() {
+  if (document.documentElement.dataset.runtime === "desktop-shell") return false;
+  return Boolean(document.getElementById("mission-canvas"));
+}
+
+if (shouldAutoInitMissionMap()) {
+  document.addEventListener("DOMContentLoaded", () => {
+    new ObservatoryApp().init();
+  });
+}
